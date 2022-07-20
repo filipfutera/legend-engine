@@ -234,12 +234,12 @@ public class MetricsHandler
         if (errorName.equals(RuntimeException.class.getSimpleName()))
         {
             Throwable cause = exception.getCause();
-            errorName = cause == null ? name + "RuntimeException" : cause.toString().contains("Exception") ? cause.toString().substring(0, cause.toString().indexOf("Exception")) + "Exception" : cause.toString();
-            errorName = errorName.contains(".") ? errorName.substring(errorName.lastIndexOf(".") + 1) : errorName;
+            errorName = cause == null ? name + "RuntimeException" : cause.getClass().getSimpleName();
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {
-            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : name + errorName;
+            errorName = ((EngineException) exception).getErrorType() != null ?
+                    ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : name + errorName;
         }
         errorName = errorName.substring(0,1).toUpperCase() + errorName.substring(1);
         return errorName.replace("Exception", "Error");
