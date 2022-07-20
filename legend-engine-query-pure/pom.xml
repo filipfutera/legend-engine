@@ -165,5 +165,11 @@
             <scope>test</scope>
         </dependency>
         <!-- TEST -->
+
+        <!-- temp for testing -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
     </dependencies>
 </project>

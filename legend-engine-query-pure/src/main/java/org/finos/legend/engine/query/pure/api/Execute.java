@@ -14,6 +14,7 @@
 
 package org.finos.legend.engine.query.pure.api;
 
+import com.zaxxer.hikari.pool.HikariPool;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import io.swagger.annotations.Api;
@@ -37,12 +38,14 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
+import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variable;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
+import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
@@ -57,12 +60,7 @@ import org.pac4j.jax.rs.annotations.Pac4JProfileManager;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -90,6 +88,23 @@ public class Execute
         this.transformers = transformers;
         MetricsHandler.createMetrics(this.getClass());
     }
+
+    //TEST
+
+    @GET
+    @Path("test/check/error/handling")
+    @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
+    public Response test() {
+        MetricsHandler.observeError("SQL", new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())));
+        MetricsHandler.observeError("DSBExecute", new RuntimeException("test"));
+        MetricsHandler.observeError("test", new EngineException("testing", null, EngineErrorType.COMPILATION));
+        MetricsHandler.observeError("test2", new EngineException("testing", null, EngineErrorType.PARSER));
+        MetricsHandler.observeError("TDSProtocol", new EngineException("tds communication exception"));
+        MetricsHandler.observeError("execute", new ArithmeticException());
+        MetricsHandler.observeError("abc", new ClassCastException());
+        return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
+    }
+    //TEST
 
     @POST
     @ApiOperation(value = "Execute a Pure query (function) in the context of a Mapping and a Runtime. Full Interactive and Semi Interactive modes are supported by giving the appropriate PureModelContext (respectively PureModelDataContext and PureModelContextComposite). Production executions need to use the Service interface.")
@@ -119,7 +134,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.incrementErrorCount(uriInfo != null ? uriInfo.getPath() : null, response.getStatus());
+            MetricsHandler.observeError("PureQueryExecution", ex);
             return response;
         }
     }
@@ -143,9 +158,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("generate plan");
+            MetricsHandler.observeError("GeneratePlan", ex);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
-            MetricsHandler.incrementErrorCount(uriInfo != null ? uriInfo.getPath() : null, response.getStatus());
             return response;
         }
 
@@ -170,9 +184,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("generate plan");
+            MetricsHandler.observeError("GeneratePlan", ex);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
-            MetricsHandler.incrementErrorCount(uriInfo != null ? uriInfo.getPath() : null, response.getStatus());
             return response;
         }
     }
@@ -219,9 +232,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("execute");
+            MetricsHandler.observeError("PureQueryExecution", ex);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
-            MetricsHandler.incrementErrorCount("pure/v1/execution/execute", response.getStatus());
             return response;
         }
     }

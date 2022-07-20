@@ -21,6 +21,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
+import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +34,7 @@ public class MetricsHandler
     static MutableMap<String, Summary> serviceMetrics = Maps.mutable.empty();
     static MutableMap<String, Gauge> serviceErrors = Maps.mutable.empty();
     static MutableMap<String, Gauge> gauges = Maps.mutable.empty();
-    static MutableMap<String, Counter> errorCounters = Maps.mutable.empty();
     static final Gauge allExecutions = Gauge.build().name("alloy_executions").help("Execution gauge metric ").register();
-    static final Gauge allExecutionErrors = Gauge.build().name("alloy_executions_errors").help("Execution error gauge metric ").register();
 
     // ----------------------------------------- NEW IMPLEMENTATION -----------------------------------------
 
@@ -56,7 +55,6 @@ public class MetricsHandler
             .register(getMetricsRegistry());
 
     private static final Counter ALL_EXECUTIONS = Counter.build("legend_engine_executions", "Execution counter metric ").register();
-    private static final Counter ERROR_COUNT = Counter.build("legend_engine_error_total", "Count errors within legend ecosystem").labelNames("operation", "status").register(getMetricsRegistry());
     private static final Counter DATASTORE_SPEC_COUNT = Counter.build("legend_engine_datastore_spec_count", "Count datastore specifications").register(getMetricsRegistry());
     private static final Counter JAVA_COMPILATION_COUNT = Counter.build("legend_engine_java_compilation_count", "Count java compilations").register(getMetricsRegistry());
     private static final Gauge TEMP_FILE_COUNT = Gauge.build("legend_engine_temp_file_count", "Measure how many temporary files are being currently created").register(getMetricsRegistry());
@@ -98,11 +96,6 @@ public class MetricsHandler
     public static void incrementExecutionCount()
     {
         ALL_EXECUTIONS.inc();
-    }
-
-    public static void incrementErrorCount(String operation, int code)
-    {
-        ERROR_COUNT.labels(returnLabelOrUnknown(operation), String.valueOf(code)).inc();
     }
 
     public static void incrementDatastoreSpecCount()
@@ -156,12 +149,6 @@ public class MetricsHandler
     public static void incrementExecutionGauge()
     {
         allExecutions.inc();
-    }
-
-    @Deprecated
-    public static void incrementExecutionErrorGauge()
-    {
-        allExecutionErrors.inc();
     }
 
     @Deprecated
@@ -228,44 +215,6 @@ public class MetricsHandler
     }
 
     @Deprecated
-    public static synchronized void observeErrorCount(String name)
-    {
-        observeErrorCount(name, empty, empty);
-    }
-
-    @Deprecated
-    public static synchronized void observeErrorCount(String name, String[] labelNames, String[] labelValues)
-    {
-        if (errorCounters.get(name) == null)
-        {
-            Counter c = Counter.build().name(generateMetricName(name, true))
-                    .help(name + " count metric")
-                    .labelNames(labelNames).register();
-            errorCounters.put(name, c);
-            c.labels(labelValues).inc();
-        }
-        else
-        {
-            errorCounters.get(name).labels(labelValues).inc();
-        }
-    }
-
-    @Deprecated
-    public static synchronized void observeError(String name)
-    {
-        if (serviceErrors.get(name) == null)
-        {
-            Gauge g = Gauge.build().name(generateMetricName(name, true)).help(name + "error gauge").register();
-            serviceErrors.put(name, g);
-            g.inc();
-        }
-        else
-        {
-            serviceErrors.get(name).inc();
-        }
-    }
-
-    @Deprecated
     public static String generateMetricName(String name, boolean isErrorMetric)
     {
         return METRIC_PREFIX + name
@@ -275,4 +224,31 @@ public class MetricsHandler
                 .replace("}", "")
                 .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
     }
+
+    // -------------------------------------- ERROR HANDLING -------------------------------------
+
+    private static final Counter ERROR_COUNTER = Counter.build("alloy_execution_errors", "Count errors in alloy ecosystem").labelNames("category").register();
+
+    private static synchronized String extractErrorLabel(String name, Exception exception) {
+        String errorName = exception.getClass().getSimpleName();
+        if (errorName.equals(RuntimeException.class.getSimpleName()))
+        {
+            Throwable cause = exception.getCause();
+            errorName = cause == null ? name + "RuntimeException" : cause.toString().contains("Exception") ? cause.toString().substring(0, cause.toString().indexOf("Exception")) + "Exception" : cause.toString();
+            errorName = errorName.contains(".") ? errorName.substring(errorName.lastIndexOf(".") + 1) : errorName;
+        }
+        else if (errorName.equals(EngineException.class.getSimpleName()))
+        {
+            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : name + errorName;
+        }
+        errorName = errorName.substring(0,1).toUpperCase() + errorName.substring(1);
+        return errorName.replace("Exception", "Error");
+    }
+
+    public static synchronized void observeError(String name, Exception exception) {
+        String errorLabel = extractErrorLabel(name, exception);
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s.", name, exception, errorLabel));
+        ERROR_COUNTER.labels(errorLabel).inc();
+    }
+
 }

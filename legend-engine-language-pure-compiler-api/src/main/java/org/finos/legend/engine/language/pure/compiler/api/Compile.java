@@ -88,7 +88,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("compile model");
+            MetricsHandler.observeError("CompileModel", ex);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -117,7 +117,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("lambda return type");
+            MetricsHandler.observeError("LambdaReturnType", ex);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -126,13 +126,11 @@ public class Compile
     {
         if (ex instanceof EngineException)
         {
-            MetricsHandler.incrementErrorCount(uriInfo != null ? uriInfo.getPath() : null, Response.Status.BAD_REQUEST.getStatusCode());
             return Response.status(Response.Status.BAD_REQUEST).entity(ex).build();
         }
         else
         {
             Response errorResponse = ExceptionTool.exceptionManager(ex, LoggingEventType.COMPILE_ERROR, profiles);
-            MetricsHandler.incrementErrorCount(uriInfo != null ? uriInfo.getPath() : null, errorResponse.getStatus());
             return errorResponse;
         }
     }
