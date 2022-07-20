@@ -122,7 +122,7 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            MetricsHandler.incrementErrorCount("model_resolve", 0);
+            MetricsHandler.observeError("ModelResolve", e);
             throw new RuntimeException(e);
         }
     }

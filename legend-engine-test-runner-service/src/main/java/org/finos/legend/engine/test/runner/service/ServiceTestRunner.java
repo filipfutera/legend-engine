@@ -281,7 +281,7 @@ public class ServiceTestRunner
             }
             catch (JavaCompileException e)
             {
-                MetricsHandler.incrementErrorCount("test_execute", 0);
+                MetricsHandler.observeError("TestExecute", e);
                 throw new RuntimeException("Error compiling test asserts for " + this.service.getPath(), e);
             }
 
@@ -355,7 +355,7 @@ public class ServiceTestRunner
             catch (Exception e)
             {
                 LOGGER.error("Error running tests", e);
-                MetricsHandler.incrementErrorCount("test_execute", 0);
+                MetricsHandler.observeError("TestExecute", e);
                 throw (e instanceof RuntimeException) ? (RuntimeException) e : new RuntimeException(e);
             }
             finally
