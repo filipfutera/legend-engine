@@ -60,7 +60,12 @@ import org.pac4j.jax.rs.annotations.Pac4JProfileManager;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -94,7 +99,8 @@ public class Execute
     @GET
     @Path("test/check/error/handling")
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
-    public Response test() {
+    public Response test()
+    {
         MetricsHandler.observeError("SQL", new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())));
         MetricsHandler.observeError("DSBExecute", new RuntimeException("test"));
         MetricsHandler.observeError("test", new EngineException("testing", null, EngineErrorType.COMPILATION));

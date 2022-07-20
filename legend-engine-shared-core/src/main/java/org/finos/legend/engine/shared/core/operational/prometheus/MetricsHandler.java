@@ -32,7 +32,6 @@ public class MetricsHandler
     public static final String METRIC_PREFIX = "alloy_";
     private static final String[] empty = new String[]{};
     static MutableMap<String, Summary> serviceMetrics = Maps.mutable.empty();
-    static MutableMap<String, Gauge> serviceErrors = Maps.mutable.empty();
     static MutableMap<String, Gauge> gauges = Maps.mutable.empty();
     static final Gauge allExecutions = Gauge.build().name("alloy_executions").help("Execution gauge metric ").register();
 
@@ -229,7 +228,8 @@ public class MetricsHandler
 
     private static final Counter ERROR_COUNTER = Counter.build("alloy_execution_errors", "Count errors in alloy ecosystem").labelNames("category").register();
 
-    private static synchronized String extractErrorLabel(String name, Exception exception) {
+    private static synchronized String extractErrorLabel(String name, Exception exception)
+    {
         String errorName = exception.getClass().getSimpleName();
         if (errorName.equals(RuntimeException.class.getSimpleName()))
         {
@@ -245,7 +245,8 @@ public class MetricsHandler
         return errorName.replace("Exception", "Error");
     }
 
-    public static synchronized void observeError(String name, Exception exception) {
+    public static synchronized void observeError(String name, Exception exception)
+    {
         String errorLabel = extractErrorLabel(name, exception);
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s.", name, exception, errorLabel));
         ERROR_COUNTER.labels(errorLabel).inc();
