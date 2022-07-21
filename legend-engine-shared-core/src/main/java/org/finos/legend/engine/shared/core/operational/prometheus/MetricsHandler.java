@@ -248,7 +248,7 @@ public class MetricsHandler
 
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePattern)
     {
-        String errorLabel = extractErrorLabel(origin.toString(), exception);
+        String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
         servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s", origin, exception, errorLabel, servicePattern));
         String[] labels = new String[] {servicePattern, errorLabel};

@@ -38,11 +38,13 @@ public enum ErrorOrigin
     DSB_EXECUTE,
     ;
 
-    public String toFriendlyString() {
+    public String toFriendlyString()
+    {
         String errorOrigin = this.toString().toLowerCase();
         String[] elements = errorOrigin.split("_");
         StringBuffer output = new StringBuffer();
-        for (String element : elements) {
+        for (String element : elements)
+        {
             output.append(element.substring(0,1).toUpperCase() + element.substring(1));
         }
         return output.toString();
