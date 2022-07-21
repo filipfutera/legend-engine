@@ -46,6 +46,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.exe
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
@@ -141,7 +142,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError("PureQueryExecution", ex, uriInfo != null ? uriInfo.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, uriInfo != null ? uriInfo.getPath() : null);
             return response;
         }
     }
@@ -165,7 +166,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("GeneratePlan", ex, uriInfo != null ? uriInfo.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -191,7 +192,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("GeneratePlan", ex, uriInfo != null ? uriInfo.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -239,7 +240,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("PureQueryExecution", ex, null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }

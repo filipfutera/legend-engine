@@ -30,6 +30,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextPo
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lambda;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
@@ -88,7 +89,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("CompileModel", ex, uriInfo != null ? uriInfo.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, uriInfo != null ? uriInfo.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -117,7 +118,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("LambdaReturnType", ex, uriInfo != null ? uriInfo.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, uriInfo != null ? uriInfo.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }

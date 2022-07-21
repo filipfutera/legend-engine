@@ -22,6 +22,7 @@ import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -245,11 +246,11 @@ public class MetricsHandler
         return errorName.replace("Exception", "Error");
     }
 
-    public static synchronized void observeError(String name, Exception exception, String servicePattern)
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePattern)
     {
-        String errorLabel = extractErrorLabel(name, exception);
+        String errorLabel = extractErrorLabel(origin.toString(), exception);
         servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s", name, exception, errorLabel, servicePattern));
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s", origin, exception, errorLabel, servicePattern));
         String[] labels = new String[] {servicePattern, errorLabel};
         ERROR_COUNTER.labels(labels).inc();
     }
