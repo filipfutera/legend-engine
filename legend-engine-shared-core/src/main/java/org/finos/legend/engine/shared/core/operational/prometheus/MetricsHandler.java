@@ -226,7 +226,7 @@ public class MetricsHandler
 
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
-    private static final Counter ERROR_COUNTER = Counter.build("alloy_execution_errors", "Count errors in alloy ecosystem").labelNames("serviceName","category").register();
+    private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
 
     private static synchronized String extractErrorLabel(String name, Exception exception)
     {
