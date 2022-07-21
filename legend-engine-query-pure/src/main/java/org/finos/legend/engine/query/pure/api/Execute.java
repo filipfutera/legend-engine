@@ -103,13 +103,13 @@ public class Execute
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
     public Response test()
     {
-        MetricsHandler.observeError("SQL", new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), null);
-        MetricsHandler.observeError("DSBExecute", new RuntimeException("test"), null);
-        MetricsHandler.observeError("test", new EngineException("testing", null, EngineErrorType.COMPILATION), null);
-        MetricsHandler.observeError("test2", new EngineException("testing", null, EngineErrorType.PARSER), null);
-        MetricsHandler.observeError("TDSProtocol", new EngineException("tds communication exception"), null);
-        MetricsHandler.observeError("execute", new ArithmeticException(), null);
-        MetricsHandler.observeError("abc", new ClassCastException(), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("testing", null, EngineErrorType.COMPILATION), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("testing", null, EngineErrorType.PARSER), null);
+        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("tds communication exception"), null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
