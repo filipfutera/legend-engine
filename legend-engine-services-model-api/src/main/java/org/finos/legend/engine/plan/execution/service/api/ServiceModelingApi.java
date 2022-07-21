@@ -97,7 +97,7 @@ public class ServiceModelingApi
         {
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError("ServiceTest", ex);
+            MetricsHandler.observeError("ServiceTest", ex, null);
             return response;
         }
     }

@@ -88,7 +88,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("CompileModel", ex);
+            MetricsHandler.observeError("CompileModel", ex, uriInfo != null ? uriInfo.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -117,7 +117,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("LambdaReturnType", ex);
+            MetricsHandler.observeError("LambdaReturnType", ex, uriInfo != null ? uriInfo.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }

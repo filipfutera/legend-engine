@@ -226,7 +226,7 @@ public class MetricsHandler
 
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
-    private static final Counter ERROR_COUNTER = Counter.build("alloy_execution_errors", "Count errors in alloy ecosystem").labelNames("category").register();
+    private static final Counter ERROR_COUNTER = Counter.build("alloy_execution_errors", "Count errors in alloy ecosystem").labelNames("serviceName","category").register();
 
     private static synchronized String extractErrorLabel(String name, Exception exception)
     {
@@ -245,11 +245,13 @@ public class MetricsHandler
         return errorName.replace("Exception", "Error");
     }
 
-    public static synchronized void observeError(String name, Exception exception)
+    public static synchronized void observeError(String name, Exception exception, String servicePattern)
     {
         String errorLabel = extractErrorLabel(name, exception);
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s.", name, exception, errorLabel));
-        ERROR_COUNTER.labels(errorLabel).inc();
+        servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s", name, exception, errorLabel, servicePattern));
+        String[] labels = new String[] {servicePattern, errorLabel};
+        ERROR_COUNTER.labels(labels).inc();
     }
 
 }

@@ -102,13 +102,13 @@ public class Execute
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
     public Response test()
     {
-        MetricsHandler.observeError("SQL", new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())));
-        MetricsHandler.observeError("DSBExecute", new RuntimeException("test"));
-        MetricsHandler.observeError("test", new EngineException("testing", null, EngineErrorType.COMPILATION));
-        MetricsHandler.observeError("test2", new EngineException("testing", null, EngineErrorType.PARSER));
-        MetricsHandler.observeError("TDSProtocol", new EngineException("tds communication exception"));
-        MetricsHandler.observeError("execute", new ArithmeticException());
-        MetricsHandler.observeError("abc", new ClassCastException());
+        MetricsHandler.observeError("SQL", new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), null);
+        MetricsHandler.observeError("DSBExecute", new RuntimeException("test"), null);
+        MetricsHandler.observeError("test", new EngineException("testing", null, EngineErrorType.COMPILATION), null);
+        MetricsHandler.observeError("test2", new EngineException("testing", null, EngineErrorType.PARSER), null);
+        MetricsHandler.observeError("TDSProtocol", new EngineException("tds communication exception"), null);
+        MetricsHandler.observeError("execute", new ArithmeticException(), null);
+        MetricsHandler.observeError("abc", new ClassCastException(), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
@@ -141,7 +141,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError("PureQueryExecution", ex);
+            MetricsHandler.observeError("PureQueryExecution", ex, uriInfo != null ? uriInfo.getPath() : null);
             return response;
         }
     }
@@ -165,7 +165,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("GeneratePlan", ex);
+            MetricsHandler.observeError("GeneratePlan", ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -191,7 +191,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("GeneratePlan", ex);
+            MetricsHandler.observeError("GeneratePlan", ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -239,7 +239,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("PureQueryExecution", ex);
+            MetricsHandler.observeError("PureQueryExecution", ex, null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
