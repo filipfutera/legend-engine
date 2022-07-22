@@ -123,7 +123,9 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, null);
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), elem -> elem instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, service == null ? null : service.getPath());
             throw new RuntimeException(e);
         }
     }

@@ -21,12 +21,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.PureModel;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.extension.CompilerExtensions;
 import org.finos.legend.engine.language.pure.modelManager.ModelManager;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextPointer;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lambda;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -89,7 +91,9 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, uriInfo != null ? uriInfo.getPath() : null);
+            PureModelContextData data = ((PureModelContextData) model).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, service != null ? service.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -118,7 +122,9 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, uriInfo != null ? uriInfo.getPath() : null);
+            PureModelContextData data = ((PureModelContextData) lambdaReturnTypeInput.model).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, service != null ? service.getPath() : null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }

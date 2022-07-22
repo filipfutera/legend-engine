@@ -26,6 +26,7 @@ import org.eclipse.collections.api.block.function.Function0;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperRuntimeBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperValueSpecificationBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.PureModel;
@@ -39,8 +40,10 @@ import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variable;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
@@ -142,7 +145,9 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, uriInfo != null ? uriInfo.getPath() : null);
+            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
             return response;
         }
     }
@@ -166,7 +171,9 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, uriInfo != null ? uriInfo.getPath() : null);
+            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -192,7 +199,9 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, uriInfo != null ? uriInfo.getPath() : null);
+            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
