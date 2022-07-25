@@ -1,6 +1,5 @@
 package org.finos.legend.engine.shared.core.operational.errorManagement;
-
-import jdk.internal.net.http.common.Pair;
+import com.sun.tools.javac.util.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
