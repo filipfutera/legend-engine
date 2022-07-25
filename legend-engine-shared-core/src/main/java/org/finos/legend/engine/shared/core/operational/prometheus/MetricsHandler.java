@@ -243,7 +243,7 @@ public class MetricsHandler
      */
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
 
-    private enum ERROR_CATEGORIES {USER_AUTHENTICATION_ERROR, USER_EXECUTION_ERROR, SERVER_INTERNAL_ERROR, SERVER_EXECUTION_ERROR, OTHER_ERROR, UNKNOWN_ERROR}
+    private enum ERROR_CATEGORIES { USER_AUTHENTICATION_ERROR, USER_EXECUTION_ERROR, SERVER_INTERNAL_ERROR, SERVER_EXECUTION_ERROR, OTHER_ERROR, UNKNOWN_ERROR }
 
     private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA = readErrorData();
 
@@ -303,7 +303,8 @@ public class MetricsHandler
      * @return Hashmap with mapping of exception data
      */
     // Make regex not case sensitive throughout all regexes!
-    private static synchronized ArrayList<ErrorCategory> readErrorData() {
+    private static synchronized ArrayList<ErrorCategory> readErrorData()
+    {
         JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
         try (FileReader reader = new FileReader("ErrorData.json"))
