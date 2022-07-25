@@ -1,0 +1,343 @@
+{
+  "ErrorCategories": [
+    {
+      "CategoryName": "UserAuthenticationError",
+      "Types": [
+
+        {
+          "TypeName": "CredentialsError",
+          "Exceptions": [
+            {
+              "ExceptionName": "SnowflakeSQLException",
+              "MessageRegex": ".*username.*|.*password.*"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": ".*username.*|.*password.*|.*GSSAPI credentials.*"
+            },
+            {
+              "ExceptionName": "UnsupportedOperationException",
+              "MessageRegex": ".*Kerberos.*|.*credential.*"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*SecureConnect credentials.*|.*does not contain one of the expected credential types.*|.*bad credentials.*"
+            },
+            {
+              "ExceptionName": "LoginException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "GSSException",
+              "MessageRegex": ".*No valid credentials provided.*"
+            },
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": ".*Expired SecureConnect token.*|.*GSSException is caught when getting a ticket from JGSS.*"
+            },
+            {
+              "ExceptionName": "SQLInvalidAuthorizationSpecException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "PoolInitializationException",
+              "MessageRegex": ".*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "PermissionsError",
+          "Exceptions": [
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*not part of .* Write service.*"
+            },
+            {
+              "ExceptionName": "SnowflakeSQLException",
+              "MessageRegex": ".*no default role has been assigned to the user.*.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        }
+      ],
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat"]
+    },
+
+
+    {
+      "CategoryName": "UserExecutionError",
+      "Types": [
+
+        {
+          "TypeName": "QuerySyntaxError",
+          "Exceptions": [
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": ".*session does not have a current database.*|.*Can't find a match for function.*"
+            },
+            {
+              "ExceptionName": "SnowflakeSQLException",
+              "MessageRegex": ".*session does not have a current database.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "DatabaseNotFoundError",
+          "Exceptions": [
+            {
+              "ExceptionName": "SQLSyntaxErrorException",
+              "MessageRegex": ".*unknown database.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "ServiceUpdateError",
+          "Exceptions": [
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*new data for the service.* doesn't have the right pattern.*"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": ".*service must have more than one owner.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        }
+
+      ],
+      "Keywords": []
+    },
+    {
+
+      "CategoryName": "InternalServerError",
+      "Types": [
+
+        {
+          "TypeName": "MissingItemError",
+          "Exceptions": [
+            {
+              "ExceptionName": "WebApplicationException",
+              "MessageRegex": ".*no registration found.*"
+            },
+            {
+              "ExceptionName": "RefreshFailedException",
+              "MessageRegex": ".*unexpected.*"
+            },
+            {
+              "ExceptionName": "ReflectionsException",
+              "MessageRegex": ".*could not get type for name.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "ConfigurationError",
+          "Exceptions": [
+            {
+              "ExceptionName": "ClassNotFoundException",
+              "MessageRegex": ".*untrusted class.*"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*GSExceptionSlang.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        }
+
+      ],
+      "Keywords": []
+    },
+
+    {
+      "CategoryName": "ServerExecutionError",
+      "Types": [
+
+        {
+          "TypeName": "DatabaseError",
+          "Exceptions": [
+            {
+              "ExceptionName": "JdbcSQLIntegrityConstraintViolationException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "JdbcSQLSyntaxError",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*Redshift.*"
+            },
+            {
+              "ExceptionName": "MongoCommandException",
+              "MessageRegex": ".*changed during processing.*"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*reading GridFS.*|.*writing to the Stream.*"
+            }
+          ],
+          "ExceptionRegex": ".*SQL.*Exception"
+        },
+
+        {
+          "TypeName": "PureError",
+          "Exceptions": [
+            {
+              "ExceptionName": "PureExecutionException",
+              "MessageRegex": ".*"
+            }
+          ],
+          "ExceptionRegex": ".*Pure.*Exception"
+        },
+
+        {
+          "TypeName": "JSONError",
+          "Exceptions": [
+            {
+              "ExceptionName": "JsonParseException",
+              "MessageRegex": ".*Unexpected character.*"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": ".*Unexpected token.*"
+            }
+          ],
+          "ExceptionRegex": ".*JSON.*Exception"
+        },
+
+        {
+          "TypeName": "GraphError",
+          "Exceptions": [
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": ".*Can't find property.*|.*Can't find store.*"
+            }
+          ],
+          "ExceptionRegex": ".*Graph.*Exception"
+        },
+
+        {
+          "TypeName": "JavaErrors",
+          "Exceptions": [
+            {
+              "ExceptionName": "JavaCompileException",
+              "MessageRegex": ".*incompatible type.*"
+            },
+            {
+              "ExceptionName": "ClassCastException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "NonStringOrTemplateOutputException",
+              "MessageRegex": ".*"
+            }
+          ],
+          "ExceptionRegex": ""
+        },
+
+        {
+        "TypeName": "ServiceError",
+        "Exceptions": [
+          {
+            "ExceptionName": "IllegalArgumentException",
+            "MessageRegex": ".*Error loading service.*|.*Invalid provided parameter.*|.*Reprocessing sql failed with vars.*"
+          }
+        ],
+        "ExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "SlangError",
+          "Exceptions": [
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*slang exception.*"
+            }
+          ],
+          "ExceptionRegex": ""
+        }
+
+      ],
+      "Keywords": []
+    },
+
+
+    {
+      "CategoryName": "OtherError",
+      "Types": [
+
+        {
+          "TypeName": "ConnectionError",
+          "Exceptions": [
+            {
+              "ExceptionName": "ConnectionException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "SQLTransientConnectionException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "SocketTimeoutException",
+              "MessageRegex": ".*"
+            },
+            {
+              "ExceptionName": "MappableException",
+              "MessageRegex": ".*"
+            }
+          ],
+          "ExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "TestingError",
+          "Exceptions": [
+            {
+              "ExceptionName": "IllegalArgumentException",
+              "MessageRegex": ".*Error running tests.*"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": ".*Checked exception caught in Procedure.*"
+            },
+            {
+              "ExceptionName": "PureAssertFailException",
+              "MessageRegex": ".*exception occurred executing service test suites.*"
+            }
+          ],
+          "ExceptionRegex": ""
+        }
+
+      ],
+      "Keywords": []
+    },
+
+
+    {
+
+      "CategoryName": "UnknownError",
+      "Types": [
+
+        {
+          "TypeName": "",
+          "Exceptions": [
+
+          ],
+          "ExceptionRegex": ""
+        }
+
+      ],
+      "Keywords": []
+    }
+
+  ]
+}
