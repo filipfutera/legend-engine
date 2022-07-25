@@ -62,7 +62,7 @@
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat"]
+      "Keywords": [".*login.*", ".*kerberos.*", ".*credential.*", ".*username.*", ".*password.*", ".*authenticat.*"]
     },
 
 
@@ -319,25 +319,6 @@
 
       ],
       "Keywords": []
-    },
-
-
-    {
-
-      "CategoryName": "UnknownError",
-      "Types": [
-
-        {
-          "TypeName": "",
-          "Exceptions": [
-
-          ],
-          "ExceptionRegex": ""
-        }
-
-      ],
-      "Keywords": []
     }
-
   ]
 }

@@ -22,18 +22,21 @@ import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class MetricsHandler
@@ -240,6 +243,10 @@ public class MetricsHandler
      */
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
 
+    private enum ERROR_CATEGORIES {USER_AUTHENTICATION_ERROR, USER_EXECUTION_ERROR, SERVER_INTERNAL_ERROR, SERVER_EXECUTION_ERROR, OTHER_ERROR, UNKNOWN_ERROR}
+
+    private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA = readErrorData();
+
     /**
      * Method to obtain a label for the error that has occurred
      * @param origin the stage in execution at which the error occurred
@@ -279,42 +286,42 @@ public class MetricsHandler
     }
 
     /**
-     * Hashmap with 1:N:N mapping of error data
-     */
-    private static final HashMap<String, List<HashMap<String, List<String>>>> ERROR_DATA = readErrorData();
-
-    /**
      * Method to categorise the exception that has occurred
      * @param origin the stage in execution at which the error occurred
      * @param errorLabel the preliminary label given to the exception
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized String getErrorCategory(String origin, String errorLabel, Exception exception)
+    private static synchronized ERROR_CATEGORIES getErrorCategory(String origin, String errorLabel, Exception exception)
     {
 
-        return origin;
+        return ERROR_CATEGORIES.UNKNOWN_ERROR;
     }
 
     /**
      * Read JSON file with outline of errors to be used in categorizing the exceptions
      * @return Hashmap with mapping of exception data
      */
-    private static synchronized HashMap<String, List<HashMap<String, List<String>>>> readErrorData() {
+    // Make regex not case sensitive throughout all regexes!
+    private static synchronized ArrayList<ErrorCategory> readErrorData() {
         JSONParser jsonParser = new JSONParser();
-        // Make regex not case sensitive throughout all regexes!
+        ArrayList<ErrorCategory> categories = new ArrayList<>();
         try (FileReader reader = new FileReader("ErrorData.json"))
         {
-            //Read JSON file
-            Object obj = jsonParser.parse(reader);
+            JSONObject object = (JSONObject) jsonParser.parse(reader);
 
-            JSONArray errorData = (JSONArray) obj;
-            System.out.println(errorData);
-
-        } catch (IOException | ParseException e) {
+            JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
+            Iterator iterator = errorCategories.iterator();
+            while (iterator.hasNext())
+            {
+                ErrorCategory category = new ErrorCategory((JSONObject) iterator.next());
+                categories.add(category);
+            }
+        } catch (IOException | ParseException e)
+        {
             LOGGER.error(e.toString());
         }
-        return null;
+        return categories;
     }
 
     // void match - while match is null if ex simplename is Exception or RuntimeException -> ex = ex.getCause() -> rerun match
