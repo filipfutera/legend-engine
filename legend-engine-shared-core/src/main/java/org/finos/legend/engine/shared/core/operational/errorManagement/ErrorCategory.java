@@ -1,5 +1,4 @@
 package org.finos.legend.engine.shared.core.operational.errorManagement;
-import com.sun.tools.javac.util.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -43,12 +42,21 @@ public class ErrorCategory {
                 JSONObject exceptionData = (JSONObject) it.next();
                 String exceptionName = exceptionData.get("ExceptionName").toString();
                 String exceptionMessageRegex = exceptionData.get("MessageRegex").toString();
-                exceptions.add(new Pair(exceptionName, Pattern.compile(exceptionMessageRegex, Pattern.CASE_INSENSITIVE)));
+                exceptions.add(new Pair<>(exceptionName, Pattern.compile(exceptionMessageRegex, Pattern.CASE_INSENSITIVE)));
             }
             exceptionDataMap.put(typeName, exceptions);
         }
 
     }
+    
+    public class Pair<S, P> {
 
+        public final String exceptionName;
+        public final Pattern exceptionMessage;
 
+        public Pair(String exceptionName, Pattern exceptionMessage) {
+            this.exceptionName = exceptionName;
+            this.exceptionMessage = exceptionMessage;
+        }
+    }
 }
