@@ -1,4 +1,4 @@
-// Copyright 2020 Goldman Sachs
+// Copyright 2022 Goldman Sachs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class ErrorCategory
     }
 
     /**
-     * Algorithm to see if a category and exception are a match
+     * Method to check if an error category and an occurred exception are a match
      * @param exception is the error that occurred during execution
      * @return true if the exception and category are a match false otherwise.
      */
@@ -96,8 +96,16 @@ public class ErrorCategory
     {
         String message = exception.getMessage() == null ? "null" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
+        return matchKeywords(name, message) || matchExceptionOutlines(name, message) || matchTypeNames(name);
+    }
 
-        //check if exception message of class name matches any category keywords
+    /**
+     * check if the exception's message or class name matches any category keywords
+     * @param name is the exception's name
+     * @param message is the exception's message
+     * @return true if the category is a match, false otherwise
+     */
+    private boolean matchKeywords(String name, String message) {
         for (Pattern keyword : keywords)
         {
             if (keyword.matcher(message).find() || keyword.matcher(name).find())
@@ -105,8 +113,16 @@ public class ErrorCategory
                 return true;
             }
         }
+        return false;
+    }
 
-        // check if exception name and message match any defined category name and message pair
+    /**
+     * check if the exception's name and message match any of the defined exception name and message pairs
+     * @param name is the exception's name
+     * @param message is the exception's message
+     * @return true if the category is a match, false otherwise
+     */
+    private boolean matchExceptionOutlines(String name, String message) {
         for (Entry<String, List<ExceptionOutline>> entry : exceptionDataMap.entrySet())
         {
             String type = entry.getKey();
@@ -119,8 +135,15 @@ public class ErrorCategory
                 }
             }
         }
+        return false;
+    }
 
-        // check if exception class name matches any of this category's Types' exception name regex
+    /**
+     * check if the exception's class name matches any of this category's Types' exception name regex
+     * @param name is the exception's name
+     * @return true if the category is a match, false otherwise
+     */
+    private boolean matchTypeNames(String name) {
         for (Entry<String, Pattern> exceptionRegex : typeRegexMap.entrySet())
         {
             String type = exceptionRegex.getKey();
