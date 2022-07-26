@@ -70,7 +70,7 @@ public class ErrorCategory
     {
         Exception ex = exception;
         boolean rerun = false;
-        while (!rerun)
+        while (!rerun && ex != null)
         {
             rerun = !ex.equals(exception);
             //check if exception matches any keywords in exception message and name
@@ -109,7 +109,7 @@ public class ErrorCategory
             }
 
             //update exception to rerun once with exception cause if no match found
-            ex = (Exception) ex.getCause();
+            ex = ex.getCause() == null ? null : (Exception) ex.getCause();
         }
         return false;
     }
