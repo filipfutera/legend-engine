@@ -107,10 +107,11 @@ public class Execute
     public Response test()
     {
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("testing", null, EngineErrorType.COMPILATION), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("testing", null, EngineErrorType.PARSER), null);
-        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("tds communication exception"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing slang exception testing"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown error", null, EngineErrorType.PARSER), null);
+        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
