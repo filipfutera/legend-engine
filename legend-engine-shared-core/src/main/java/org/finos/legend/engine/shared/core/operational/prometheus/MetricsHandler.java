@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -295,7 +297,6 @@ public class MetricsHandler
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(String origin, String errorLabel, Exception exception)
     {
-
         return ERROR_CATEGORIES.UNKNOWN_ERROR;
     }
 
@@ -308,9 +309,9 @@ public class MetricsHandler
     {
         JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
-        try (FileReader reader = new FileReader("ErrorData.json"))
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream("/ErrorData.json"))
         {
-            JSONObject object = (JSONObject) jsonParser.parse(reader);
+            JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, "UTF-8"));
 
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
             Iterator iterator = errorCategories.iterator();
@@ -319,7 +320,7 @@ public class MetricsHandler
                 ErrorCategory category = new ErrorCategory((JSONObject) iterator.next());
                 categories.add(category);
             }
-        } 
+        }
         catch (IOException | ParseException e)
         {
             LOGGER.error(e.toString());

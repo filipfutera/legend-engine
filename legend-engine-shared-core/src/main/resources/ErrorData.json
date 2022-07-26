@@ -185,7 +185,7 @@
               "MessageRegex": ".*reading GridFS.*|.*writing to the Stream.*"
             }
           ],
-          "ExceptionRegex": ".*SQL.*Exception"
+          "TypeExceptionRegex": ".*SQL.*Exception"
         },
 
         {
@@ -196,7 +196,7 @@
               "MessageRegex": ".*"
             }
           ],
-          "ExceptionRegex": ".*Pure.*Exception"
+          "TypeExceptionRegex": ".*Pure.*Exception"
         },
 
         {
@@ -211,7 +211,7 @@
               "MessageRegex": ".*Unexpected token.*"
             }
           ],
-          "ExceptionRegex": ".*JSON.*Exception"
+          "TypeExceptionRegex": ".*JSON.*Exception"
         },
 
         {
@@ -222,7 +222,7 @@
               "MessageRegex": ".*Can't find property.*|.*Can't find store.*"
             }
           ],
-          "ExceptionRegex": ".*Graph.*Exception"
+          "TypeExceptionRegex": ".*Graph.*Exception"
         },
 
         {
@@ -241,7 +241,7 @@
               "MessageRegex": ".*"
             }
           ],
-          "ExceptionRegex": ""
+          "TypeExceptionRegex": ""
         },
 
         {
@@ -252,7 +252,7 @@
             "MessageRegex": ".*Error loading service.*|.*Invalid provided parameter.*|.*Reprocessing sql failed with vars.*"
           }
         ],
-        "ExceptionRegex": ""
+        "TypeExceptionRegex": ""
         },
 
         {
@@ -263,7 +263,7 @@
               "MessageRegex": ".*slang exception.*"
             }
           ],
-          "ExceptionRegex": ""
+          "TypeExceptionRegex": ""
         }
 
       ],
@@ -295,7 +295,7 @@
               "MessageRegex": ".*"
             }
           ],
-          "ExceptionRegex": ""
+          "TypeExceptionRegex": ""
         },
 
         {
@@ -314,7 +314,7 @@
               "MessageRegex": ".*exception occurred executing service test suites.*"
             }
           ],
-          "ExceptionRegex": ""
+          "TypeExceptionRegex": ""
         }
 
       ],
