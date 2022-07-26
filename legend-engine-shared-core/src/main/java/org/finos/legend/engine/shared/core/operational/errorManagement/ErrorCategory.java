@@ -37,7 +37,6 @@ public class ErrorCategory
     {
         this.friendlyName = errorCategory.get("CategoryName").toString();
 
-        // Get and Cast Category Regex Keywords
         JSONArray regexKeywords = ((JSONArray) errorCategory.get("Keywords"));
         for (Object regexKeyword : regexKeywords)
         {
@@ -67,7 +66,8 @@ public class ErrorCategory
         }
     }
 
-    public boolean match(Exception exception) {
+    public boolean match(Exception exception)
+    {
         Exception ex = exception;
         boolean rerun = false;
         while (!rerun)
@@ -114,7 +114,8 @@ public class ErrorCategory
         return false;
     }
 
-    public String getFriendlyName() {
+    public String getFriendlyName()
+    {
         return friendlyName;
     }
     

@@ -31,15 +31,12 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 public class MetricsHandler
 {
@@ -286,7 +283,7 @@ public class MetricsHandler
         servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
         String[] labels = new String[] {servicePattern, errorLabel};
         ERROR_COUNTER.labels(labels).inc();
-        
+
         String errorCategory = getErrorCategory(exception).toString();
         CATEGORIZED_ERROR_COUNTER.labels(errorCategory).inc();
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePattern, errorCategory));
@@ -300,8 +297,10 @@ public class MetricsHandler
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
-        for (ErrorCategory category : ERROR_CATEGORY_DATA) {
-            if (category.match(exception)) {
+        for (ErrorCategory category : ERROR_CATEGORY_DATA)
+        {
+            if (category.match(exception))
+            {
                 return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
             }
         }
