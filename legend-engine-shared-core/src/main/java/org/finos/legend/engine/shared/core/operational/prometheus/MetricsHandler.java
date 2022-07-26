@@ -244,9 +244,10 @@ public class MetricsHandler
      * Prometheus counter to record errors with labels of the service causing the error and the label given to the error
      */
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
+    private static final Counter CATEGORIZED_ERROR_COUNTER = Counter.build("legend_engine_categorized_error_total", "Categorise and count errors in legend ecosystem").labelNames("category").register(getMetricsRegistry());
 
     private enum ERROR_CATEGORIES
-    { USER_AUTHENTICATION_ERROR, USER_EXECUTION_ERROR, SERVER_INTERNAL_ERROR, SERVER_EXECUTION_ERROR, OTHER_ERROR, UNKNOWN_ERROR }
+    { UserAuthenticationError, UserExecutionError, ServerInternalError, ServerExecutionError, OtherError, UnknownError }
 
     private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA = readErrorData();
 
@@ -283,21 +284,28 @@ public class MetricsHandler
     {
         String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
         servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s", origin, exception, errorLabel, servicePattern));
         String[] labels = new String[] {servicePattern, errorLabel};
         ERROR_COUNTER.labels(labels).inc();
+        
+        String errorCategory = getErrorCategory(exception).toString();
+        CATEGORIZED_ERROR_COUNTER.labels(errorCategory).inc();
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePattern, errorCategory));
+
     }
 
     /**
      * Method to categorise the exception that has occurred
-     * @param origin the stage in execution at which the error occurred
-     * @param errorLabel the preliminary label given to the exception
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(String origin, String errorLabel, Exception exception)
+    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
-        return ERROR_CATEGORIES.UNKNOWN_ERROR;
+        for (ErrorCategory category : ERROR_CATEGORY_DATA) {
+            if (category.match(exception)) {
+                return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+            }
+        }
+        return ERROR_CATEGORIES.UnknownError;
     }
 
     /**

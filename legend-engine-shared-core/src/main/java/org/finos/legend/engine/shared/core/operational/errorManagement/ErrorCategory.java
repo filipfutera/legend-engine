@@ -18,10 +18,12 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ErrorCategory
@@ -63,7 +65,57 @@ public class ErrorCategory
             }
             exceptionDataMap.put(typeName, exceptions);
         }
+    }
 
+    public boolean match(Exception exception) {
+        Exception ex = exception;
+        boolean rerun = false;
+        while (!rerun)
+        {
+            rerun = !ex.equals(exception);
+            //check if exception matches any keywords in exception message and name
+            for (Pattern keyword : keywords)
+            {
+                if (keyword.matcher(ex.getMessage()).find() || keyword.matcher(ex.getClass().getSimpleName()).find())
+                {
+                    return true;
+                }
+            }
+
+            // check if exception matches any exception name and message pair
+            for (Entry<String, List<Pair<String, Pattern>>> entry : exceptionDataMap.entrySet())
+            {
+                String type = entry.getKey();
+                for (Pair<String, Pattern> exceptionData : entry.getValue())
+                {
+                    Matcher matcher = exceptionData.exceptionMessage.matcher(ex.getMessage());
+                    if (ex.getClass().getSimpleName().equals(exceptionData.exceptionName) && matcher.find())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // check if exception matches any general exception name regex
+            for (Entry<String, Pattern> exceptionRegex : typeRegexMap.entrySet())
+            {
+                String type = exceptionRegex.getKey();
+                Pattern regex = exceptionRegex.getValue();
+                Matcher matcher = regex.matcher(ex.getClass().getSimpleName());
+                if (!regex.toString().equals("") && matcher.find())
+                {
+                    return true;
+                }
+            }
+
+            //update exception to rerun once with exception cause if no match found
+            ex = (Exception) ex.getCause();
+        }
+        return false;
+    }
+
+    public String getFriendlyName() {
+        return friendlyName;
     }
     
     public class Pair<S, P>
