@@ -27,11 +27,9 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -242,12 +240,22 @@ public class MetricsHandler
      * Prometheus counter to record errors with labels of the service causing the error and the label given to the error
      */
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
+
+    /**
+     * Prometheus counter to record errors split into six major categories
+     */
     private static final Counter CATEGORIZED_ERROR_COUNTER = Counter.build("legend_engine_categorized_error_total", "Categorise and count errors in legend ecosystem").labelNames("category").register(getMetricsRegistry());
 
+    /**
+     * User friendly error categories
+     */
     private enum ERROR_CATEGORIES
     { UserAuthenticationError, UserExecutionError, ServerInternalError, ServerExecutionError, OtherError, UnknownError }
 
-    private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA = readErrorData();
+    /**
+     * List of objects corresponding to the error categories holding their associated exception data
+     */
+    private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
      * Method to obtain a label for the error that has occurred
@@ -293,26 +301,31 @@ public class MetricsHandler
 
     /**
      * Method to categorise the exception that has occurred
+     * If original exception cannot be matched its cause is attempted to be matched if both fail UnknownError is returned
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
-        for (ErrorCategory category : ERROR_CATEGORY_DATA)
+        for (int runs = 0; runs < 2; runs++)
         {
-            if (category.match(exception))
+            for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
             {
-                return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+                if (category.match(exception))
+                {
+                    return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+                }
             }
+            runs = exception.getCause() != null && exception.getCause() instanceof Exception ? runs : runs + 1;
+            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : exception;
         }
         return ERROR_CATEGORIES.UnknownError;
     }
 
     /**
      * Read JSON file with outline of errors to be used in categorizing the exceptions
-     * @return Hashmap with mapping of exception data
+     * @return List of objects corresponding to the categories with their respective data
      */
-    // Make regex not case-sensitive throughout all regexes!
     private static synchronized ArrayList<ErrorCategory> readErrorData()
     {
         JSONParser jsonParser = new JSONParser();
@@ -329,14 +342,11 @@ public class MetricsHandler
                 categories.add(category);
             }
         }
-        catch (IOException | ParseException e)
+        catch (Exception e)
         {
             LOGGER.error(e.toString());
         }
         return categories;
     }
-
-    // void match - while match is null if ex simple-name is Exception or RuntimeException -> ex = ex.getCause() -> rerun match
-    // do same with engine-exception to get cause.
 
 }
