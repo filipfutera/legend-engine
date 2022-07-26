@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -311,14 +312,14 @@ public class MetricsHandler
      * Read JSON file with outline of errors to be used in categorizing the exceptions
      * @return Hashmap with mapping of exception data
      */
-    // Make regex not case sensitive throughout all regexes!
+    // Make regex not case-sensitive throughout all regexes!
     private static synchronized ArrayList<ErrorCategory> readErrorData()
     {
         JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream("/ErrorData.json"))
         {
-            JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, "UTF-8"));
+            JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
             Iterator iterator = errorCategories.iterator();
@@ -335,7 +336,7 @@ public class MetricsHandler
         return categories;
     }
 
-    // void match - while match is null if ex simplename is Exception or RuntimeException -> ex = ex.getCause() -> rerun match
-    // do same with engineexception to get cause.
+    // void match - while match is null if ex simple-name is Exception or RuntimeException -> ex = ex.getCause() -> rerun match
+    // do same with engine-exception to get cause.
 
 }

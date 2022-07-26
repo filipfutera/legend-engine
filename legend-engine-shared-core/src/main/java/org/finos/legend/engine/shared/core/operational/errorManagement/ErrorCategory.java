@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
 
 public class ErrorCategory
 {
-    private String friendlyName;
-    private final HashMap<String, List<Pair<String, Pattern>>> exceptionDataMap = new HashMap<>();
-    private ArrayList<Pattern> keywords = new ArrayList<>();
+    private final String friendlyName;
+    private final HashMap<String, List<Pair>> exceptionDataMap = new HashMap<>();
+    private final ArrayList<Pattern> keywords = new ArrayList<>();
     private final HashMap<String, Pattern> typeRegexMap = new HashMap<>();
 
     public ErrorCategory(JSONObject errorCategory)
@@ -54,13 +54,13 @@ public class ErrorCategory
 
             JSONArray jsonExceptions = (JSONArray) type.get("Exceptions");
             Iterator it = jsonExceptions.iterator();
-            ArrayList<Pair<String,Pattern>> exceptions = new ArrayList();
+            ArrayList<Pair> exceptions = new ArrayList();
             while (it.hasNext())
             {
                 JSONObject exceptionData = (JSONObject) it.next();
                 String exceptionName = exceptionData.get("ExceptionName").toString();
                 String exceptionMessageRegex = exceptionData.get("MessageRegex").toString();
-                exceptions.add(new Pair<>(exceptionName, Pattern.compile(exceptionMessageRegex, Pattern.CASE_INSENSITIVE)));
+                exceptions.add(new Pair(exceptionName, Pattern.compile(exceptionMessageRegex, Pattern.CASE_INSENSITIVE)));
             }
             exceptionDataMap.put(typeName, exceptions);
         }
@@ -72,24 +72,26 @@ public class ErrorCategory
         boolean rerun = false;
         while (!rerun && ex != null)
         {
+            String message = ex.getMessage() == null ? "null" : ex.getMessage();
+            String name = ex.getClass().getSimpleName();
             rerun = !ex.equals(exception);
             //check if exception matches any keywords in exception message and name
             for (Pattern keyword : keywords)
             {
-                if (keyword.matcher(ex.getMessage()).find() || keyword.matcher(ex.getClass().getSimpleName()).find())
+                if (keyword.matcher(message).find() || keyword.matcher(name).find())
                 {
                     return true;
                 }
             }
 
             // check if exception matches any exception name and message pair
-            for (Entry<String, List<Pair<String, Pattern>>> entry : exceptionDataMap.entrySet())
+            for (Entry<String, List<Pair>> entry : exceptionDataMap.entrySet())
             {
                 String type = entry.getKey();
-                for (Pair<String, Pattern> exceptionData : entry.getValue())
+                for (Pair exceptionData : entry.getValue())
                 {
-                    Matcher matcher = exceptionData.exceptionMessage.matcher(ex.getMessage());
-                    if (ex.getClass().getSimpleName().equals(exceptionData.exceptionName) && matcher.find())
+                    Matcher matcher = exceptionData.exceptionMessage.matcher(message);
+                    if (name.equals(exceptionData.exceptionName) && matcher.find())
                     {
                         return true;
                     }
@@ -101,7 +103,7 @@ public class ErrorCategory
             {
                 String type = exceptionRegex.getKey();
                 Pattern regex = exceptionRegex.getValue();
-                Matcher matcher = regex.matcher(ex.getClass().getSimpleName());
+                Matcher matcher = regex.matcher(name);
                 if (!regex.toString().equals("") && matcher.find())
                 {
                     return true;
@@ -119,8 +121,7 @@ public class ErrorCategory
         return friendlyName;
     }
     
-    public class Pair<S, P>
-    {
+    public static class Pair {
 
         public final String exceptionName;
         public final Pattern exceptionMessage;
