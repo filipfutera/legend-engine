@@ -105,7 +105,8 @@ public class ErrorCategory
      * @param message is the exception's message
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchKeywords(String name, String message) {
+    private boolean matchKeywords(String name, String message)
+    {
         for (Pattern keyword : keywords)
         {
             if (keyword.matcher(message).find() || keyword.matcher(name).find())
@@ -122,7 +123,8 @@ public class ErrorCategory
      * @param message is the exception's message
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchExceptionOutlines(String name, String message) {
+    private boolean matchExceptionOutlines(String name, String message)
+    {
         for (Entry<String, List<ExceptionOutline>> entry : exceptionDataMap.entrySet())
         {
             String type = entry.getKey();
@@ -143,7 +145,8 @@ public class ErrorCategory
      * @param name is the exception's name
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchTypeNames(String name) {
+    private boolean matchTypeNames(String name)
+    {
         for (Entry<String, Pattern> exceptionRegex : typeRegexMap.entrySet())
         {
             String type = exceptionRegex.getKey();
