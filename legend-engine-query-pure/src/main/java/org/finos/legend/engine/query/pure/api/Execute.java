@@ -76,6 +76,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import java.sql.SQLException;
+
 import static org.finos.legend.engine.plan.execution.api.result.ResultManager.manageResult;
 import static org.finos.legend.engine.shared.core.operational.http.InflateInterceptor.APPLICATION_ZLIB;
 
@@ -114,6 +116,7 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new SQLException("check sqlerror type regex"), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
