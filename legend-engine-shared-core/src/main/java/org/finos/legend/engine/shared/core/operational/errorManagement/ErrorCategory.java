@@ -68,14 +68,16 @@ public class ErrorCategory
             this.keywords.add(Pattern.compile(regexKeyword.toString(), Pattern.CASE_INSENSITIVE));
         }
 
-        for (Object typeObject : (JSONArray) errorCategory.get("Types")) {
+        for (Object typeObject : (JSONArray) errorCategory.get("Types"))
+        {
             JSONObject type = (JSONObject) typeObject;
             String typeName = type.get("TypeName").toString();
             Pattern typeExceptionRegex = Pattern.compile(type.get("TypeExceptionRegex").toString(), Pattern.CASE_INSENSITIVE);
             typeRegexMap.put(typeName, typeExceptionRegex);
 
             ArrayList<ExceptionOutline> exceptions = new ArrayList();
-            for (Object jsonException : (JSONArray) type.get("Exceptions")) {
+            for (Object jsonException : (JSONArray) type.get("Exceptions"))
+            {
                 JSONObject exceptionData = (JSONObject) jsonException;
                 String exceptionName = exceptionData.get("ExceptionName").toString();
                 String exceptionMessageRegex = exceptionData.get("MessageRegex").toString();
@@ -132,17 +134,34 @@ public class ErrorCategory
         return false;
     }
 
+    /**
+     * @return user-friendly string corresponding to this error category
+     */
     public String getFriendlyName()
     {
         return friendlyName;
     }
-    
+
+    /**
+     * Local class to implement a tuple holding exception data to match with
+     */
     public static class ExceptionOutline
     {
-
+        /**
+         * Exception class name
+         */
         public final String exceptionName;
+
+        /**
+         * Regex pattern to match with the exception message
+         */
         public final Pattern exceptionMessage;
 
+        /**
+         * Constructor for tuple class
+         * @param exceptionName is the exception class name
+         * @param exceptionMessage is the exception message regex
+         */
         public ExceptionOutline(String exceptionName, Pattern exceptionMessage)
         {
             this.exceptionName = exceptionName;
