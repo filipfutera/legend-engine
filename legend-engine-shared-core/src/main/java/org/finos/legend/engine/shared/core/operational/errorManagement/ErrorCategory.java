@@ -169,9 +169,9 @@ public class ErrorCategory
     }
 
     /**
-     * Local class to implement a tuple holding exception data to match with
+     * Local class to implement a tuple holding exception data to match errors with
      */
-    public static class ExceptionOutline
+    private static class ExceptionOutline
     {
         /**
          * Exception class name
