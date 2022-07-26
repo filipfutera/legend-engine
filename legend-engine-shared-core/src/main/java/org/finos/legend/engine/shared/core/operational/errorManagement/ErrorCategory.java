@@ -121,7 +121,8 @@ public class ErrorCategory
         return friendlyName;
     }
     
-    public static class Pair {
+    public static class Pair
+    {
 
         public final String exceptionName;
         public final Pattern exceptionMessage;
