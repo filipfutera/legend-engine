@@ -183,6 +183,10 @@
             {
               "ExceptionName": "RuntimeException",
               "MessageRegex": "reading GridFS|writing to the Stream"
+            },
+            {
+              "ExceptionName": "JdbcSQLDataException",
+              "MessageRegex": "Value too long for column"
             }
           ],
           "TypeExceptionRegex": "SQL.*Exception"
