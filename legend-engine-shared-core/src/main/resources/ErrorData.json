@@ -57,12 +57,16 @@
             {
               "ExceptionName": "SnowflakeSQLException",
               "MessageRegex": "no default role has been assigned to the user"
+            },
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": "permission denied"
             }
           ],
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat"]
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat", "permission"]
     },
 
 
@@ -71,7 +75,7 @@
       "Types": [
 
         {
-          "TypeName": "QuerySyntaxError",
+          "TypeName": "QueryError",
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
@@ -80,6 +84,10 @@
             {
               "ExceptionName": "SnowflakeSQLException",
               "MessageRegex": "session does not have a current database"
+            },
+            {
+              "ExceptionName": "AvaticaSqlException",
+              "MessageRegex": "not entitled to data store"
             }
           ],
           "TypeExceptionRegex": ""
@@ -169,8 +177,12 @@
               "MessageRegex": ""
             },
             {
-              "ExceptionName": "JdbcSQLSyntaxError",
+              "ExceptionName": "JdbcSQLSyntaxErrorException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "SQLSyntaxErrorException",
+              "MessageRegex": "Unknown column"
             },
             {
               "ExceptionName": "RuntimeException",
@@ -187,6 +199,10 @@
             {
               "ExceptionName": "JdbcSQLDataException",
               "MessageRegex": "Value too long for column"
+            },
+            {
+              "ExceptionName": "AvaticaSqlException",
+              "MessageRegex": "remote driver error"
             }
           ],
           "TypeExceptionRegex": "SQL.*Exception"
@@ -268,10 +284,21 @@
             }
           ],
           "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "CommunicationErrors",
+          "Exceptions": [
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Failed to initialize pool"
+            }
+          ],
+          "TypeExceptionRegex": ""
         }
 
       ],
-      "Keywords": []
+      "Keywords": ["initialize.*pool"]
     },
 
 

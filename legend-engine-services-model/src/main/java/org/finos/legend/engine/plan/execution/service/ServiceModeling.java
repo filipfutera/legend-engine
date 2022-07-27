@@ -95,11 +95,11 @@ public class ServiceModeling
     @Prometheus(name = "service test model resolve", doc = "Model resolution duration summary within service test execution")
     public List<TestResult> testService(MutableList<CommonProfile> profiles, PureModelContext context, String metricsContext)
     {
+        PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
         try
         {
             long start = System.currentTimeMillis();
-            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             PureModelContextData dataWithoutService = PureModelContextData.newBuilder().withOrigin(data.getOrigin()).withSerializer(data.getSerializer()).withElements(LazyIterate.select(data.getElements(), e -> e != service)).build();
             PureModel pureModel  = new PureModel(dataWithoutService, profiles, deploymentMode);
             Pair<PureModelContextData, PureModel> pureModelAndData  = Tuples.pair(dataWithoutService, pureModel);
@@ -123,8 +123,6 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), elem -> elem instanceof Service);
             MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, service == null ? null : service.getPath());
             throw new RuntimeException(e);
         }

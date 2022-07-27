@@ -129,6 +129,8 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
+        PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
+        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -139,7 +141,7 @@ public class Execute
                     executeInput.runtime,
                     executeInput.context,
                     clientVersion,
-                    profiles, request.getRemoteUser(), format);
+                    profiles, request.getRemoteUser(), format, service != null ? service.getPath() : null);
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
                 MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
@@ -149,8 +151,6 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
             return response;
         }
@@ -224,7 +224,7 @@ public class Execute
                 new PlanWithDebug(PlanGenerator.generateExecutionPlan(lambda, mapping, runtime, context, pureModel, clientVersion, PlanPlatform.JAVA, null, this.extensions.apply(pureModel), this.transformers), "");
     }
 
-    public Response exec(Function<PureModel, LambdaFunction<?>> functionFunc, Function0<PureModel> pureModelFunc, PlanExecutor planExecutor, String mapping, Runtime runtime, ExecutionContext context, String clientVersion, MutableList<CommonProfile> pm, String user, SerializationFormat format)
+    public Response exec(Function<PureModel, LambdaFunction<?>> functionFunc, Function0<PureModel> pureModelFunc, PlanExecutor planExecutor, String mapping, Runtime runtime, ExecutionContext context, String clientVersion, MutableList<CommonProfile> pm, String user, SerializationFormat format, String servicePath)
     {
         try
         {
@@ -253,7 +253,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
