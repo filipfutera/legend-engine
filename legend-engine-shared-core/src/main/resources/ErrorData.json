@@ -13,7 +13,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "username|password|GSSAPI credentials"
+              "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid"
             },
             {
               "ExceptionName": "UnsupportedOperationException",
@@ -33,7 +33,7 @@
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "Expired SecureConnect token|GSSException is caught when getting a ticket from JGSS"
+              "MessageRegex": "Expired SecureConnect token|GSSException is caught when getting a ticket from JGSS|Invalid user ID or password"
             },
             {
               "ExceptionName": "SQLInvalidAuthorizationSpecException",
@@ -79,7 +79,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "session does not have a current database|Can't find a match for function"
+              "MessageRegex": "session does not have a current database|Can't find a match for function|Can't find type"
             },
             {
               "ExceptionName": "SnowflakeSQLException",
@@ -239,7 +239,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find property|Can't find store"
+              "MessageRegex": "Can't find property|Can't find store|Can't find table"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
@@ -259,6 +259,10 @@
             {
               "ExceptionName": "NonStringOrTemplateOutputException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": "Issue processing freemarker function|MiscTemplateException"
             }
           ],
           "TypeExceptionRegex": ""
@@ -326,7 +330,7 @@
               "MessageRegex": ""
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "Connection|Timeout"
         },
 
         {
