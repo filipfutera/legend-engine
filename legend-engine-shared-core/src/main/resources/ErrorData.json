@@ -185,7 +185,7 @@
               "MessageRegex": "reading GridFS|writing to the Stream"
             }
           ],
-          "TypeExceptionRegex": "SQLException"
+          "TypeExceptionRegex": "SQL.*Exception"
         },
 
         {
@@ -196,7 +196,7 @@
               "MessageRegex": ""
             }
           ],
-          "TypeExceptionRegex": "PureException"
+          "TypeExceptionRegex": "Pure.*Exception"
         },
 
         {
@@ -211,7 +211,7 @@
               "MessageRegex": "Unexpected token"
             }
           ],
-          "TypeExceptionRegex": "JSONException"
+          "TypeExceptionRegex": "JSON.*Exception"
         },
 
         {
@@ -222,7 +222,7 @@
               "MessageRegex": "Can't find property|Can't find store"
             }
           ],
-          "TypeExceptionRegex": "GraphException"
+          "TypeExceptionRegex": "Graph.*Exception"
         },
 
         {
