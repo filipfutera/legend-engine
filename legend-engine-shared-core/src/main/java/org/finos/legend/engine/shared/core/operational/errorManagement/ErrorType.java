@@ -82,7 +82,8 @@ public class ErrorType
      * @param name is the occurring exception class name
      * @return true if the type name regex matches the parameter name and false otherwise
      */
-    public boolean isTypeExceptionNameMatch(String name) {
+    public boolean isTypeExceptionNameMatch(String name)
+    {
         Matcher matcher = this.typeExceptionRegex.matcher(name);
         return !this.typeExceptionRegex.toString().equals("") && matcher.find();
     }
