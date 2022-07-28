@@ -106,7 +106,8 @@ public class ErrorCategory
     {
         for (ErrorType type : this.errorTypes)
         {
-            if (type.isExceptionOutlineMatch(name, message)) {
+            if (type.isExceptionOutlineMatch(name, message))
+            {
                 return true;
             }
         }
