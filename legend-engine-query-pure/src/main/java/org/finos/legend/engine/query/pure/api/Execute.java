@@ -109,7 +109,7 @@ public class Execute
     public Response test()
     {
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), "/test/tempService");
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing slang exception testing"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("nothing", new RuntimeException("testing slang exception testing")), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new RuntimeException("nothing", new EngineException("can't find table: test")), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
