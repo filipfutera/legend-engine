@@ -239,12 +239,7 @@ public class MetricsHandler
     /**
      * Prometheus counter to record errors with labels of the service causing the error and the label given to the error
      */
-    private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("serviceName", "errorLabel").register(getMetricsRegistry());
-
-    /**
-     * Prometheus counter to record errors split into six major categories
-     */
-    private static final Counter CATEGORIZED_ERROR_COUNTER = Counter.build("legend_engine_categorized_error_total", "Categorise and count errors in legend ecosystem").labelNames("category").register(getMetricsRegistry());
+    private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
      * User friendly error categories
@@ -289,12 +284,10 @@ public class MetricsHandler
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePattern)
     {
         String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
-        servicePattern = servicePattern == null ? "UnknownService" : servicePattern;
-        String[] labels = new String[] {servicePattern, errorLabel};
-        ERROR_COUNTER.labels(labels).inc();
-
+        servicePattern = servicePattern == null ? "N/A" : servicePattern;
+        String source = servicePattern == null ? origin.toFriendlyString() : "Service";
         String errorCategory = getErrorCategory(exception).toString();
-        CATEGORIZED_ERROR_COUNTER.labels(errorCategory).inc();
+        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePattern, errorCategory));
 
     }

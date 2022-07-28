@@ -42,10 +42,10 @@ public enum ErrorOrigin
     {
         String errorOrigin = this.toString().toLowerCase();
         String[] elements = errorOrigin.split("_");
-        StringBuffer output = new StringBuffer();
+        StringBuilder output = new StringBuilder();
         for (String element : elements)
         {
-            output.append(element.substring(0,1).toUpperCase() + element.substring(1));
+            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
         }
         return output.toString();
     }
