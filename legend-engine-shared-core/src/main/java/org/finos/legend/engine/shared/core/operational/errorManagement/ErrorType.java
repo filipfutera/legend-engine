@@ -18,6 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -77,21 +78,22 @@ public class ErrorType
     }
 
     /**
+     * Method to check if an occurring exception class name matches the defined exception class name regex for this error type
+     * @param name is the occurring exception class name
+     * @return true if the type name regex matches the parameter name and false otherwise
+     */
+    public boolean isTypeExceptionNameMatch(String name) {
+        Matcher matcher = this.typeExceptionRegex.matcher(name);
+        return !this.typeExceptionRegex.toString().equals("") && matcher.find();
+    }
+
+    /**
      * Method to get the user-friendly but more technical error Type name
      * @return error type friendly name
      */
     public String getTypeName()
     {
         return typeName;
-    }
-
-    /**
-     * Method to get the regex for matching occuring exception's class names
-     * @return the type's class name regex
-     */
-    public Pattern getTypeExceptionRegex()
-    {
-        return typeExceptionRegex;
     }
 
 }

@@ -18,9 +18,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.Map.Entry;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -37,12 +35,12 @@ public class ErrorCategory
     /**
      * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
      */
-    private ArrayList<Pattern> keywords;
+    private final ArrayList<Pattern> keywords;
 
     /**
      * List of error types (essentially sub-categories of errors) associated with this category
      */
-    private ArrayList<ErrorType> errorTypes;
+    private final ArrayList<ErrorType> errorTypes;
 
     /**
      * Constructor to read a JSONObject and extract aforementioned data into its correct fields
@@ -123,8 +121,7 @@ public class ErrorCategory
     {
         for (ErrorType errorType : this.errorTypes)
         {
-            Matcher matcher = errorType.getTypeExceptionRegex().matcher(name);
-            if (!errorType.getTypeExceptionRegex().toString().equals("") && matcher.find())
+            if (errorType.isTypeExceptionNameMatch(name))
             {
                 return true;
             }
