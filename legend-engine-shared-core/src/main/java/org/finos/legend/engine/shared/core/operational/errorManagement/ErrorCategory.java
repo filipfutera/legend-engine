@@ -18,9 +18,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,22 +35,14 @@ public class ErrorCategory
     private final String friendlyName;
 
     /**
-     * Map of exception data with
-     * Keys being the Exception Types associated with the category
-     * Values being a tuple of exception class names and exception message regexes
-     */
-    private final HashMap<String, List<ExceptionOutline>> exceptionDataMap = new HashMap<>();
-
-    /**
      * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
      */
-    private final ArrayList<Pattern> keywords = new ArrayList<>();
+    private ArrayList<Pattern> keywords;
 
     /**
-     * Maps Exception Types to general regexes used to match an exception with matching class name to the Type and thus category
-     * Different to keywords as only used to match with exception class name rather than also the exception message.
+     * List of error types (essentially sub-categories of errors) associated with this category
      */
-    private final HashMap<String, Pattern> typeRegexMap = new HashMap<>();
+    private ArrayList<ErrorType> errorTypes;
 
     /**
      * Constructor to read a JSONObject and extract aforementioned data into its correct fields
@@ -63,27 +53,16 @@ public class ErrorCategory
         this.friendlyName = errorCategory.get("CategoryName").toString();
 
         JSONArray regexKeywords = ((JSONArray) errorCategory.get("Keywords"));
+        this.keywords = new ArrayList<>();
         for (Object regexKeyword : regexKeywords)
         {
             this.keywords.add(Pattern.compile(regexKeyword.toString(), Pattern.CASE_INSENSITIVE));
         }
-
+        this.errorTypes = new ArrayList<>();
         for (Object typeObject : (JSONArray) errorCategory.get("Types"))
         {
-            JSONObject type = (JSONObject) typeObject;
-            String typeName = type.get("TypeName").toString();
-            Pattern typeExceptionRegex = Pattern.compile(type.get("TypeExceptionRegex").toString(), Pattern.CASE_INSENSITIVE);
-            typeRegexMap.put(typeName, typeExceptionRegex);
-
-            ArrayList<ExceptionOutline> exceptions = new ArrayList();
-            for (Object jsonException : (JSONArray) type.get("Exceptions"))
-            {
-                JSONObject exceptionData = (JSONObject) jsonException;
-                String exceptionName = exceptionData.get("ExceptionName").toString();
-                String exceptionMessageRegex = exceptionData.get("MessageRegex").toString();
-                exceptions.add(new ExceptionOutline(exceptionName, Pattern.compile(exceptionMessageRegex, Pattern.CASE_INSENSITIVE)));
-            }
-            exceptionDataMap.put(typeName, exceptions);
+            ErrorType type = new ErrorType((JSONObject) typeObject);
+            this.errorTypes.add(type);
         }
     }
 
@@ -94,9 +73,9 @@ public class ErrorCategory
      */
     public boolean match(Exception exception)
     {
-        String message = exception.getMessage() == null ? "null" : exception.getMessage();
+        String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        return matchKeywords(name, message) || matchExceptionOutlines(name, message) || matchTypeNames(name);
+        return matchKeywords(name, message) || matchTypeNames(name) || matchExceptionOutlines(name, message);
     }
 
     /**
@@ -125,16 +104,10 @@ public class ErrorCategory
      */
     private boolean matchExceptionOutlines(String name, String message)
     {
-        for (Entry<String, List<ExceptionOutline>> entry : exceptionDataMap.entrySet())
+        for (ErrorType type : this.errorTypes)
         {
-            String type = entry.getKey();
-            for (ExceptionOutline exceptionData : entry.getValue())
-            {
-                Matcher matcher = exceptionData.exceptionMessage.matcher(message);
-                if (name.equals(exceptionData.exceptionName) && matcher.find())
-                {
-                    return true;
-                }
+            if (type.isExceptionOutlineMatch(name, message)) {
+                return true;
             }
         }
         return false;
@@ -147,12 +120,10 @@ public class ErrorCategory
      */
     private boolean matchTypeNames(String name)
     {
-        for (Entry<String, Pattern> exceptionRegex : typeRegexMap.entrySet())
+        for (ErrorType errorType : this.errorTypes)
         {
-            String type = exceptionRegex.getKey();
-            Pattern regex = exceptionRegex.getValue();
-            Matcher matcher = regex.matcher(name);
-            if (!regex.toString().equals("") && matcher.find())
+            Matcher matcher = errorType.getTypeExceptionRegex().matcher(name);
+            if (!errorType.getTypeExceptionRegex().toString().equals("") && matcher.find())
             {
                 return true;
             }
@@ -168,30 +139,8 @@ public class ErrorCategory
         return friendlyName;
     }
 
-    /**
-     * Local class to implement a tuple holding exception data to match errors with
-     */
-    private static class ExceptionOutline
-    {
-        /**
-         * Exception class name
-         */
-        public final String exceptionName;
-
-        /**
-         * Regex pattern to match with the exception message
-         */
-        public final Pattern exceptionMessage;
-
-        /**
-         * Constructor for tuple class
-         * @param exceptionName is the exception class name
-         * @param exceptionMessage is the exception message regex
-         */
-        public ExceptionOutline(String exceptionName, Pattern exceptionMessage)
-        {
-            this.exceptionName = exceptionName;
-            this.exceptionMessage = exceptionMessage;
-        }
-    }
 }
+
+
+
+

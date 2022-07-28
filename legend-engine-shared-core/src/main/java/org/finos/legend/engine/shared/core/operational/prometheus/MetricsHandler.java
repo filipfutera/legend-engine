@@ -301,14 +301,13 @@ public class MetricsHandler
 
     /**
      * Method to categorise the exception that has occurred
-     * If original exception cannot be matched its cause is attempted to be matched - after three failed iterations UnknownError is returned
+     * If original exception cannot be matched its cause is attempted to be matched until the cause is null
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
-        int maxMatchRuns = 3;
-        for (int runs = 0; runs < maxMatchRuns; runs++)
+        while (exception != null)
         {
             for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
             {
@@ -317,8 +316,7 @@ public class MetricsHandler
                     return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
                 }
             }
-            runs = exception.getCause() != null && exception.getCause() instanceof Exception ? runs : runs + 2;
-            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : exception;
+            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
         return ERROR_CATEGORIES.UnknownError;
     }
