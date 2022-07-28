@@ -325,12 +325,9 @@ public class MetricsHandler
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream("/ErrorData.json"))
         {
             JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
-            Iterator iterator = errorCategories.iterator();
-            while (iterator.hasNext())
-            {
-                ErrorCategory category = new ErrorCategory((JSONObject) iterator.next());
+            for (Object errorCategory : errorCategories) {
+                ErrorCategory category = new ErrorCategory((JSONObject) errorCategory);
                 categories.add(category);
             }
         }
