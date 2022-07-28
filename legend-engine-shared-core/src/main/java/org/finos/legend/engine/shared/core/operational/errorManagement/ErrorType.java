@@ -64,7 +64,8 @@ public class ErrorType
      * @param message is the exception message
      * @return true if the exception matches an outline class name and message regex pair and false otherwise.
      */
-    public boolean isExceptionOutlineMatch(String name, String message) {
+    public boolean isExceptionOutlineMatch(String name, String message)
+    {
         for (ErrorExceptionOutline exceptionOutline : this.exceptionOutlines)
         {
             if (exceptionOutline.isMatch(name, message))
