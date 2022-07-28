@@ -110,6 +110,7 @@ public class Execute
     {
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), "/test/tempService");
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing slang exception testing"), null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new RuntimeException("nothing", new EngineException("can't find table: test")), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown error", null, EngineErrorType.PARSER), "/test/new/testService");
