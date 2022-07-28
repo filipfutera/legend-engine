@@ -326,7 +326,8 @@ public class MetricsHandler
         {
             JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
-            for (Object errorCategory : errorCategories) {
+            for (Object errorCategory : errorCategories)
+            {
                 ErrorCategory category = new ErrorCategory((JSONObject) errorCategory);
                 categories.add(category);
             }
