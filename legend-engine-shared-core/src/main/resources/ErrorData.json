@@ -79,7 +79,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "session does not have a current database|Can't find a match for function|Can't find type"
+              "MessageRegex": "session does not have a current database|Can't find a match for function"
             },
             {
               "ExceptionName": "SnowflakeSQLException",
@@ -239,7 +239,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find property|Can't find store|Can't find table"
+              "MessageRegex": "Can't find property|Can't find store|Can't find table|Can't find type"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
