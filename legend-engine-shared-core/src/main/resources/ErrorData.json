@@ -13,7 +13,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid"
+              "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid|A 'Secure Connect' or a Kerberos connection can't be build outside of a user call"
             },
             {
               "ExceptionName": "UnsupportedOperationException",
@@ -21,7 +21,7 @@
             },
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "SecureConnect credentials|does not contain one of the expected credential types|bad credentials"
+              "MessageRegex": "SecureConnect credentials|does not contain one of the expected credential types|bad credentials|Identity does not contain one of the expected credential types"
             },
             {
               "ExceptionName": "LoginException",
@@ -46,6 +46,18 @@
             {
               "ExceptionName": "EngineException",
               "MessageRegex": "Failed to initialize pool"
+            },
+            {
+              "ExceptionName": "AuthenticationFailedException",
+              "MessageRegex": "401 Unauthorized"
+            },
+            {
+              "ExceptionName": "IOException",
+              "MessageRegex": "Server returned HTTP response code: 401 for URL"
+            },
+            {
+              "ExceptionName": "Exception",
+              "MessageRegex": "Identity does not contain one of the expected credential types"
             }
           ],
           "TypeExceptionRegex": ""
@@ -56,15 +68,19 @@
           "Exceptions": [
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "not part of  Write service"
+              "MessageRegex": "not part of  Write service|access denied"
             },
             {
               "ExceptionName": "SnowflakeSQLException",
-              "MessageRegex": "no default role has been assigned to the user"
+              "MessageRegex": "no default role has been assigned to the user|session does not have a current database|no active warehouse selected in the current session|Role .* specified in the connect string is not granted to this user"
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "permission denied"
+              "MessageRegex": "permission denied|access denied"
+            },
+            {
+              "ExceptionName": "FailureException",
+              "MessageRegex": "access denied"
             }
           ],
           "TypeExceptionRegex": ""
@@ -83,15 +99,19 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "session does not have a current database|Can't find a match for function"
+              "MessageRegex": "Can't find a match for function"
             },
             {
               "ExceptionName": "SnowflakeSQLException",
-              "MessageRegex": "session does not have a current database"
+              "MessageRegex": "sql compilation error.*object.*does not exist or not authorized"
             },
             {
               "ExceptionName": "AvaticaSqlException",
               "MessageRegex": "not entitled to data store"
+            },
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": "Table .* doesn't exist|Column .* not found"
             }
           ],
           "TypeExceptionRegex": ""
@@ -103,10 +123,26 @@
             {
               "ExceptionName": "SQLSyntaxErrorException",
               "MessageRegex": "unknown database"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Can't find database"
             }
           ],
           "TypeExceptionRegex": ""
         },
+
+        {
+          "TypeName": "UserRequestError",
+          "Exceptions": [
+            {
+              "ExceptionName": "IllegalArgumentException",
+              "MessageRegex": "|No service found with uri .*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
 
         {
           "TypeName": "ServiceUpdateError",
@@ -117,7 +153,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "service must have more than one owner"
+              "MessageRegex": "service must have more than one owner|test does not match execution type"
             }
           ],
           "TypeExceptionRegex": ""
@@ -145,6 +181,10 @@
             {
               "ExceptionName": "ReflectionsException",
               "MessageRegex": "could not get type for name"
+            },
+            {
+              "ExceptionName": "NotFoundException",
+              "MessageRegex": "HTTP 404 Not Found"
             }
           ],
           "TypeExceptionRegex": ""
@@ -160,6 +200,17 @@
             {
               "ExceptionName": "RuntimeException",
               "MessageRegex": "GSExceptionSlang"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "JavaError",
+          "Exceptions": [
+            {
+              "ExceptionName": "InterruptedException",
+              "MessageRegex": ""
             }
           ],
           "TypeExceptionRegex": ""
@@ -218,6 +269,10 @@
             {
               "ExceptionName": "PureExecutionException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Engine was unable to load information from the Pure SDLC|Can't find mapping|Assert failure at"
             }
           ],
           "TypeExceptionRegex": "Pure.*Exception"
@@ -232,7 +287,19 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Unexpected token"
+              "MessageRegex": "Unexpected token|no viable alternative at input"
+            },
+            {
+              "ExceptionName": "UnrecognizedPropertyException",
+              "MessageRegex": "Unrecognised field.*not marked as ignorable|.*"
+            },
+            {
+              "ExceptionName": "InvalidTypeIdException",
+              "MessageRegex": "Could not resolve type id.*as a subtype of|.*"
+            },
+            {
+              "ExceptionName": "InvalidDefinitionException",
+              "MessageRegex": "Direct self-reference leading to cycle|.*"
             }
           ],
           "TypeExceptionRegex": "JSON.*Exception"
@@ -243,7 +310,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find property|Can't find store|Can't find table|Can't find type"
+              "MessageRegex": "Can't find property|Can't find store|Can't find type|Error in.* all required service parameters should be mapped|Can't find profile|Error in .* Can't find connection"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
@@ -265,19 +332,27 @@
               "MessageRegex": ""
             },
             {
-              "ExceptionName": "RuntimeException",
-              "MessageRegex": "Issue processing freemarker function|MiscTemplateException"
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Can't find property .* in class"
             }
           ],
           "TypeExceptionRegex": ""
         },
 
         {
-        "TypeName": "ServiceError",
+        "TypeName": "ServiceRequestError",
         "Exceptions": [
           {
             "ExceptionName": "IllegalArgumentException",
             "MessageRegex": "Error loading service|Invalid provided parameter|Reprocessing sql failed with vars"
+          },
+          {
+            "ExceptionName": "RuntimeException",
+            "MessageRegex": "HTTP request.*failed with error|Invalid Input: null|Input stream was not provided"
+          },
+          {
+            "ExceptionName": "EngineException",
+            "MessageRegex": "Can't resolve the builder for function|Can't find model for ID|No generation found with id"
           }
         ],
         "TypeExceptionRegex": ""
@@ -295,9 +370,27 @@
         },
 
         {
-          "TypeName": "CommunicationErrors",
+          "TypeName": "FreemarkerError",
           "Exceptions": [
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": "Issue processing freemarker function|MiscTemplateException"
+            },
+            {
+              "ExceptionName": "_MiscTemplateException",
+              "MessageRegex": "When calling function.*required parameter.*was specified, but had null/missing value"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
 
+        {
+          "TypeName": "RegexError",
+          "Exceptions": [
+            {
+              "ExceptionName": "PatternSyntaxException",
+              "MessageRegex": "Illegal repetition"
+            }
           ],
           "TypeExceptionRegex": ""
         }
@@ -348,6 +441,17 @@
             {
               "ExceptionName": "PureAssertFailException",
               "MessageRegex": "exception occurred executing service test suites|Assert failure at*trees are not supported yet|.*"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "GenericError",
+          "Exceptions": [
+            {
+              "ExceptionName": "NullPointerException",
+              "MessageRegex": ""
             }
           ],
           "TypeExceptionRegex": ""
