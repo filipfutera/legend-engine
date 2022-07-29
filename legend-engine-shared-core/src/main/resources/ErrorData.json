@@ -42,6 +42,10 @@
             {
               "ExceptionName": "PoolInitializationException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Failed to initialize pool"
             }
           ],
           "TypeExceptionRegex": ""
@@ -66,7 +70,7 @@
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat", "permission"]
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat", "permission", "initialize pool"]
     },
 
 
@@ -293,10 +297,7 @@
         {
           "TypeName": "CommunicationErrors",
           "Exceptions": [
-            {
-              "ExceptionName": "EngineException",
-              "MessageRegex": "Failed to initialize pool"
-            }
+
           ],
           "TypeExceptionRegex": ""
         }
@@ -346,7 +347,7 @@
             },
             {
               "ExceptionName": "PureAssertFailException",
-              "MessageRegex": "exception occurred executing service test suites"
+              "MessageRegex": "exception occurred executing service test suites|Assert failure at*trees are not supported yet|.*"
             }
           ],
           "TypeExceptionRegex": ""

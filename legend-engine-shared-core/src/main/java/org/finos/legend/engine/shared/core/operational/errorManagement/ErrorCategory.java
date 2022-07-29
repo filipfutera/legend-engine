@@ -74,7 +74,7 @@ public class ErrorCategory
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        return matchKeywords(name, message) || matchTypeNames(name) || matchExceptionOutlines(name, message);
+        return hasMatchingKeywords(name, message) || hasMatchingTypeName(name) || hasMatchingExceptionOutline(name, message);
     }
 
     /**
@@ -83,7 +83,7 @@ public class ErrorCategory
      * @param message is the exception's message
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchKeywords(String name, String message)
+    private boolean hasMatchingKeywords(String name, String message)
     {
         for (Pattern keyword : keywords)
         {
@@ -101,11 +101,11 @@ public class ErrorCategory
      * @param message is the exception's message
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchExceptionOutlines(String name, String message)
+    private boolean hasMatchingExceptionOutline(String name, String message)
     {
         for (ErrorType type : this.errorTypes)
         {
-            if (type.isExceptionOutlineMatch(name, message))
+            if (type.hasMatchingExceptionOutline(name, message))
             {
                 return true;
             }
@@ -118,11 +118,11 @@ public class ErrorCategory
      * @param name is the exception's name
      * @return true if the category is a match, false otherwise
      */
-    private boolean matchTypeNames(String name)
+    private boolean hasMatchingTypeName(String name)
     {
         for (ErrorType errorType : this.errorTypes)
         {
-            if (errorType.isTypeExceptionNameMatch(name))
+            if (errorType.hasMatchingTypeName(name))
             {
                 return true;
             }
@@ -143,7 +143,6 @@ public class ErrorCategory
      */
     private static class ErrorType
     {
-
         /**
          * more technical but still user-friendly name of the error type
          */
@@ -177,16 +176,16 @@ public class ErrorCategory
         }
 
         /**
-         * Method to check if an occurring exception class name and message match any exception outline associated with this type.
+         * Checks if an occurring exception class name and message match any exception outline associated with this type.
          * @param name is the exception class name
          * @param message is the exception message
          * @return true if the exception matches an outline class name and message regex pair and false otherwise.
          */
-        public boolean isExceptionOutlineMatch(String name, String message)
+        public boolean hasMatchingExceptionOutline(String name, String message)
         {
             for (ErrorExceptionOutline exceptionOutline : this.exceptionOutlines)
             {
-                if (exceptionOutline.isMatch(name, message))
+                if (exceptionOutline.matches(name, message))
                 {
                     return true;
                 }
@@ -199,7 +198,7 @@ public class ErrorCategory
          * @param name is the occurring exception class name
          * @return true if the type name regex matches the parameter name and false otherwise
          */
-        public boolean isTypeExceptionNameMatch(String name)
+        public boolean hasMatchingTypeName(String name)
         {
             Matcher matcher = this.typeExceptionRegex.matcher(name);
             return !this.typeExceptionRegex.toString().equals("") && matcher.find();
@@ -247,7 +246,7 @@ public class ErrorCategory
              * @param message is the message included in the exception
              * @return true if the name and message match the predefined pair false otherwise
              */
-            public boolean isMatch(String name, String message)
+            public boolean matches(String name, String message)
             {
                 Matcher matcher = this.exceptionMessage.matcher(message);
                 return name.equals(this.exceptionName) && matcher.find();
@@ -255,7 +254,3 @@ public class ErrorCategory
         }
     }
 }
-
-
-
-

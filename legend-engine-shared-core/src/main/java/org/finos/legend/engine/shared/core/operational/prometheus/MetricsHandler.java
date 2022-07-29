@@ -35,7 +35,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 
 public class MetricsHandler
 {
@@ -237,7 +237,8 @@ public class MetricsHandler
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
     /**
-     * Prometheus counter to record errors with labels of the service causing the error and the label given to the error
+     * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
+     * the label given to the error, the category of the error and source of the error
      */
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
@@ -253,7 +254,9 @@ public class MetricsHandler
     private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
-     * Method to obtain a label for the error that has occurred
+     * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
+     * If RuntimeException - Extract label from exception's cause - if it is null then label is UnknownRuntimeError
+     * If EngineException - Prefix EngineError with its Type - if type is null then use error origin value as prefix.
      * @param origin the stage in execution at which the error occurred
      * @param exception the exception to be analysed that has occurred in execution
      * @return the error label generated for the error
@@ -279,16 +282,16 @@ public class MetricsHandler
      * Method to record an error occurring during execution and add it to the metrics
      * @param origin the stage in execution at which the error occurred
      * @param exception the exception to be analysed that has occurred in execution
-     * @param servicePattern the name of the service whose execution invoked the error
+     * @param servicePath the name of the service whose execution invoked the error
      */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePattern)
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
         String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
-        String source = servicePattern == null ? origin.toFriendlyString() : "Service";
-        servicePattern = servicePattern == null ? "N/A" : servicePattern;
+        String source = servicePath == null ? origin.toFriendlyString() : "Service";
+        String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePattern, errorCategory));
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
 
     }
 
@@ -300,7 +303,8 @@ public class MetricsHandler
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
-        while (exception != null)
+        HashSet<Exception> exceptionHistory = new HashSet();
+        while (exception != null && !exceptionHistory.contains(exception))
         {
             for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
             {
@@ -309,6 +313,7 @@ public class MetricsHandler
                     return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
                 }
             }
+            exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
         return ERROR_CATEGORIES.UnknownError;
