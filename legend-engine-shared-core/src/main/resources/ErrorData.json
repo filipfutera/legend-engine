@@ -68,7 +68,7 @@
           "Exceptions": [
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "not part of  Write service|access denied"
+              "MessageRegex": "not part of Write service|access denied"
             },
             {
               "ExceptionName": "SnowflakeSQLException",
@@ -396,7 +396,7 @@
         }
 
       ],
-      "Keywords": ["initialize.*pool"]
+      "Keywords": []
     },
 
 

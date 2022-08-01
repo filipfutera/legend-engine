@@ -292,7 +292,6 @@ public class MetricsHandler
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
-
     }
 
     /**
