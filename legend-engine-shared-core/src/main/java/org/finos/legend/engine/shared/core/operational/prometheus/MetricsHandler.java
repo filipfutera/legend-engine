@@ -294,6 +294,9 @@ public class MetricsHandler
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
     }
 
+    public enum CATEGORIZATION_STAGES
+    { EXCEPTION_OUTLINE, KEYWORDS, TYPE_NAME }
+
     /**
      * Method to categorise the exception that has occurred
      * If original exception cannot be matched its cause is attempted to be matched until the cause is null
@@ -303,13 +306,12 @@ public class MetricsHandler
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
         HashSet<Exception> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
-        {
-            for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
-            {
-                if (category.match(exception))
-                {
-                    return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+        while (exception != null && !exceptionHistory.contains(exception)) {
+            for (CATEGORIZATION_STAGES stage : CATEGORIZATION_STAGES.values()) {
+                for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS) {
+                    if (category.match(exception, stage)) {
+                        return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+                    }
                 }
             }
             exceptionHistory.add(exception);

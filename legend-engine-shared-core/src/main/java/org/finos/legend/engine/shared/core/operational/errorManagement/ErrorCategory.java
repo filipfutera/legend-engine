@@ -15,6 +15,8 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.CATEGORIZATION_STAGES;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -70,11 +72,12 @@ public class ErrorCategory
      * @param exception is the error that occurred during execution
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean match(Exception exception)
+    public boolean match(Exception exception, MetricsHandler.CATEGORIZATION_STAGES stage)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        return hasMatchingKeywords(name, message) || hasMatchingTypeName(name) || hasMatchingExceptionOutline(name, message);
+        return stage == CATEGORIZATION_STAGES.EXCEPTION_OUTLINE ? hasMatchingExceptionOutline(name, message) :
+                stage == CATEGORIZATION_STAGES.KEYWORDS ? hasMatchingKeywords(name, message) : hasMatchingTypeName(name);
     }
 
     /**
