@@ -21,7 +21,7 @@
             },
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "SecureConnect credentials|does not contain one of the expected credential types|bad credentials|Identity does not contain one of the expected credential types"
+              "MessageRegex": "(SecureConnect|bad) credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types"
             },
             {
               "ExceptionName": "LoginException",
@@ -111,7 +111,7 @@
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "Table .* doesn't exist|Column .* not found|Table .* not found"
+              "MessageRegex": "Table .* doesn't exist|(Column|Table) .* not found"
             }
           ],
           "TypeExceptionRegex": ""
@@ -122,7 +122,7 @@
           "Exceptions": [
             {
               "ExceptionName": "SQLSyntaxErrorException",
-              "MessageRegex": "unknown database"
+              "MessageRegex": "unknown (database|column)"
             },
             {
               "ExceptionName": "EngineException",
@@ -137,7 +137,7 @@
           "Exceptions": [
             {
               "ExceptionName": "IllegalArgumentException",
-              "MessageRegex": "No service found with uri .*"
+              "MessageRegex": "No service found with uri"
             }
           ],
           "TypeExceptionRegex": ""
@@ -236,10 +236,6 @@
               "MessageRegex": "Syntax error in SQL statement|.*"
             },
             {
-              "ExceptionName": "SQLSyntaxErrorException",
-              "MessageRegex": "Unknown column"
-            },
-            {
               "ExceptionName": "RuntimeException",
               "MessageRegex": "Redshift"
             },
@@ -318,15 +314,11 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find property|Can't find store|Can't find type|Can't find [the ]*profile|Can't build the message function for constraint .* of class"
+              "MessageRegex": "Error in.*Can't (find [the ]*(property|store|type|profile|Connection|SchemaSet)|build the message function for constraint .* of class)"
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Error in.* all required service parameters should be mapped|Error in .* Can't find connection|Error in .* Can't find SchemaSet"
-            },
-            {
-              "ExceptionName": "EngineException",
-              "MessageRegex": "Error in .* Mapping error: the join .* does not contain the source table"
+              "MessageRegex": "Error in.* (all required service parameters should be mapped|Mapping error: the join .* does not contain the source table)"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
