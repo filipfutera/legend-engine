@@ -306,10 +306,14 @@ public class MetricsHandler
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
         HashSet<Exception> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception)) {
-            for (CATEGORIZATION_STAGES stage : CATEGORIZATION_STAGES.values()) {
-                for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS) {
-                    if (category.match(exception, stage)) {
+        while (exception != null && !exceptionHistory.contains(exception))
+        {
+            for (CATEGORIZATION_STAGES stage : CATEGORIZATION_STAGES.values())
+            {
+                for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
+                {
+                    if (category.match(exception, stage))
+                    {
                         return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
                     }
                 }
