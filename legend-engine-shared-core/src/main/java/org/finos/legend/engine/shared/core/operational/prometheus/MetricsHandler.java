@@ -333,6 +333,8 @@ public class MetricsHandler
         return ERROR_CATEGORIES.UnknownError;
     }
 
+    private static final String RESOURCE_DIRECTORY = "/ErrorData.json";
+
     /**
      * Read JSON file with outline of errors to be used in categorizing the exceptions
      * @return List of objects corresponding to the categories with their respective data
@@ -341,7 +343,7 @@ public class MetricsHandler
     {
         JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream("/ErrorData.json"))
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(RESOURCE_DIRECTORY))
         {
             JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
