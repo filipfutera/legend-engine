@@ -15,6 +15,7 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.CATEGORIZATION_STAGES;
 import org.json.simple.JSONArray;
@@ -77,7 +78,8 @@ public class ErrorCategory
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
         return stage == CATEGORIZATION_STAGES.EXCEPTION_OUTLINE ? hasMatchingExceptionOutline(name, message) :
-                stage == CATEGORIZATION_STAGES.KEYWORDS ? hasMatchingKeywords(name, message) : hasMatchingTypeName(name);
+                stage == CATEGORIZATION_STAGES.KEYWORDS ? hasMatchingKeywords(name, message) :
+                        stage == CATEGORIZATION_STAGES.TYPE_NAME ? hasMatchingTypeName(name) : false;
     }
 
     /**
