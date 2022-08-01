@@ -13,7 +13,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid|A 'Secure Connect' or a Kerberos connection can't be build outside of a user call"
+              "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid|A 'Secure Connect' or a Kerberos connection can't be built outside of a user call"
             },
             {
               "ExceptionName": "UnsupportedOperationException",
@@ -194,8 +194,12 @@
           "TypeName": "ConfigurationError",
           "Exceptions": [
             {
-              "ExceptionName": "ClassNotFoundException",
-              "MessageRegex": "untrusted class"
+              "ExceptionName": "ZipException",
+              "MessageRegex": "ZipFile invalid LOC header"
+            },
+            {
+              "ExceptionName": "RuntimeException",
+              "MessageRegex": "GSExceptionSlang"
             },
             {
               "ExceptionName": "RuntimeException",
