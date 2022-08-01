@@ -323,6 +323,12 @@ public class MetricsHandler
             }
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
+//            Check if any previous exception has same simple name and message as next exception rather than same memory address
+//            Exception newExceptionCopy = exception;
+//            if (exceptionHistory.stream().anyMatch(e -> e.getClass().getSimpleName().equals(newExceptionCopy.getClass().getSimpleName()) &&
+//                    (e.getMessage() == newExceptionCopy.getMessage() || e.getMessage().equals(newExceptionCopy.getMessage())))) {
+//                break; //add cause checking too?
+//            }
         }
         return ERROR_CATEGORIES.UnknownError;
     }
