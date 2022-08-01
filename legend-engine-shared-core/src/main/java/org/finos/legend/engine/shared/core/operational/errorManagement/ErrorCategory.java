@@ -15,9 +15,7 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.CATEGORIZATION_STAGES;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MATCHING_METHODS;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -71,15 +69,26 @@ public class ErrorCategory
     /**
      * Method to check if an error category and an occurred exception are a match
      * @param exception is the error that occurred during execution
+     * @param stage is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean match(Exception exception, MetricsHandler.CATEGORIZATION_STAGES stage)
+    public boolean match(Exception exception, MATCHING_METHODS stage)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        return stage == CATEGORIZATION_STAGES.EXCEPTION_OUTLINE ? hasMatchingExceptionOutline(name, message) :
-                stage == CATEGORIZATION_STAGES.KEYWORDS ? hasMatchingKeywords(name, message) :
-                        stage == CATEGORIZATION_STAGES.TYPE_NAME ? hasMatchingTypeName(name) : false;
+        if (stage == MATCHING_METHODS.ExceptionOutlineMatching)
+        {
+            return hasMatchingExceptionOutline(name, message);
+        }
+        else if (stage == MATCHING_METHODS.KeywordsMatching)
+        {
+            return hasMatchingKeywords(name, message);
+        }
+        else if (stage == MATCHING_METHODS.TypeNameMatching)
+        {
+            return hasMatchingTypeName(name);
+        }
+        return false;
     }
 
     /**

@@ -29,7 +29,7 @@
             },
             {
               "ExceptionName": "GSSException",
-              "MessageRegex": "No valid credentials provided"
+              "MessageRegex": "No valid credentials provided|defective token detected"
             },
             {
               "ExceptionName": "SQLException",
@@ -111,7 +111,7 @@
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "Table .* doesn't exist|Column .* not found"
+              "MessageRegex": "Table .* doesn't exist|Column .* not found|Table .* not found"
             }
           ],
           "TypeExceptionRegex": ""
@@ -137,7 +137,7 @@
           "Exceptions": [
             {
               "ExceptionName": "IllegalArgumentException",
-              "MessageRegex": "|No service found with uri .*"
+              "MessageRegex": "No service found with uri .*"
             }
           ],
           "TypeExceptionRegex": ""
@@ -233,7 +233,7 @@
             },
             {
               "ExceptionName": "JdbcSQLSyntaxErrorException",
-              "MessageRegex": ""
+              "MessageRegex": "Syntax error in SQL statement|.*"
             },
             {
               "ExceptionName": "SQLSyntaxErrorException",
@@ -258,6 +258,14 @@
             {
               "ExceptionName": "AvaticaSqlException",
               "MessageRegex": "remote driver error"
+            },
+            {
+              "ExceptionName": "IllegalArgumentException",
+              "MessageRegex": "invalid hexadecimal representation of an ObjectId"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Can't find table .* in schema .* and database .*"
             }
           ],
           "TypeExceptionRegex": "SQL.*Exception"
@@ -268,7 +276,7 @@
           "Exceptions": [
             {
               "ExceptionName": "PureExecutionException",
-              "MessageRegex": ""
+              "MessageRegex": "Execution error at .* cast exception|cannot cast collection of size 0 to multiplicity"
             },
             {
               "ExceptionName": "EngineException",
@@ -310,7 +318,15 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find property|Can't find store|Can't find type|Error in.* all required service parameters should be mapped|Can't find profile|Error in .* Can't find connection"
+              "MessageRegex": "Can't find property|Can't find store|Can't find type|Can't find [the ]*profile|Can't build the message function for constraint .* of class"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Error in.* all required service parameters should be mapped|Error in .* Can't find connection|Error in .* Can't find SchemaSet"
+            },
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Error in .* Mapping error: the join .* does not contain the source table"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
@@ -330,6 +346,10 @@
             {
               "ExceptionName": "NonStringOrTemplateOutputException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "IllegalArgumentException",
+              "MessageRegex": "Missing external parameter"
             },
             {
               "ExceptionName": "EngineException",
@@ -379,6 +399,10 @@
             {
               "ExceptionName": "_MiscTemplateException",
               "MessageRegex": "When calling function.*required parameter.*was specified, but had null/missing value"
+            },
+            {
+              "ExceptionName": "StopException",
+              "MessageRegex": "no metadata found"
             }
           ],
           "TypeExceptionRegex": ""
@@ -396,7 +420,7 @@
         }
 
       ],
-      "Keywords": []
+      "Keywords": ["mapping error"]
     },
 
 
@@ -422,6 +446,10 @@
             {
               "ExceptionName": "MappableException",
               "MessageRegex": ""
+            },
+            {
+              "ExceptionName": "EOFException",
+              "MessageRegex": "unexpected end of stream"
             }
           ],
           "TypeExceptionRegex": "Connection|Timeout"

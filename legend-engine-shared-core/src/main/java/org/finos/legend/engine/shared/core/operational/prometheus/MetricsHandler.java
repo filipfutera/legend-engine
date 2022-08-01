@@ -249,6 +249,12 @@ public class MetricsHandler
     { UserAuthenticationError, UserExecutionError, ServerInternalError, ServerExecutionError, OtherError, UnknownError }
 
     /**
+     * Types of error matching techniques that can be performed on an incoming exceptions
+     */
+    public enum MATCHING_METHODS
+    { ExceptionOutlineMatching, KeywordsMatching, TypeNameMatching }
+
+    /**
      * List of objects corresponding to the error categories holding their associated exception data
      */
     private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
@@ -261,7 +267,7 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution
      * @return the error label generated for the error
      */
-    private static synchronized String extractErrorLabel(String origin, Exception exception)
+    private static synchronized String getErrorLabel(String origin, Exception exception)
     {
         String errorName = exception.getClass().getSimpleName();
         if (errorName.equals(RuntimeException.class.getSimpleName()))
@@ -286,16 +292,13 @@ public class MetricsHandler
      */
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
-        String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
+        String errorLabel = getErrorLabel(origin.toFriendlyString(), exception);
         String source = servicePath == null ? origin.toFriendlyString() : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
         LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
     }
-
-    public enum CATEGORIZATION_STAGES
-    { EXCEPTION_OUTLINE, KEYWORDS, TYPE_NAME }
 
     /**
      * Method to categorise the exception that has occurred
@@ -308,7 +311,7 @@ public class MetricsHandler
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
-            for (CATEGORIZATION_STAGES stage : CATEGORIZATION_STAGES.values())
+            for (MATCHING_METHODS stage : MATCHING_METHODS.values())
             {
                 for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
                 {
