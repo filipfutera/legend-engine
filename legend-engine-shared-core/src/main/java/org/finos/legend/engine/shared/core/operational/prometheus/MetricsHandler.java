@@ -237,6 +237,11 @@ public class MetricsHandler
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
     /**
+     * Path to JSON file outlining error data for categorisation
+     */
+    private static final String ERROR_DATA_RESOURCE_PATH = "/ErrorData.json";
+
+    /**
      * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
      * the label given to the error, the category of the error and source of the error
      */
@@ -333,8 +338,6 @@ public class MetricsHandler
         return ERROR_CATEGORIES.UnknownError;
     }
 
-    private static final String RESOURCE_DIRECTORY = "/ErrorData.json";
-
     /**
      * Read JSON file with outline of errors to be used in categorizing the exceptions
      * @return List of objects corresponding to the categories with their respective data
@@ -343,7 +346,7 @@ public class MetricsHandler
     {
         JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(RESOURCE_DIRECTORY))
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_RESOURCE_PATH))
         {
             JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
