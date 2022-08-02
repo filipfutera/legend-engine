@@ -314,14 +314,15 @@ public class MetricsHandler
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
+        Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
-            for (MATCHING_METHODS stage : MATCHING_METHODS.values())
+            for (MATCHING_METHODS method : MATCHING_METHODS.values())
             {
                 for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
                 {
-                    if (category.match(exception, stage))
+                    if (category.matches(exception, method))
                     {
                         return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
                     }
@@ -330,6 +331,7 @@ public class MetricsHandler
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
+        LOGGER.info(String.format("Unclassifiable error has occurred - Exception Name: %s. Exception Message: %s.", originalException.getClass().getSimpleName(), originalException.getMessage()));
         return ERROR_CATEGORIES.UnknownError;
     }
 

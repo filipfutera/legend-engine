@@ -26,7 +26,6 @@ public enum ErrorOrigin
     SERVICE_TEST_EXECUTE,
     SERVICE_EXECUTE,
 
-
     TDS_PROTOCOL,
     TDS_EXECUTE,
     TDS_GENERATE_CODE,

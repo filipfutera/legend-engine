@@ -72,7 +72,7 @@ public class ErrorCategory
      * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean match(Exception exception, MATCHING_METHODS method)
+    public boolean matches(Exception exception, MATCHING_METHODS method)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
@@ -133,6 +133,8 @@ public class ErrorCategory
 
     /**
      * Class representing an error type which is essentially a sub-category of errors
+     * To track the Type for each error change the streams().anyMatch() to enhanced for loops in ErrorCategory
+     * and return Type object's name when a successful match is found
      */
     private static class ErrorType
     {
