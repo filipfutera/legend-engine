@@ -3,7 +3,6 @@
     {
       "CategoryName": "UserAuthenticationError",
       "Types": [
-
         {
           "TypeName": "CredentialsError",
           "Exceptions": [
@@ -86,14 +85,14 @@
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat", "permission", "initialize pool"]
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool"]
     },
+
 
 
     {
       "CategoryName": "UserExecutionError",
       "Types": [
-
         {
           "TypeName": "QueryError",
           "Exceptions": [
@@ -143,7 +142,6 @@
           "TypeExceptionRegex": ""
         },
 
-
         {
           "TypeName": "ServiceUpdateError",
           "Exceptions": [
@@ -162,11 +160,13 @@
       ],
       "Keywords": []
     },
+
+
+
     {
 
       "CategoryName": "InternalServerError",
       "Types": [
-
         {
           "TypeName": "MissingItemError",
           "Exceptions": [
@@ -241,10 +241,11 @@
           ],
           "TypeExceptionRegex": ""
         }
-
       ],
       "Keywords": []
     },
+
+
 
     {
       "CategoryName": "ServerExecutionError",
@@ -447,6 +448,7 @@
       ],
       "Keywords": ["mapping error","Error in '.*::.*':" ]
     },
+
 
 
     {
