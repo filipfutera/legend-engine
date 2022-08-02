@@ -30,6 +30,7 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -295,7 +296,7 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution
      * @param servicePath the name of the service whose execution invoked the error
      */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    public static synchronized void observeError(ErrorOrigin origin, @Nonnull Exception exception, String servicePath)
     {
         String originFriendlyString = origin == null ? "Unknown" : origin.toFriendlyString();
         String errorLabel = getErrorLabel(originFriendlyString, exception);

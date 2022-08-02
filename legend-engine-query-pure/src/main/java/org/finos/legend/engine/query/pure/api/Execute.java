@@ -122,7 +122,7 @@ public class Execute
         Exception ex = new RuntimeException(e);
         e.initCause(ex);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, e, null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, null, null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException(), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
