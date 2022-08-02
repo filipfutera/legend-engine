@@ -100,14 +100,6 @@ public class ErrorCategory
     private boolean hasMatchingKeywords(String name, String message)
     {
         return this.keywords.stream().anyMatch(keyword -> keyword.matcher(message).find() || keyword.matcher(name).find());
-//        for (Pattern keyword : keywords)
-//        {
-//            if (keyword.matcher(message).find() || keyword.matcher(name).find())
-//            {
-//                return true;
-//            }
-//        }
-//        return false;
     }
 
     /**
@@ -119,14 +111,6 @@ public class ErrorCategory
     private boolean hasMatchingExceptionOutline(String name, String message)
     {
         return this.errorTypes.stream().anyMatch(type -> type.hasMatchingExceptionOutline(name, message));
-//        for (ErrorType type : this.errorTypes)
-//        {
-//            if (type.hasMatchingExceptionOutline(name, message))
-//            {
-//                return true;
-//            }
-//        }
-//        return false;
     }
 
     /**
@@ -137,14 +121,6 @@ public class ErrorCategory
     private boolean hasMatchingTypeName(String name)
     {
         return this.errorTypes.stream().anyMatch(type -> type.hasMatchingTypeName(name));
-//        for (ErrorType errorType : this.errorTypes)
-//        {
-//            if (errorType.hasMatchingTypeName(name))
-//            {
-//                return true;
-//            }
-//        }
-//        return false;
     }
 
     /**
@@ -200,14 +176,7 @@ public class ErrorCategory
          */
         public boolean hasMatchingExceptionOutline(String name, String message)
         {
-            for (ErrorExceptionOutline exceptionOutline : this.exceptionOutlines)
-            {
-                if (exceptionOutline.matches(name, message))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return this.exceptionOutlines.stream().anyMatch(exceptionOutline -> exceptionOutline.matches(name, message));
         }
 
         /**
