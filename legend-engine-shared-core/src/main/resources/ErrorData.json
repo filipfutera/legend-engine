@@ -21,7 +21,7 @@
             },
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "(SecureConnect|bad) credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types"
+              "MessageRegex": "(SecureConnect|bad) credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types|Failed to authenticate to kerberos"
             },
             {
               "ExceptionName": "LoginException",
@@ -191,6 +191,17 @@
         },
 
         {
+          "TypeName": "APIError",
+          "Exceptions": [
+            {
+              "ExceptionName": "IOException",
+              "MessageRegex": "Server returned HTTP response code: 500 for URL|Unable to tunnel through proxy. Proxy returns.*503 Service Unavailable"
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
           "TypeName": "ConfigurationError",
           "Exceptions": [
             {
@@ -215,6 +226,17 @@
             {
               "ExceptionName": "InterruptedException",
               "MessageRegex": ""
+            }
+          ],
+          "TypeExceptionRegex": ""
+        },
+
+        {
+          "TypeName": "ServerOverloadError",
+          "Exceptions": [
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": "Insufficient buffers for '.*"
             }
           ],
           "TypeExceptionRegex": ""
@@ -262,9 +284,24 @@
             {
               "ExceptionName": "IllegalArgumentException",
               "MessageRegex": "invalid hexadecimal representation of an ObjectId"
+            },
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": "Cannot use view '.*' because it is invalid"
             }
           ],
           "TypeExceptionRegex": "SQL.*Exception"
+        },
+
+        {
+          "TypeName": "GrammarToJSONConversionError",
+          "Exceptions": [
+            {
+              "ExceptionName": "EngineException",
+              "MessageRegex": "Unexpected (character|token)|no viable alternative at input|Missing table or alias for column"
+            }
+          ],
+          "TypeExceptionRegex": ""
         },
 
         {
@@ -290,10 +327,6 @@
               "MessageRegex": "Unexpected (character|token)"
             },
             {
-              "ExceptionName": "EngineException",
-              "MessageRegex": "Unexpected (character|token)|no viable alternative at input"
-            },
-            {
               "ExceptionName": "UnrecognizedPropertyException",
               "MessageRegex": "Unrecognised field.*not marked as ignorable|.*"
             },
@@ -314,11 +347,11 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Error in.*Can't (find [the ]*(property|store|type|profile|Connection|SchemaSet|table.*in schema.*and database.*)|build the message function for constraint .* of class)"
+              "MessageRegex": "Error in.*Can't (find [the ]?(property|store|type|profile|Connection|SchemaSet|table.*in schema.*and database.*)|build the message function for constraint .* of class)"
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Error in.* (all required service parameters should be mapped|Mapping error: the join .* does not contain the source table)"
+              "MessageRegex": "Error in.* (all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity)"
             }
           ],
           "TypeExceptionRegex": "Graph.*Exception"
@@ -412,7 +445,7 @@
         }
 
       ],
-      "Keywords": ["mapping error"]
+      "Keywords": ["mapping error","Error in '.*::.*':" ]
     },
 
 
@@ -464,19 +497,7 @@
             }
           ],
           "TypeExceptionRegex": ""
-        },
-
-        {
-          "TypeName": "GenericError",
-          "Exceptions": [
-            {
-              "ExceptionName": "NullPointerException",
-              "MessageRegex": ""
-            }
-          ],
-          "TypeExceptionRegex": ""
         }
-
       ],
       "Keywords": []
     }

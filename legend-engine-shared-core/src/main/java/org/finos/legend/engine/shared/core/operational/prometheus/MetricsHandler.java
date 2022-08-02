@@ -303,7 +303,6 @@ public class MetricsHandler
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", originFriendlyString, exception, errorLabel, servicePath, errorCategory));
     }
 
     /**
@@ -331,7 +330,7 @@ public class MetricsHandler
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
-        LOGGER.info(String.format("Unclassifiable error has occurred - Exception Name: %s. Exception Message: %s.", originalException.getClass().getSimpleName(), originalException.getMessage()));
+        LOGGER.warn(String.format("Unknown error - Exception Name: %s. Exception Message: %s. Add it to ErrorData.json!", originalException.getClass().getSimpleName(), originalException.getMessage()));
         return ERROR_CATEGORIES.UnknownError;
     }
 
