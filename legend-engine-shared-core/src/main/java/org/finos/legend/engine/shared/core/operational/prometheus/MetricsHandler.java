@@ -297,12 +297,13 @@ public class MetricsHandler
      */
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
-        String errorLabel = getErrorLabel(origin.toFriendlyString(), exception);
-        String source = servicePath == null ? origin.toFriendlyString() : "Service";
+        String originFriendlyString = origin == null ? "Unknown" : origin.toFriendlyString();
+        String errorLabel = getErrorLabel(originFriendlyString, exception);
+        String source = servicePath == null ? originFriendlyString : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
+        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", originFriendlyString, exception, errorLabel, servicePath, errorCategory));
     }
 
     /**
