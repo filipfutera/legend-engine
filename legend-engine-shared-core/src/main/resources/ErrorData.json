@@ -59,7 +59,7 @@
               "MessageRegex": "Identity does not contain one of the expected credential types"
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "Authentication|Pool|Credential|GSS"
         },
 
         {
@@ -82,10 +82,10 @@
               "MessageRegex": "access denied"
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "Permission|Access"
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool"]
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket"]
     },
 
 
@@ -291,7 +291,7 @@
               "MessageRegex": "Cannot use view '.*' because it is invalid"
             }
           ],
-          "TypeExceptionRegex": "SQL.*Exception"
+          "TypeExceptionRegex": "SQL"
         },
 
         {
@@ -317,7 +317,7 @@
               "MessageRegex": "Engine was unable to load information from the Pure SDLC|Can't find mapping|Assert failure at"
             }
           ],
-          "TypeExceptionRegex": "Pure.*Exception"
+          "TypeExceptionRegex": "Pure"
         },
 
         {
@@ -340,7 +340,7 @@
               "MessageRegex": "Direct self-reference leading to cycle|.*"
             }
           ],
-          "TypeExceptionRegex": "JSON.*Exception"
+          "TypeExceptionRegex": "JSON"
         },
 
         {
@@ -355,7 +355,7 @@
               "MessageRegex": "Error in.* (all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity)"
             }
           ],
-          "TypeExceptionRegex": "Graph.*Exception"
+          "TypeExceptionRegex": "Graph"
         },
 
         {
