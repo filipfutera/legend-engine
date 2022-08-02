@@ -120,9 +120,9 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new SQLException("check sqlerror type regex"), "test/sql/computers/dell/getAllPurchases");
         Exception e = new RuntimeException();
         Exception ex = new RuntimeException(e);
-        e.initCause(ex);
+        System.out.println(e.getCause() + " " + ex.getCause());
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, e, null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException(), null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("login"), null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST

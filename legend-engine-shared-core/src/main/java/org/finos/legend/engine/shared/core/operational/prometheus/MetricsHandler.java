@@ -30,7 +30,6 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -293,10 +292,10 @@ public class MetricsHandler
     /**
      * Method to record an error occurring during execution and add it to the metrics
      * @param origin the stage in execution at which the error occurred
-     * @param exception the exception to be analysed that has occurred in execution
+     * @param exception the non-null exception to be analysed that has occurred in execution
      * @param servicePath the name of the service whose execution invoked the error
      */
-    public static synchronized void observeError(ErrorOrigin origin, @Nonnull Exception exception, String servicePath)
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
         String originFriendlyString = origin == null ? "Unknown" : origin.toFriendlyString();
         String errorLabel = getErrorLabel(originFriendlyString, exception);
@@ -330,12 +329,6 @@ public class MetricsHandler
             }
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
-//            Check if any previous exception has same simple name and message as next exception rather than same memory address
-//            Exception newExceptionCopy = exception;
-//            if (exceptionHistory.stream().anyMatch(e -> e == null || e.getClass().getSimpleName().equals(newExceptionCopy.getClass().getSimpleName()) &&
-//                    (e.getMessage() == newExceptionCopy.getMessage() || e.getMessage().equals(newExceptionCopy.getMessage())))) {
-//                break; //add cause checking too?
-//            }
         }
         return ERROR_CATEGORIES.UnknownError;
     }
@@ -352,15 +345,15 @@ public class MetricsHandler
         {
             JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
-            for (Object errorCategory : errorCategories)
+            for (Object errorCategoryData : errorCategories)
             {
-                ErrorCategory category = new ErrorCategory((JSONObject) errorCategory);
+                ErrorCategory category = new ErrorCategory((JSONObject) errorCategoryData);
                 categories.add(category);
             }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            LOGGER.error(e.toString());
+            LOGGER.error(String.format("Error reading exception categorisation data: %s", exception));
         }
         return categories;
     }

@@ -67,28 +67,28 @@ public class ErrorCategory
     }
 
     /**
-     * Method to check if an error category and an occurred exception are a match
+     * Method to check if an error category and an occurred exception are a match under a specified matching method
      * @param exception is the error that occurred during execution
-     * @param stage is the type of exception matching we would like to execute
+     * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean match(Exception exception, MATCHING_METHODS stage)
+    public boolean match(Exception exception, MATCHING_METHODS method)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        if (stage == MATCHING_METHODS.ExceptionOutlineMatching)
+        if (method == MATCHING_METHODS.ExceptionOutlineMatching)
         {
             return hasMatchingExceptionOutline(name, message);
         }
-        else if (stage == MATCHING_METHODS.KeywordsMatching)
+        else if (method == MATCHING_METHODS.KeywordsMatching)
         {
             return hasMatchingKeywords(name, message);
         }
-        else if (stage == MATCHING_METHODS.TypeNameMatching)
+        else if (method == MATCHING_METHODS.TypeNameMatching)
         {
             return hasMatchingTypeName(name);
         }
-        return false;
+        return hasMatchingExceptionOutline(name, message) || hasMatchingKeywords(name, message) || hasMatchingTypeName(name);
     }
 
     /**
@@ -99,14 +99,15 @@ public class ErrorCategory
      */
     private boolean hasMatchingKeywords(String name, String message)
     {
-        for (Pattern keyword : keywords)
-        {
-            if (keyword.matcher(message).find() || keyword.matcher(name).find())
-            {
-                return true;
-            }
-        }
-        return false;
+        return this.keywords.stream().anyMatch(keyword -> keyword.matcher(message).find() || keyword.matcher(name).find());
+//        for (Pattern keyword : keywords)
+//        {
+//            if (keyword.matcher(message).find() || keyword.matcher(name).find())
+//            {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 
     /**
@@ -117,14 +118,15 @@ public class ErrorCategory
      */
     private boolean hasMatchingExceptionOutline(String name, String message)
     {
-        for (ErrorType type : this.errorTypes)
-        {
-            if (type.hasMatchingExceptionOutline(name, message))
-            {
-                return true;
-            }
-        }
-        return false;
+        return this.errorTypes.stream().anyMatch(type -> type.hasMatchingExceptionOutline(name, message));
+//        for (ErrorType type : this.errorTypes)
+//        {
+//            if (type.hasMatchingExceptionOutline(name, message))
+//            {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 
     /**
@@ -134,14 +136,15 @@ public class ErrorCategory
      */
     private boolean hasMatchingTypeName(String name)
     {
-        for (ErrorType errorType : this.errorTypes)
-        {
-            if (errorType.hasMatchingTypeName(name))
-            {
-                return true;
-            }
-        }
-        return false;
+        return this.errorTypes.stream().anyMatch(type -> type.hasMatchingTypeName(name));
+//        for (ErrorType errorType : this.errorTypes)
+//        {
+//            if (errorType.hasMatchingTypeName(name))
+//            {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 
     /**

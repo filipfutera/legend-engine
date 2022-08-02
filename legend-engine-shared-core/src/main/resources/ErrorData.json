@@ -262,10 +262,6 @@
             {
               "ExceptionName": "IllegalArgumentException",
               "MessageRegex": "invalid hexadecimal representation of an ObjectId"
-            },
-            {
-              "ExceptionName": "EngineException",
-              "MessageRegex": "Can't find table .* in schema .* and database .*"
             }
           ],
           "TypeExceptionRegex": "SQL.*Exception"
@@ -291,11 +287,11 @@
           "Exceptions": [
             {
               "ExceptionName": "JsonParseException",
-              "MessageRegex": "Unexpected character"
+              "MessageRegex": "Unexpected (character|token)"
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Unexpected token|no viable alternative at input"
+              "MessageRegex": "Unexpected (character|token)|no viable alternative at input"
             },
             {
               "ExceptionName": "UnrecognizedPropertyException",
@@ -318,7 +314,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Error in.*Can't (find [the ]*(property|store|type|profile|Connection|SchemaSet)|build the message function for constraint .* of class)"
+              "MessageRegex": "Error in.*Can't (find [the ]*(property|store|type|profile|Connection|SchemaSet|table.*in schema.*and database.*)|build the message function for constraint .* of class)"
             },
             {
               "ExceptionName": "EngineException",
