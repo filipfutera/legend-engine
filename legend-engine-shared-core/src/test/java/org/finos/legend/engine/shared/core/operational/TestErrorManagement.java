@@ -15,6 +15,8 @@
 package org.finos.legend.engine.shared.core.operational;
 
 import io.prometheus.client.CollectorRegistry;
+import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.Test;
@@ -71,9 +73,35 @@ public class TestErrorManagement
 
         MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH_ONE);
         labels = new String[]{"NullPointerError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
-        System.out.println(METRIC_REGISTRY.getSampleValue(METRIC_NAME));
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelWithEngineExceptionWithType()
+    {
+        MetricsHandler.observeError(null, new EngineException(null,null, EngineErrorType.COMPILATION), null);
+        String[] labels = {"CompilationEngineException", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("test message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH_ONE);
+        labels = new String[]{"ParserEngineException", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelWithRuntimeExceptionWithCause()
+    {
+        MetricsHandler.observeError(null, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH_ONE);
+        String[] labels = {"ArithmeticError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelWithRuntimeExceptionWithoutCause()
+    {
+        MetricsHandler.observeError(null, new RuntimeException(), null);
+        String[] labels = {"UnknownRuntimeException", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
 }
