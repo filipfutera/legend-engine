@@ -19,8 +19,9 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class TestErrorManagement
 {
@@ -29,6 +30,13 @@ public class TestErrorManagement
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0.000001d;
     private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
+    private HashMap<String[],Double> metricCounterTracker = new HashMap<>();
+
+
+    private void incrementMetricCounterTracker(String[] labels)
+    {
+        metricCounterTracker.put(labels, metricCounterTracker.containsKey(labels) ? metricCounterTracker.get(labels)+1 : 1);
+    }
 
     @Test
     public void testErrorWithValidOriginValidServicePattern()
@@ -36,6 +44,7 @@ public class TestErrorManagement
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH);
         String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
     }
 
     @Test
@@ -44,6 +53,7 @@ public class TestErrorManagement
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
         String[] expectedLabels = {"Error", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
     }
 
     @Test
@@ -52,6 +62,7 @@ public class TestErrorManagement
         MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
         String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
     }
 
     @Test
@@ -60,6 +71,21 @@ public class TestErrorManagement
         MetricsHandler.observeError(null, new Exception(), null);
         String[] expectedLabels = {"Error", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
+    }
+
+    @Test
+    public void testErrorLabelWithUniqueException()
+    {
+        MetricsHandler.observeError(null, new ArithmeticException(), null);
+        String[] expectedLabels = {"ArithmeticError", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
+
+        MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH);
+        expectedLabels = new String[]{"NullPointerError", "UnknownError", ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+        incrementMetricCounterTracker(expectedLabels);
     }
 
 }
