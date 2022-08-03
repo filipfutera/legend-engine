@@ -278,7 +278,8 @@ public class MetricsHandler
         if (errorName.equals(RuntimeException.class.getSimpleName()))
         {
             Throwable cause = exception.getCause();
-            errorName = cause == null ? origin + RuntimeException.class.getSimpleName() : cause.getClass().getSimpleName();
+            errorName = cause != null && cause instanceof Exception ?
+                    getErrorLabel(origin, (Exception) cause) : origin + RuntimeException.class.getSimpleName();
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {

@@ -59,7 +59,7 @@
               "MessageRegex": "Identity does not contain one of the expected credential types"
             }
           ],
-          "TypeExceptionRegex": "Authentication|Pool|Credential|GSS"
+          "TypeExceptionRegex": "Authentication|Pool|Credential|GSS|Authorization"
         },
 
         {
