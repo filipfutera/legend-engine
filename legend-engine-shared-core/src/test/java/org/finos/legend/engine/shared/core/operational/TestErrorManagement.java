@@ -15,6 +15,7 @@
 package org.finos.legend.engine.shared.core.operational;
 
 import io.prometheus.client.CollectorRegistry;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.Test;
 
@@ -27,15 +28,22 @@ public class TestErrorManagement
     private final String METRIC_NAME = "legend_engine_error_total";
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0.000001d;
+    private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
 
     @Test
     public void testErrorWithValidServicePattern()
     {
-        String servicePath = "service/remote/getRegistry";
-        MetricsHandler.observeError(null, new Exception(), servicePath);
-        String[] expectedLabels = {"Error", "UnknownError", "Service", servicePath};
-        float count = METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels).floatValue();
-        assertEquals("Valid service pattern is not labeled correctly", count, 1.0, DELTA);
+        MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
+        String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+    }
+
+    @Test
+    public void testErrorWithInvalidServicePattern()
+    {
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
+        String[] expectedLabels = {"Error", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
     }
 
 
