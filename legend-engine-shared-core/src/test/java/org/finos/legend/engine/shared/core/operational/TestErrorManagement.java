@@ -19,8 +19,6 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.Test;
 
-import java.util.HashMap;
-
 import static org.junit.Assert.assertEquals;
 
 public class TestErrorManagement
@@ -72,7 +70,7 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH_ONE);
-        labels = new String[]{"NullPointerError", "UnknownError", ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), TEST_SERVICE_PATH_ONE};
+        labels = new String[]{"NullPointerError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
         System.out.println(METRIC_REGISTRY.getSampleValue(METRIC_NAME));
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
