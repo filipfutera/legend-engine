@@ -120,8 +120,11 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new SQLException("check sqlerror type regex"), "test/sql/computers/dell/getAllPurchases");
         Exception e = new RuntimeException();
         Exception ex = new RuntimeException(e);
+        e.initCause(ex);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, e, null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("login"), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new HikariPool.PoolInitializationException(new Exception()))), "/get/ComputerRegistry/{id}");
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new RuntimeException())), "/get/ComputerRegistry/{id}");
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
