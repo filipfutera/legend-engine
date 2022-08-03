@@ -30,7 +30,7 @@ public class TestErrorManagement
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0.000001d;
     private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
-    private HashMap<String[],Double> metricCounterTracker = new HashMap<>();
+    private final HashMap<String[],Double> metricCounterTracker = new HashMap<>();
 
 
     private void incrementMetricCounterTracker(String[] labels)
@@ -42,50 +42,51 @@ public class TestErrorManagement
     public void testErrorWithValidOriginValidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH);
-        String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
     }
 
     @Test
     public void testErrorWithValidOriginInvalidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
-        String[] expectedLabels = {"Error", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        String[] labels = {"Error", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
     }
 
     @Test
     public void testErrorWithInvalidOriginValidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
-        String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
     }
 
     @Test
     public void testErrorWithInvalidOriginInvalidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), null);
-        String[] expectedLabels = {"Error", "UnknownError", "Unknown", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
     }
 
     @Test
     public void testErrorLabelWithUniqueException()
     {
         MetricsHandler.observeError(null, new ArithmeticException(), null);
-        String[] expectedLabels = {"ArithmeticError", "UnknownError", "Unknown", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        String[] labels = {"ArithmeticError", "UnknownError", "Unknown", "N/A"};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH);
-        expectedLabels = new String[]{"NullPointerError", "UnknownError", ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
-        incrementMetricCounterTracker(expectedLabels);
+        labels = new String[]{"NullPointerError", "UnknownError", ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), TEST_SERVICE_PATH};
+        incrementMetricCounterTracker(labels);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), metricCounterTracker.get(labels), DELTA);
+
     }
 
 }
