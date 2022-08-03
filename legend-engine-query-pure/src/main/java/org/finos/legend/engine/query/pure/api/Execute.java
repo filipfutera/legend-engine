@@ -117,7 +117,6 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new SQLException("check sqlerror type regex"), "test/sql/computers/dell/getAllPurchases");
         Exception e = new RuntimeException();
         Exception ex = new RuntimeException(e);
         e.initCause(ex);

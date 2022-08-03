@@ -104,4 +104,6 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
+    //test for each category - matching by keywords, typenameregex and an exceptionoutline
+
 }

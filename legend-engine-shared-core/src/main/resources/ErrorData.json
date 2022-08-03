@@ -128,7 +128,7 @@
               "MessageRegex": "Can't find database"
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "NotFound|Missing|Unknown"
         },
 
         {
@@ -158,7 +158,7 @@
         }
 
       ],
-      "Keywords": []
+      "Keywords": ["[a-zA-Z]* '.*' not found"]
     },
 
 
@@ -217,7 +217,7 @@
               "MessageRegex": "GSExceptionSlang"
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "Config[a-z]*"
         },
 
         {
@@ -242,7 +242,7 @@
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": []
+      "Keywords": ["proxy","buffers"]
     },
 
 
@@ -501,7 +501,7 @@
           "TypeExceptionRegex": ""
         }
       ],
-      "Keywords": []
+      "Keywords": ["test|timeout"]
     }
   ]
 }
