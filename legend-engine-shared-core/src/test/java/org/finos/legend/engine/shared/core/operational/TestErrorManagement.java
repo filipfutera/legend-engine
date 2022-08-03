@@ -80,11 +80,11 @@ public class TestErrorManagement
     public void testErrorLabelWithEngineExceptionWithType()
     {
         MetricsHandler.observeError(null, new EngineException(null,null, EngineErrorType.COMPILATION), null);
-        String[] labels = {"CompilationEngineException", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"CompilationEngineError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("test message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH_ONE);
-        labels = new String[]{"ParserEngineException", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        labels = new String[]{"ParserEngineError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -100,7 +100,7 @@ public class TestErrorManagement
     public void testErrorLabelWithRuntimeExceptionWithoutCause()
     {
         MetricsHandler.observeError(null, new RuntimeException(), null);
-        String[] labels = {"UnknownRuntimeException", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnknownRuntimeError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
