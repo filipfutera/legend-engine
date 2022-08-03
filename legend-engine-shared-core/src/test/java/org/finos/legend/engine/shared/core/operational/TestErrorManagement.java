@@ -31,7 +31,7 @@ public class TestErrorManagement
     private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
 
     @Test
-    public void testErrorWithValidServicePattern()
+    public void testErrorWithValidOriginValidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH);
         String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
@@ -39,7 +39,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithInvalidServicePattern()
+    public void testErrorWithValidOriginInvalidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
         String[] expectedLabels = {"Error", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
@@ -47,12 +47,19 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithInvalidErrorOrigin()
+    public void testErrorWithInvalidOriginValidServicePattern()
+    {
+        MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
+        String[] expectedLabels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
+    }
+
+    @Test
+    public void testErrorWithInvalidOriginInvalidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), null);
         String[] expectedLabels = {"Error", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, expectedLabels), 1.0, DELTA);
     }
-
 
 }
