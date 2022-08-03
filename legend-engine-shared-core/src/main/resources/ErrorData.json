@@ -288,7 +288,7 @@
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "Cannot use view '.*' because it is invalid"
+              "MessageRegex": "Cannot use view '.*' because it is invalid|Data exception - data type conversion is not possible"
             }
           ],
           "TypeExceptionRegex": "SQL"
@@ -310,7 +310,7 @@
           "Exceptions": [
             {
               "ExceptionName": "PureExecutionException",
-              "MessageRegex": "Execution error at .* cast exception|cannot cast collection of size 0 to multiplicity"
+              "MessageRegex": "Execution error at .*(cast exception|ERROR unhandled type for value)|cannot cast collection of size 0 to multiplicity"
             },
             {
               "ExceptionName": "EngineException",
@@ -352,7 +352,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Error in.* (all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity)"
+              "MessageRegex": "Error in.*[all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity|Execution error at]?"
             }
           ],
           "TypeExceptionRegex": "Graph"
@@ -394,11 +394,11 @@
           },
           {
             "ExceptionName": "RuntimeException",
-            "MessageRegex": "HTTP request.*failed with error|Invalid Input: null|Input stream was not provided"
+            "MessageRegex": "HTTP request.*failed with error|Invalid Input: null|Input stream was not provided|The following PackageableElementPointers.*do not exist in the project data loaded from the metadata server"
           },
           {
             "ExceptionName": "EngineException",
-            "MessageRegex": "Can't resolve the builder for function|Can't find model for ID|No generation found with id"
+            "MessageRegex": "Can't resolve the builder for function|Can't find model for ID|No generation found with id|Can't find service"
           }
         ],
         "TypeExceptionRegex": ""
