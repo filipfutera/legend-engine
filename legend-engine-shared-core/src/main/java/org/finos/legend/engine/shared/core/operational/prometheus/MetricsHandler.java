@@ -278,8 +278,11 @@ public class MetricsHandler
     {
         String errorName = exception.getClass().getSimpleName();
         Throwable cause = exception.getCause();
-        while ((errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName())) && cause != null)
+        HashSet<Throwable> exploredExceptions = new HashSet<>();
+        while ((errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
+                && cause != null && cause instanceof Exception && !exploredExceptions.contains(cause))
         {
+            exploredExceptions.add(cause);
             errorName = ((Exception) cause).getClass().getSimpleName();
             cause = cause.getCause();
         }
