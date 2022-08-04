@@ -260,7 +260,7 @@ public class TestErrorManagement
     @Test
     public void testInternalServerErrorTypeNameMatching()
     {
-        MetricsHandler.observeError(null, new MissingFormatWidthException("test"), null);
+        MetricsHandler.observeError(null, new MissingFormatWidthException(""), null);
         String[] labels = {"MissingFormatWidthError", "InternalServerError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
