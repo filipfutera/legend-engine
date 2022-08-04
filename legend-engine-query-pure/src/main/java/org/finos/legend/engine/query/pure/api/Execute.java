@@ -14,7 +14,6 @@
 
 package org.finos.legend.engine.query.pure.api;
 
-import com.zaxxer.hikari.pool.HikariPool;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import io.swagger.annotations.Api;
@@ -39,7 +38,6 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
-import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
@@ -114,7 +112,6 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
         MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new HikariPool.PoolInitializationException(new Exception()))), "/get/ComputerRegistry/{id}");
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new RuntimeException())), "/get/ComputerRegistry/{id}");
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
