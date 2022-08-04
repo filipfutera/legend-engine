@@ -122,9 +122,13 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         RuntimeException exceptionThree = new RuntimeException();
+        RuntimeException exceptionFour = new RuntimeException();
+        RuntimeException exceptionFive = new RuntimeException(exceptionThree);
+        exceptionThree.initCause(exceptionFour);
+        exceptionFour.initCause(exceptionFive);
         exceptionThree.initCause(exceptionThree);
         MetricsHandler.observeError(null, exceptionThree, null);
-        labels = new String[]{"RunError", "UnknownError", "Unknown", "N/A"};
+        labels = new String[]{"RunTIMEError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
     }
