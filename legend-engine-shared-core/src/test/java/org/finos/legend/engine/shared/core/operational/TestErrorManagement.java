@@ -15,10 +15,12 @@
 package org.finos.legend.engine.shared.core.operational;
 
 import io.prometheus.client.CollectorRegistry;
+import org.apache.http.auth.AuthenticationException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
+import org.ietf.jgss.GSSException;
 import org.junit.After;
 import org.junit.Test;
 
@@ -147,19 +149,26 @@ public class TestErrorManagement
     @Test
     public void testUserAuthenticationErrorExceptionOutlineMatching()
     {
-
+        RuntimeException permissionsError = new RuntimeException("some_user is not part of write service for some_service");
+        MetricsHandler.observeError(null, permissionsError, null);
+        String[] labels = {"UnknownRuntimeError", "UserAuthenticationError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testUserAuthenticationErrorTypeNameMatching()
     {
-
+        MetricsHandler.observeError(null, new GSSException(), null);
+        String[] labels = {"GSSError", "UserAuthenticationError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testUserAuthenticationErrorKeywordsMatching()
     {
-
+        MetricsHandler.observeError(null, new Exception("some text including kerberos keyword"), null);
+        String[] labels = {"Error", "UserAuthenticationError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
@@ -243,5 +252,5 @@ public class TestErrorManagement
 
     //test for each category - matching by keywords, typenameregex and an exceptionoutline -
     //then test looping exceptions, and convoluted exceptions.
-
+    // some json parsing tests?
 }
