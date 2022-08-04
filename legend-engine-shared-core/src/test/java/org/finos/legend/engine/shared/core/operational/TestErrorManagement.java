@@ -29,12 +29,14 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
-import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestErrorManagement
 {
@@ -54,9 +56,8 @@ public class TestErrorManagement
     {
         JSONObject testCategory = new JSONObject();
         testCategory.put("CategoryName", categoryName);
-
         JSONArray keywordsArray = new JSONArray();
-        keywordsArray.addAll(keywords);
+        keywordsArray.addAll(Arrays.asList(keywords));
         testCategory.put("keywords", keywordsArray);
 
         JSONArray typeArray = new JSONArray();
@@ -259,8 +260,8 @@ public class TestErrorManagement
     @Test
     public void testInternalServerErrorTypeNameMatching()
     {
-        MetricsHandler.observeError(null, new MissingEnvironmentVariableException("Env_Var"), null);
-        String[] labels = {"MissingEnvironmentVariableError", "InternalServerError", "Unknown", "N/A"};
+        MetricsHandler.observeError(null, new MissingFormatWidthException("test"), null);
+        String[] labels = {"MissingFormatWidthError", "InternalServerError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -382,11 +383,16 @@ public class TestErrorManagement
         String categoryName = "TestCategory";
         String[] keywords = {"Test", "Sample", "Check"};
         String typeName = "TypeOne";
-        String typeRegex = "[help]?";
+        String typeRegex = "[a-zA-Z]*Exception";
         String exceptionName = "RuntimeException";
-        String exceptionMessage = "test[s]*";
+        String exceptionMessage = "test[s]?";
         ErrorCategory testCategory = new ErrorCategory(generateSimpleErrorCategoryJSONObject(categoryName, keywords, typeName, typeRegex, exceptionName, exceptionMessage));
+        RuntimeException threeWayMatchException = new RuntimeException("test");
 
+        assertEquals(testCategory.getFriendlyName(), categoryName);
+        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.KeywordsMatching));
+        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.ExceptionOutlineMatching));
+        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.TypeNameMatching));
     }
 
     @Test
