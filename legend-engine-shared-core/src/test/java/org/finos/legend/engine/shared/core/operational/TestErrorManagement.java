@@ -195,7 +195,7 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"UnrecognisedRuntimeError", "OtherError", "Unrecognised", "N/A"};
+        String[] labels = {"SocketTimeoutError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
