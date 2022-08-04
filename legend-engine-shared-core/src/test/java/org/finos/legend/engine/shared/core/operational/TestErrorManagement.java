@@ -14,6 +14,7 @@
 
 package org.finos.legend.engine.shared.core.operational;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -21,6 +22,8 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.After;
 import org.junit.Test;
+
+import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,9 +39,15 @@ public class TestErrorManagement
     @After
     public void clearCounterData()
     {
-        System.out.println(MetricsHandler.getErrorCounter().collect());
-        MetricsHandler.getErrorCounter().clear();
-        System.out.println(MetricsHandler.getErrorCounter().collect());
+        //MetricsHandler.getErrorCounter().clear();
+        Enumeration<Collector.MetricFamilySamples> iterator = METRIC_REGISTRY.metricFamilySamples();
+        while (iterator.hasMoreElements()) {
+            Collector.MetricFamilySamples metricFamilySamples = iterator.nextElement();
+            System.out.println(metricFamilySamples.name.equals(METRIC_NAME));
+            if (metricFamilySamples.name.equals(METRIC_NAME)) {
+                metricFamilySamples.samples.clear();
+            }
+        }
     }
 
 
