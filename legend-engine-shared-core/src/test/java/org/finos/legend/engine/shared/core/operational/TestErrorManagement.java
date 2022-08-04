@@ -307,8 +307,8 @@ public class TestErrorManagement
     @Test
     public void testExceptionOutlineToKeywordMatchingPriority()
     {
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("Can't resolve the builder for function 'get/Login/Username"), TEST_SERVICE_PATH);
-        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "Serve", TEST_SERVICE_PATH};
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("Can't resolve the builder for function 'get/Login/Kerberos"), TEST_SERVICE_PATH);
+        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
