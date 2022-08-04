@@ -108,20 +108,12 @@ public class Execute
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
     public Response test()
     {
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), "/test/tempService");
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("", new RuntimeException("testing slang exception testing")), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("invalid credentials")), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
         MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
-        Exception e = new RuntimeException();
-        Exception ex = new RuntimeException(e);
-        e.initCause(ex);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, e, null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("login"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new HikariPool.PoolInitializationException(new Exception()))), "/get/ComputerRegistry/{id}");
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("test", new RuntimeException("test2", new RuntimeException())), "/get/ComputerRegistry/{id}");
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);

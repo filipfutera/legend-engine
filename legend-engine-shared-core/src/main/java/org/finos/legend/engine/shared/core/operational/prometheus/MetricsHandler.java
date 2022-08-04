@@ -268,9 +268,7 @@ public class MetricsHandler
 
     /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
-     * If RuntimeException or Exception - Extract label from exception's cause - if it is null then label is
-     * {{ErrorOrigin}}{{ExceptionName}} or Unknown{{ExceptionName}} if origin is invalid.
-     * If EngineException - Prefix EngineError with its Type - if type is null then use error origin value as prefix.
+     * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
      * @param origin the stage in execution at which the error occurred
      * @param exception the exception to be analysed that has occurred in execution
      * @return the error label generated for the error
@@ -292,11 +290,9 @@ public class MetricsHandler
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {
-            errorName = ((EngineException) exception).getErrorType() != null ?
-                    ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
+            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
         }
-        errorName = errorName.substring(0,1).toUpperCase() + errorName.substring(1);
-        return errorName.replace("Exception", "Error");
+        return (errorName.substring(0,1).toUpperCase() + errorName.substring(1)).replace("Exception", "Error");
     }
 
     /**
