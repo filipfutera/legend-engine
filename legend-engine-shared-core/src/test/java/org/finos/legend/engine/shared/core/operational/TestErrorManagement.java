@@ -98,7 +98,7 @@ public class TestErrorManagement
     public void testErrorWithInvalidOriginValidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
-        String[] labels = {"UnknownError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -106,7 +106,7 @@ public class TestErrorManagement
     public void testErrorWithInvalidOriginInvalidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), null);
-        String[] labels = {"UnknownError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -114,7 +114,7 @@ public class TestErrorManagement
     public void testErrorLabelWithUniqueException()
     {
         MetricsHandler.observeError(null, new ArithmeticException(), null);
-        String[] labels = {"ArithmeticError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"ArithmeticError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH);
@@ -126,7 +126,7 @@ public class TestErrorManagement
     public void testErrorLabelWithEngineExceptionWithType()
     {
         MetricsHandler.observeError(null, new EngineException(null, null, EngineErrorType.COMPILATION), null);
-        String[] labels = {"CompilationEngineError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"CompilationEngineError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH);
@@ -146,7 +146,7 @@ public class TestErrorManagement
     public void testErrorLabelWithEngineExceptionWithoutTypeWithoutOrigin()
     {
         MetricsHandler.observeError(null, new EngineException(null), null);
-        String[] labels = {"UnknownEngineError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedEngineError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -162,7 +162,7 @@ public class TestErrorManagement
     public void testErrorLabelWithRuntimeExceptionWithoutCause()
     {
         MetricsHandler.observeError(null, new RuntimeException(), null);
-        String[] labels = {"UnknownRuntimeError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -173,7 +173,7 @@ public class TestErrorManagement
         Exception exceptionTwo = new Exception(exceptionOne);
         exceptionOne.initCause(exceptionTwo);
         MetricsHandler.observeError(null, exceptionOne, null);
-        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"Error", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -186,7 +186,7 @@ public class TestErrorManagement
         exceptionThree.initCause(exceptionFour);
         exceptionFour.initCause(exceptionFive);
         MetricsHandler.observeError(null, exceptionThree, null);
-        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"Error", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -195,7 +195,7 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"Error", "OtherError", "Unknown", "N/A"};
+        String[] labels = {"RuntimeError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -204,7 +204,7 @@ public class TestErrorManagement
     {
         RuntimeException permissionsError = new RuntimeException("some_user is not part of write service for some_service");
         MetricsHandler.observeError(null, permissionsError, null);
-        String[] labels = {"UnknownRuntimeError", "UserAuthenticationError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedRuntimeError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -212,7 +212,7 @@ public class TestErrorManagement
     public void testUserAuthenticationErrorTypeNameMatching()
     {
         MetricsHandler.observeError(null, new GSSException(1), null);
-        String[] labels = {"GSSError", "UserAuthenticationError", "Unknown", "N/A"};
+        String[] labels = {"GSSError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -220,7 +220,7 @@ public class TestErrorManagement
     public void testUserAuthenticationErrorKeywordsMatching()
     {
         MetricsHandler.observeError(null, new Exception("some text including kerberos keyword"), null);
-        String[] labels = {"UnknownError", "UserAuthenticationError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -228,7 +228,7 @@ public class TestErrorManagement
     public void testUserExecutionErrorExceptionOutlineMatching()
     {
         MetricsHandler.observeError(null, new Exception("some text including kerberos keyword"), null);
-        String[] labels = {"UnknownError", "UserAuthenticationError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -243,7 +243,7 @@ public class TestErrorManagement
     public void testUserExecutionErrorKeywordsMatching()
     {
         MetricsHandler.observeError(null, new Exception("database schema 'someSchema' not found"), null);
-        String[] labels = {"UnknownError", "UserExecutionError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "UserExecutionError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -251,7 +251,7 @@ public class TestErrorManagement
     public void testInternalServerErrorExceptionOutlineMatching()
     {
         MetricsHandler.observeError(null, new IOException("Server returned HTTP response code: 500 for URL 'https://someUrl.com/get'"), null);
-        String[] labels = {"IOError", "InternalServerError", "Unknown", "N/A"};
+        String[] labels = {"IOError", "InternalServerError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -259,7 +259,7 @@ public class TestErrorManagement
     public void testInternalServerErrorTypeNameMatching()
     {
         MetricsHandler.observeError(null, new MissingFormatWidthException(""), null);
-        String[] labels = {"MissingFormatWidthError", "InternalServerError", "Unknown", "N/A"};
+        String[] labels = {"MissingFormatWidthError", "InternalServerError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -267,7 +267,7 @@ public class TestErrorManagement
     public void testInternalServerErrorKeywordsMatching()
     {
         MetricsHandler.observeError(null, new Exception("unreachable proxy"), null);
-        String[] labels = {"UnknownError", "InternalServerError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "InternalServerError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -275,11 +275,11 @@ public class TestErrorManagement
     public void testServerExecutionErrorExceptionOutlineMatching()
     {
         MetricsHandler.observeError(null, new IllegalArgumentException("there was an invalid hexadecimal representation of an ObjectId '123456789'"), null);
-        String[] labels = {"IllegalArgumentError", "ServerExecutionError", "Unknown", "N/A"};
+        String[] labels = {"IllegalArgumentError", "ServerExecutionError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Can't find the profile 'some::profile'"), null);
-        labels = new String[]{"UnknownEngineError", "ServerExecutionError", "Unknown", "N/A"};
+        labels = new String[]{"UnrecognisedEngineError", "ServerExecutionError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -287,7 +287,7 @@ public class TestErrorManagement
     public void testServerExecutionErrorTypeNameMatching()
     {
         MetricsHandler.observeError(null, new JsonGenerationException("some message"), null);
-        String[] labels = {"JsonGenerationError", "ServerExecutionError", "Unknown", "N/A"};
+        String[] labels = {"JsonGenerationError", "ServerExecutionError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -295,7 +295,7 @@ public class TestErrorManagement
     public void testServerExecutionErrorKeywordsMatching()
     {
         MetricsHandler.observeError(null, new Exception("Error in 'some::graph': Couldn't resolve test"), null);
-        String[] labels = {"UnknownError", "ServerExecutionError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "ServerExecutionError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -303,7 +303,7 @@ public class TestErrorManagement
     public void testOtherErrorExceptionOutlineMatching()
     {
         MetricsHandler.observeError(null, new IllegalArgumentException("Tests Failed! Error running tests for service 'some/service'"), null);
-        String[] labels = {"IllegalArgumentError", "OtherError", "Unknown", "N/A"};
+        String[] labels = {"IllegalArgumentError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -311,7 +311,7 @@ public class TestErrorManagement
     public void testOtherErrorTypeNameMatching()
     {
         MetricsHandler.observeError(null, new ConnectionClosedException(), null);
-        String[] labels = {"ConnectionClosedError", "OtherError", "Unknown", "N/A"};
+        String[] labels = {"ConnectionClosedError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -319,7 +319,7 @@ public class TestErrorManagement
     public void testOtherErrorKeywordsInNameMatching()
     {
         MetricsHandler.observeError(null, new TestCouldNotBeSkippedException(null), null);
-        String[] labels = {"TestCouldNotBeSkippedError", "OtherError", "Unknown", "N/A"};
+        String[] labels = {"TestCouldNotBeSkippedError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -327,7 +327,7 @@ public class TestErrorManagement
     public void testOtherErrorKeywordsInMessageMatching()
     {
         MetricsHandler.observeError(null, new Exception("some tests have failed!"), null);
-        String[] labels = {"UnknownError", "OtherError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -335,7 +335,7 @@ public class TestErrorManagement
     public void testUnknownErrorMatching()
     {
         MetricsHandler.observeError(null, new UnknownFormatFlagsException("some unknown error"), null);
-        String[] labels = {"UnknownFormatFlagsError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnknownFormatFlagsError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 

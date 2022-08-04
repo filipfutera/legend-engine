@@ -299,7 +299,7 @@ public class MetricsHandler
      */
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
-        String originFriendlyString = origin == null ? "Unknown" : origin.toFriendlyString();
+        String originFriendlyString = origin == null ? "Unrecognised" : origin.toFriendlyString();
         String errorLabel = getErrorLabel(originFriendlyString, exception);
         String source = servicePath == null ? originFriendlyString : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
