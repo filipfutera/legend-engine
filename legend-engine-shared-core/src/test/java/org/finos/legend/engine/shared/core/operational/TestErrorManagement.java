@@ -14,6 +14,9 @@
 
 package org.finos.legend.engine.shared.core.operational;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -224,25 +227,37 @@ public class TestErrorManagement
     @Test
     public void testServerExecutionErrorExceptionOutlineMatching()
     {
+        MetricsHandler.observeError(null, new IllegalArgumentException("there was an invalid hexadecimal representation of an ObjectId '123456789'"), null);
+        String[] labels = {"Error", "ServerExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Can't find the profile 'some::profile'"), null);
+        labels = new String[]{"UnknownEngineError", "ServerExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testServerExecutionErrorTypeNameMatching()
     {
-
+        MetricsHandler.observeError(null, new IllegalArgumentException("there was an invalid hexadecimal representation of an ObjectId '123456789'"), null);
+        String[] labels = {"Error", "ServerExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testServerExecutionErrorKeywordsMatching()
     {
-
+        MetricsHandler.observeError(null, new JsonGenerationException("some message"), null);
+        String[] labels = {"JsonGenerationError", "ServerExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testOtherErrorExceptionOutlineMatching()
     {
-
+        MetricsHandler.observeError(null, new Exception("Error in 'some::graph': Couldn't resolve test"), null);
+        String[] labels = {"Error", "ServerExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
@@ -264,7 +279,13 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testMethodOrderingForCorrectCategorisation()
+    public void testExceptionOutlineToKeywordMatchingPriority()
+    {
+        //test some sql error with column 'loginUsername' and check that it is server error not user authentication
+    }
+
+    @Test
+    public void testKeywordToTypeNameMatchingPriority()
     {
         //test some sql error with column 'loginUsername' and check that it is server error not user authentication
     }
