@@ -290,7 +290,7 @@ public class TestErrorManagement
     public void testUnknownErrorMatching()
     {
         MetricsHandler.observeError(null, new UnknownFormatFlagsException("some unknown error"), null);
-        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnknownFormatFlagsError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
