@@ -315,11 +315,18 @@ public class TestErrorManagement
     @Test
     public void testKeywordToTypeNameMatchingPriority()
     {
-        //test some sql error with column 'loginUsername' and check that it is server error not user authentication
-    }
+        MetricsHandler.observeError(null, new JsonGenerationException("can't get kerberos authentication"), TEST_SERVICE_PATH);
+        String[] labels = {"UnknownEngineError", "UserAuthenticationError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);    }
 
     @Test
     public void testJSONParsing()
+    {
+
+    }
+
+    @Test
+    public void testErrorOriginToFriendlyString()
     {
 
     }
