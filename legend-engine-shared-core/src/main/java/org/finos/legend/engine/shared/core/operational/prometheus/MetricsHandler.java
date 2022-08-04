@@ -360,6 +360,10 @@ public class MetricsHandler
         return categories;
     }
 
+    /**
+     * Accessor for the Prometheus Collector for errors
+     * @return Counter measuring error frequency
+     */
     public static Counter getErrorCounter()
     {
         return ERROR_COUNTER;
