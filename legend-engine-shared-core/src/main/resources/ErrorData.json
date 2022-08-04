@@ -128,7 +128,7 @@
               "MessageRegex": "Can't find database"
             }
           ],
-          "TypeExceptionRegex": "NotFound|Missing|Unknown"
+          "TypeExceptionRegex": ""
         },
 
         {
@@ -187,7 +187,7 @@
               "MessageRegex": "HTTP 404 Not Found"
             }
           ],
-          "TypeExceptionRegex": ""
+          "TypeExceptionRegex": "Missing|NotFound"
         },
 
         {

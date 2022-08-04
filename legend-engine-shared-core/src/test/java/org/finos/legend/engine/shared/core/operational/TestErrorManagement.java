@@ -22,9 +22,11 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.ietf.jgss.GSSException;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TestErrorManagement
 {
@@ -158,7 +160,7 @@ public class TestErrorManagement
     @Test
     public void testUserAuthenticationErrorTypeNameMatching()
     {
-        MetricsHandler.observeError(null, new GSSException(), null);
+        MetricsHandler.observeError(null, new GSSException(1), null);
         String[] labels = {"GSSError", "UserAuthenticationError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -174,19 +176,24 @@ public class TestErrorManagement
     @Test
     public void testUserExecutionErrorExceptionOutlineMatching()
     {
-
+        MetricsHandler.observeError(null, new Exception("some text including kerberos keyword"), null);
+        String[] labels = {"Error", "UserAuthenticationError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
+    @Ignore
     @Test
     public void testUserExecutionErrorTypeNameMatching()
     {
-
+        fail("No Type name patterns recorded for UserExecution error category yet");
     }
 
     @Test
     public void testUserExecutionErrorKeywordsMatching()
     {
-
+        MetricsHandler.observeError(null, new Exception("database schema 'someSchema' not found"), null);
+        String[] labels = {"Error", "UserExecutionError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
