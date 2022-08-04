@@ -136,9 +136,12 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testCategoryLabelWithConvolutedException()
+    public void testCategoryLabelWithNestedException()
     {
-
+        RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
+        MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
+        String[] labels = {"Error", "OtherError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
