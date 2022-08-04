@@ -267,7 +267,8 @@ public class MetricsHandler
 
     /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
-     * If RuntimeException - Extract label from exception's cause - if it is null then label is UnknownRuntimeError
+     * If RuntimeException or Exception - Extract label from exception's cause - if it is null then label is
+     * {{ErrorOrigin}}{{ExceptionName}} or Unknown{{ExceptionName}} if origin is invalid.
      * If EngineException - Prefix EngineError with its Type - if type is null then use error origin value as prefix.
      * @param origin the stage in execution at which the error occurred
      * @param exception the exception to be analysed that has occurred in execution
@@ -276,10 +277,10 @@ public class MetricsHandler
     private static synchronized String getErrorLabel(String origin, Exception exception)
     {
         String errorName = exception.getClass().getSimpleName();
-        if (errorName.equals(RuntimeException.class.getSimpleName()))
+        if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
             Throwable cause = exception.getCause();
-            errorName = cause == null ? origin + RuntimeException.class.getSimpleName() : cause.getClass().getSimpleName();
+            errorName = cause == null ? origin + errorName : cause.getClass().getSimpleName();
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {
