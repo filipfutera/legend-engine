@@ -56,7 +56,7 @@ public class TestErrorManagement
         testCategory.put("CategoryName", categoryName);
 
         JSONArray keywordsArray = new JSONArray();
-        keywordsArray.add(keywords);
+        keywordsArray.addAll(keywords);
         testCategory.put("keywords", keywordsArray);
 
         JSONArray typeArray = new JSONArray();
