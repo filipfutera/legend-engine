@@ -86,7 +86,7 @@ public class TestErrorManagement
     @Test
     public void testErrorLabelWithEngineExceptionWithType()
     {
-        MetricsHandler.observeError(null, new EngineException(null,null, EngineErrorType.COMPILATION), null);
+        MetricsHandler.observeError(null, new EngineException(null, null, EngineErrorType.COMPILATION), null);
         String[] labels = {"CompilationEngineError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
@@ -110,6 +110,127 @@ public class TestErrorManagement
         String[] labels = {"UnknownRuntimeError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
+
+    @Test
+    public void testCategoryLabelWithLoopingExceptionCause()
+    {
+        Exception exceptionOne = new Exception();
+        Exception exceptionTwo = new Exception(exceptionOne);
+        exceptionOne.initCause(exceptionTwo);
+        MetricsHandler.observeError(null, exceptionOne, null);
+        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+
+        RuntimeException exceptionThree = new RuntimeException();
+        exceptionThree.initCause(exceptionThree);
+        MetricsHandler.observeError(null, exceptionThree, null);
+        labels = new String[]{"RunError", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+
+    }
+
+    @Test
+    public void testCategoryLabelWithConvolutedException()
+    {
+
+    }
+
+    @Test
+    public void testUserAuthenticationErrorExceptionOutlineMatching()
+    {
+
+    }
+
+    @Test
+    public void testUserAuthenticationErrorTypeNameMatching()
+    {
+
+    }
+
+    @Test
+    public void testUserAuthenticationErrorKeywordsMatching()
+    {
+
+    }
+
+    @Test
+    public void testUserExecutionErrorExceptionOutlineMatching()
+    {
+
+    }
+
+    @Test
+    public void testUserExecutionErrorTypeNameMatching()
+    {
+
+    }
+
+    @Test
+    public void testUserExecutionErrorKeywordsMatching()
+    {
+
+    }
+
+    @Test
+    public void testInternalServerErrorExceptionOutlineMatching()
+    {
+
+    }
+
+    @Test
+    public void testInternalServerErrorTypeNameMatching()
+    {
+
+    }
+
+    @Test
+    public void testInternalServerErrorKeywordsMatching()
+    {
+
+    }
+
+    @Test
+    public void testServerExecutionErrorExceptionOutlineMatching()
+    {
+
+    }
+
+    @Test
+    public void testServerExecutionErrorTypeNameMatching()
+    {
+
+    }
+
+    @Test
+    public void testServerExecutionErrorKeywordsMatching()
+    {
+
+    }
+
+    @Test
+    public void testOtherErrorExceptionOutlineMatching()
+    {
+
+    }
+
+    @Test
+    public void testOtherErrorTypeNameMatching()
+    {
+
+    }
+
+    @Test
+    public void testOtherErrorKeywordsMatching()
+    {
+
+    }
+
+    @Test
+    public void testUnknownErrorMatching()
+    {
+
+    }
+
 
     //test for each category - matching by keywords, typenameregex and an exceptionoutline -
     //then test looping exceptions, and convoluted exceptions.
