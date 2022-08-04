@@ -167,6 +167,24 @@ public class TestErrorManagement
     }
 
     @Test
+    public void testErrorLabelWithNestedRuntimeException()
+    {
+        RuntimeException nestedOtherErrorException = new RuntimeException(new RuntimeException());
+        MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
+        String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelWithNestedEngineException()
+    {
+        RuntimeException nestedOtherErrorException = new RuntimeException(new EngineException(""));
+        MetricsHandler.observeError(ErrorOrigin.UNRECOGNISED, new Exception(nestedOtherErrorException), null);
+        String[] labels = {"UnrecognisedEngineException", "UnknownError", "Unrecognised", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
     public void testCategoryLabelWithCrossCausingExceptionCause()
     {
         Exception exceptionOne = new Exception();
@@ -191,7 +209,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testCategoryLabelWithNestedException()
+    public void testCategoryLabelWithNestedUniqueException()
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
@@ -373,6 +391,7 @@ public class TestErrorManagement
         assertEquals(ErrorOrigin.TDS_METADATA.toFriendlyString(), "TdsMetadata");
         assertEquals(ErrorOrigin.TDS_INPUTS.toFriendlyString(), "TdsInputs");
         assertEquals(ErrorOrigin.DSB_EXECUTE.toFriendlyString(), "DsbExecute");
+        assertEquals(ErrorOrigin.UNRECOGNISED.toFriendlyString(), "Unrecognised");
     }
 
     @Test
