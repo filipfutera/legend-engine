@@ -196,6 +196,19 @@ public class TestErrorManagement
     }
 
     @Test
+    public void testErrorLabelExtractionWithLoopingExceptionCause()
+    {
+        Exception exceptionOne = new Exception();
+        Exception exceptionTwo = new Exception();
+        RuntimeException exceptionThree = new RuntimeException(exceptionOne);
+        exceptionThree.initCause(exceptionTwo);
+        exceptionTwo.initCause(exceptionThree);
+        MetricsHandler.observeError(null, exceptionOne, null);
+        String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
     public void testCategoryLabelWithCrossCausingExceptions()
     {
         Exception exceptionOne = new Exception();
@@ -209,12 +222,12 @@ public class TestErrorManagement
     @Test
     public void testCategoryLabelWithLoopingExceptionCause()
     {
-        Exception exceptionThree = new Exception();
-        Exception exceptionFour = new Exception();
-        Exception exceptionFive = new Exception(exceptionThree);
-        exceptionThree.initCause(exceptionFour);
-        exceptionFour.initCause(exceptionFive);
-        MetricsHandler.observeError(null, exceptionThree, null);
+        Exception exceptionOne = new Exception();
+        Exception exceptionTwo = new Exception();
+        Exception exceptionThree = new Exception(exceptionOne);
+        exceptionOne.initCause(exceptionTwo);
+        exceptionTwo.initCause(exceptionThree);
+        MetricsHandler.observeError(null, exceptionOne, null);
         String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
