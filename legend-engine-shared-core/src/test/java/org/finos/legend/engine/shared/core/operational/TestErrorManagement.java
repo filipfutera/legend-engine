@@ -14,7 +14,6 @@
 
 package org.finos.legend.engine.shared.core.operational;
 
-import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -22,8 +21,6 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrig
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.After;
 import org.junit.Test;
-
-import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,29 +30,20 @@ public class TestErrorManagement
     private final String METRIC_NAME = "legend_engine_error_total";
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0.000001d;
-    private final String TEST_SERVICE_PATH_ONE = "service/remote/getRegistry";
-    private final String TEST_SERVICE_PATH_TWO = "service/remote/getComputers";
+    private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
 
     @After
     public void clearCounterData()
     {
-        //MetricsHandler.getErrorCounter().clear();
-        Enumeration<Collector.MetricFamilySamples> iterator = METRIC_REGISTRY.metricFamilySamples();
-        while (iterator.hasMoreElements()) {
-            Collector.MetricFamilySamples metricFamilySamples = iterator.nextElement();
-            System.out.println(metricFamilySamples.name.equals(METRIC_NAME));
-            if (metricFamilySamples.name.equals(METRIC_NAME)) {
-                metricFamilySamples.samples.clear();
-            }
-        }
+        MetricsHandler.getErrorCounter().clear();
     }
 
 
     @Test
     public void testErrorWithValidOriginValidServicePattern()
     {
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH_ONE);
-        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH);
+        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -70,8 +58,8 @@ public class TestErrorManagement
     @Test
     public void testErrorWithInvalidOriginValidServicePattern()
     {
-        MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH_TWO);
-        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH_TWO};
+        MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
+        String[] labels = {"Error", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -90,8 +78,8 @@ public class TestErrorManagement
         String[] labels = {"ArithmeticError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
-        MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH_ONE);
-        labels = new String[]{"NullPointerError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH);
+        labels = new String[]{"NullPointerError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -102,16 +90,16 @@ public class TestErrorManagement
         String[] labels = {"CompilationEngineError", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("test message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH_ONE);
-        labels = new String[]{"ParserEngineError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH);
+        labels = new String[]{"ParserEngineError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testErrorLabelWithRuntimeExceptionWithCause()
     {
-        MetricsHandler.observeError(null, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH_ONE);
-        String[] labels = {"ArithmeticError", "UnknownError", "Service", TEST_SERVICE_PATH_ONE};
+        MetricsHandler.observeError(null, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH);
+        String[] labels = {"ArithmeticError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
