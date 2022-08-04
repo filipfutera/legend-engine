@@ -19,9 +19,12 @@ import io.prometheus.client.CollectorRegistry;
 import org.apache.http.ConnectionClosedException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.ietf.jgss.GSSException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,6 +49,35 @@ public class TestErrorManagement
     {
         MetricsHandler.getErrorCounter().clear();
     }
+
+    private JSONObject generateSimpleErrorCategoryJSONObject(String categoryName, String[] keywords, String typeName, String typeRegex, String exceptionName, String exceptionMessage)
+    {
+        JSONObject testCategory = new JSONObject();
+        testCategory.put("CategoryName", categoryName);
+
+        JSONArray keywordsArray = new JSONArray();
+        keywordsArray.add(keywords);
+        testCategory.put("keywords", keywordsArray);
+
+        JSONArray typeArray = new JSONArray();
+        JSONObject testType = new JSONObject();
+        testType.put("TypeName", typeName);
+        testType.put("TypeExceptionRegex", typeRegex);
+
+        JSONArray outlineArray = new JSONArray();
+        JSONObject testOutline = new JSONObject();
+        testOutline.put("ExceptionName", exceptionName);
+        testOutline.put("MessageRegex", exceptionMessage);
+
+        outlineArray.add(testOutline);
+        testType.put("Exceptions", outlineArray);
+        typeArray.add(testType);
+        testCategory.put("Types", typeArray);
+
+        return testCategory;
+    }
+
+
 
     @Test
     public void testErrorWithValidOriginValidServicePattern()
@@ -107,7 +139,7 @@ public class TestErrorManagement
     public void testErrorLabelWithEngineExceptionWithoutTypeWithOrigin()
     {
         MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, new EngineException(null), null);
-        String[] labels = {"CompileModelEngineError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"CompileModelEngineError", "UnknownError", "CompileModel", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -321,12 +353,7 @@ public class TestErrorManagement
     {
         MetricsHandler.observeError(null, new JsonGenerationException("can't get kerberos authentication"), TEST_SERVICE_PATH);
         String[] labels = {"JsonGenerationError", "UserAuthenticationError", "Service", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);    }
-
-    @Test
-    public void testJSONParsing()
-    {
-
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
@@ -349,4 +376,27 @@ public class TestErrorManagement
         assertEquals(ErrorOrigin.DSB_EXECUTE.toFriendlyString(), "DsbExecute");
     }
 
+    @Test
+    public void testJSONParsing()
+    {
+        String categoryName = "TestCategory";
+        String[] keywords = {"Test", "Sample", "Check"};
+        String typeName = "TypeOne";
+        String typeRegex = "[help]?";
+        String exceptionName = "RuntimeException";
+        String exceptionMessage = "test[s]*";
+        ErrorCategory testCategory = new ErrorCategory(generateSimpleErrorCategoryJSONObject(categoryName, keywords, typeName, typeRegex, exceptionName, exceptionMessage));
+
+    }
+
+    @Test
+    public void testCounterSameSampleIncrementation()
+    {
+        MetricsHandler.observeError(null, new Exception(), null);
+        MetricsHandler.observeError(null, new Exception(), null);
+        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 2, DELTA);
+    }
+
+    //change label extraction from generic Exception type...
 }
