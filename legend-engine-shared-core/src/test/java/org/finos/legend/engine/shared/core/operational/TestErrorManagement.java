@@ -15,9 +15,8 @@
 package org.finos.legend.engine.shared.core.operational;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.io.JsonEOFException;
 import io.prometheus.client.CollectorRegistry;
+import org.apache.http.ConnectionClosedException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
@@ -26,9 +25,12 @@ import org.ietf.jgss.GSSException;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.TestCouldNotBeSkippedException;
 import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.util.UnknownFormatFlagsException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -255,25 +257,41 @@ public class TestErrorManagement
     @Test
     public void testOtherErrorExceptionOutlineMatching()
     {
-
+        MetricsHandler.observeError(null, new IllegalArgumentException("Tests Failed! Error running tests for service 'some/service'"), null);
+        String[] labels = {"IllegalArgumentError", "OtherError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testOtherErrorTypeNameMatching()
     {
-
+        MetricsHandler.observeError(null, new ConnectionClosedException(), null);
+        String[] labels = {"ConnectionClosedError", "OtherError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
-    public void testOtherErrorKeywordsMatching()
+    public void testOtherErrorKeywordsInNameMatching()
     {
+        MetricsHandler.observeError(null, new TestCouldNotBeSkippedException(null), null);
+        String[] labels = {"TestCouldNotBeSkippedError", "OtherError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
 
+    @Test
+    public void testOtherErrorKeywordsInMessageMatching()
+    {
+        MetricsHandler.observeError(null, new Exception("some tests have failed!"), null);
+        String[] labels = {"Error", "OtherError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testUnknownErrorMatching()
     {
-
+        MetricsHandler.observeError(null, new UnknownFormatFlagsException("some unknown error"), null);
+        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
