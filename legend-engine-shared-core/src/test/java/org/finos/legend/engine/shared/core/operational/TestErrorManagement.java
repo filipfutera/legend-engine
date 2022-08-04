@@ -185,7 +185,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelExtractionWithLoopingException()
+    public void testErrorLabelExtractionWithCrossCausingExceptions()
     {
         Exception exceptionOne = new Exception();
         RuntimeException exceptionTwo = new RuntimeException(exceptionOne);
@@ -196,7 +196,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testCategoryLabelWithCrossCausingExceptionCause()
+    public void testCategoryLabelWithCrossCausingExceptions()
     {
         Exception exceptionOne = new Exception();
         Exception exceptionTwo = new Exception(exceptionOne);

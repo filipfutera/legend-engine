@@ -277,17 +277,14 @@ public class MetricsHandler
     private static synchronized String getErrorLabel(String origin, Exception exception)
     {
         String errorName = exception.getClass().getSimpleName();
-        Throwable cause = exception.getCause();
-        HashSet<Throwable> exploredExceptions = new HashSet<>();
+        HashSet<Exception> exploredExceptions = new HashSet<>();
         while ((errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
-                && cause != null && cause instanceof Exception && !exploredExceptions.contains(cause))
+                && exception.getCause() != null && exception.getCause() instanceof Exception && !exploredExceptions.contains(exception.getCause()))
         {
-            exploredExceptions.add(cause);
-            exception = (Exception) cause;
+            exploredExceptions.add(exception);
+            exception = (Exception) exception.getCause();
             errorName = exception.getClass().getSimpleName();
-            cause = cause.getCause();
         }
-
         if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
             errorName = origin + errorName;
