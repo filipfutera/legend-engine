@@ -201,7 +201,7 @@ public class TestErrorManagement
         Exception exceptionOne = new Exception();
         Exception exceptionTwo = new Exception();
         RuntimeException exceptionThree = new RuntimeException(exceptionOne);
-        exceptionThree.initCause(exceptionTwo);
+        exceptionOne.initCause(exceptionTwo);
         exceptionTwo.initCause(exceptionThree);
         MetricsHandler.observeError(null, exceptionOne, null);
         String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
