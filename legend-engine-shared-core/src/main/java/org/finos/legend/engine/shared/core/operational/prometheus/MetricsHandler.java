@@ -252,7 +252,7 @@ public class MetricsHandler
      * User friendly error categories
      */
     private enum ERROR_CATEGORIES
-    { UserAuthenticationError, UserExecutionError, ServerInternalError, ServerExecutionError, OtherError, UnknownError }
+    { UserAuthenticationError, UserExecutionError, InternalServerError, ServerExecutionError, OtherError, UnknownError }
 
     /**
      * Types of error matching techniques that can be performed on an incoming exceptions

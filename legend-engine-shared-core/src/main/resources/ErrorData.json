@@ -164,7 +164,6 @@
 
 
     {
-
       "CategoryName": "InternalServerError",
       "Types": [
         {
@@ -207,10 +206,6 @@
             {
               "ExceptionName": "ZipException",
               "MessageRegex": "ZipFile invalid LOC header"
-            },
-            {
-              "ExceptionName": "RuntimeException",
-              "MessageRegex": "GSExceptionSlang"
             },
             {
               "ExceptionName": "RuntimeException",
