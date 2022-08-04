@@ -316,7 +316,7 @@ public class TestErrorManagement
     public void testKeywordToTypeNameMatchingPriority()
     {
         MetricsHandler.observeError(null, new JsonGenerationException("can't get kerberos authentication"), TEST_SERVICE_PATH);
-        String[] labels = {"UnknownEngineError", "UserAuthenticationError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"JsonGenerationError", "UserAuthenticationError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);    }
 
     @Test
@@ -328,6 +328,22 @@ public class TestErrorManagement
     @Test
     public void testErrorOriginToFriendlyString()
     {
+        assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toFriendlyString(), "PureQueryExecution");
+        assertEquals(ErrorOrigin.GENERATE_PLAN.toFriendlyString(), "GeneratePlan");
+        assertEquals(ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), "LambdaReturnType");
+        assertEquals(ErrorOrigin.COMPILE_MODEL.toFriendlyString(), "CompileModel");
+        assertEquals(ErrorOrigin.MODEL_RESOLVE.toFriendlyString(), "ModelResolve");
+        assertEquals(ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "ServiceTestExecute");
+        assertEquals(ErrorOrigin.SERVICE_EXECUTE.toFriendlyString(), "ServiceExecute");
+        assertEquals(ErrorOrigin.TDS_PROTOCOL.toFriendlyString(), "TdsProtocol");
+        assertEquals(ErrorOrigin.TDS_EXECUTE.toFriendlyString(), "TdsExecute");
+        assertEquals(ErrorOrigin.TDS_GENERATE_CODE.toFriendlyString(), "TdsGenerateCode");
+        assertEquals(ErrorOrigin.TDS_SCHEMA.toFriendlyString(), "TdsSchema");
+        assertEquals(ErrorOrigin.TDS_LAMBDA.toFriendlyString(), "TdsLambda");
+        assertEquals(ErrorOrigin.TDS_METADATA.toFriendlyString(), "TdsMetadata");
+        assertEquals(ErrorOrigin.TDS_INPUTS.toFriendlyString(), "TdsInputs");
+        assertEquals(ErrorOrigin.DSB_EXECUTE.toFriendlyString(), "DsbExecute");
+        
 
     }
 
