@@ -47,7 +47,6 @@ public class TestErrorManagement
         MetricsHandler.getErrorCounter().clear();
     }
 
-
     @Test
     public void testErrorWithValidOriginValidServicePattern()
     {
@@ -102,6 +101,18 @@ public class TestErrorManagement
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH);
         labels = new String[]{"ParserEngineError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelWithEngineExceptionWithoutTypeWithOrigin()
+    {
+
+    }
+
+    @Test
+    public void testErrorLabelWithEngineExceptionWithoutTypeWithoutOrigin()
+    {
+
     }
 
     @Test
@@ -296,7 +307,9 @@ public class TestErrorManagement
     @Test
     public void testExceptionOutlineToKeywordMatchingPriority()
     {
-        //test some sql error with column 'loginUsername' and check that it is server error not user authentication
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("Can't resolve the builder for function 'get/Login/Username"), TEST_SERVICE_PATH);
+        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "Serve", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
