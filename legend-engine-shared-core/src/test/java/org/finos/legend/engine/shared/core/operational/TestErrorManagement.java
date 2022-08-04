@@ -23,6 +23,9 @@ import org.ietf.jgss.GSSException;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -197,19 +200,25 @@ public class TestErrorManagement
     @Test
     public void testInternalServerErrorExceptionOutlineMatching()
     {
-
+        MetricsHandler.observeError(null, new IOException("Server returned HTTP response code: 500 for URL 'https://someUrl.com/get'"), null);
+        String[] labels = {"IOError", "InternalServerError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testInternalServerErrorTypeNameMatching()
     {
-
+        MetricsHandler.observeError(null, new MissingEnvironmentVariableException("Env_Var"), null);
+        String[] labels = {"MissingEnvironmentVariableError", "InternalServerError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testInternalServerErrorKeywordsMatching()
     {
-
+        MetricsHandler.observeError(null, new Exception("unreachable proxy"), null);
+        String[] labels = {"Error", "InternalServerError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
@@ -252,6 +261,12 @@ public class TestErrorManagement
     public void testUnknownErrorMatching()
     {
 
+    }
+
+    @Test
+    public void testMethodOrderingForCorrectCategorisation()
+    {
+        //test some sql error with column 'loginUsername' and check that it is server error not user authentication
     }
 
 
