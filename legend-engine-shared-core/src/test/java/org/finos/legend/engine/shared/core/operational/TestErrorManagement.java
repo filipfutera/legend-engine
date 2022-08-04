@@ -180,14 +180,19 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new EngineException(""));
         MetricsHandler.observeError(ErrorOrigin.UNRECOGNISED, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"UnrecognisedEngineException", "UnknownError", "Unrecognised", "N/A"};
+        String[] labels = {"UnrecognisedEngineError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testErrorLabelExtractionWithLoopingException()
     {
-
+        Exception exceptionOne = new Exception();
+        RuntimeException exceptionTwo = new RuntimeException(exceptionOne);
+        exceptionOne.initCause(exceptionTwo);
+        MetricsHandler.observeError(null, exceptionOne, null);
+        String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
