@@ -106,13 +106,17 @@ public class TestErrorManagement
     @Test
     public void testErrorLabelWithEngineExceptionWithoutTypeWithOrigin()
     {
-
+        MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, new EngineException(null), null);
+        String[] labels = {"CompileModelEngineError", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testErrorLabelWithEngineExceptionWithoutTypeWithoutOrigin()
     {
-
+        MetricsHandler.observeError(null, new EngineException(null), null);
+        String[] labels = {"UnknownEngineError", "UnknownError", "Unknown", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
@@ -343,8 +347,6 @@ public class TestErrorManagement
         assertEquals(ErrorOrigin.TDS_METADATA.toFriendlyString(), "TdsMetadata");
         assertEquals(ErrorOrigin.TDS_INPUTS.toFriendlyString(), "TdsInputs");
         assertEquals(ErrorOrigin.DSB_EXECUTE.toFriendlyString(), "DsbExecute");
-        
-
     }
 
 }
