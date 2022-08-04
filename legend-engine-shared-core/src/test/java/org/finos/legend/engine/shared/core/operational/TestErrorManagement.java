@@ -131,7 +131,7 @@ public class TestErrorManagement
         exceptionThree.initCause(exceptionFour);
         exceptionFour.initCause(exceptionFive);
         MetricsHandler.observeError(null, exceptionThree, null);
-        String[] labels = {"RuntimeError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"Error", "UnknownError", "Unknown", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
