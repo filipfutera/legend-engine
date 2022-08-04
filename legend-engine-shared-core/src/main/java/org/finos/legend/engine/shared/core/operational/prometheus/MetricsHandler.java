@@ -286,6 +286,7 @@ public class MetricsHandler
             errorName = ((Exception) cause).getClass().getSimpleName();
             cause = cause.getCause();
         }
+        exception = (Exception) cause;
         if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
             errorName = origin + errorName;
