@@ -111,7 +111,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithUniqueException()
+    public void testErrorLabelExtractionWithUniqueException()
     {
         MetricsHandler.observeError(null, new ArithmeticException(), null);
         String[] labels = {"ArithmeticError", "UnknownError", "Unrecognised", "N/A"};
@@ -123,7 +123,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithEngineExceptionWithType()
+    public void testErrorLabelExtractionWithEngineExceptionWithType()
     {
         MetricsHandler.observeError(null, new EngineException(null, null, EngineErrorType.COMPILATION), null);
         String[] labels = {"CompilationEngineError", "UnknownError", "Unrecognised", "N/A"};
@@ -135,7 +135,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithEngineExceptionWithoutTypeWithOrigin()
+    public void testErrorLabelExtractionWithEngineExceptionWithoutTypeWithOrigin()
     {
         MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, new EngineException(null), null);
         String[] labels = {"CompileModelEngineError", "UnknownError", "CompileModel", "N/A"};
@@ -143,7 +143,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithEngineExceptionWithoutTypeWithoutOrigin()
+    public void testErrorLabelExtractionWithEngineExceptionWithoutTypeWithoutOrigin()
     {
         MetricsHandler.observeError(null, new EngineException(null), null);
         String[] labels = {"UnrecognisedEngineError", "UnknownError", "Unrecognised", "N/A"};
@@ -151,7 +151,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithRuntimeExceptionWithCause()
+    public void testErrorLabelExtractionWithRuntimeExceptionWithCause()
     {
         MetricsHandler.observeError(null, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH);
         String[] labels = {"ArithmeticError", "UnknownError", "Service", TEST_SERVICE_PATH};
@@ -159,7 +159,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithRuntimeExceptionWithoutCause()
+    public void testErrorLabelExtractionWithRuntimeExceptionWithoutCause()
     {
         MetricsHandler.observeError(null, new RuntimeException(), null);
         String[] labels = {"UnrecognisedRuntimeError", "UnknownError", "Unrecognised", "N/A"};
@@ -167,7 +167,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithNestedRuntimeException()
+    public void testErrorLabelExtractionWithNestedRuntimeException()
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new RuntimeException());
         MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
@@ -176,12 +176,18 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorLabelWithNestedEngineException()
+    public void testErrorLabelExtractionWithNestedEngineException()
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new EngineException(""));
         MetricsHandler.observeError(ErrorOrigin.UNRECOGNISED, new Exception(nestedOtherErrorException), null);
         String[] labels = {"UnrecognisedEngineException", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorLabelExtractionWithLoopingException()
+    {
+
     }
 
     @Test
