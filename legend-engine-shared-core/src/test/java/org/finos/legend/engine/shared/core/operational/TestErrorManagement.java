@@ -15,7 +15,6 @@
 package org.finos.legend.engine.shared.core.operational;
 
 import io.prometheus.client.CollectorRegistry;
-import org.apache.http.auth.AuthenticationException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
@@ -26,7 +25,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class TestErrorManagement
 {
@@ -181,11 +179,11 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
-    @Ignore
+    @Ignore("no type name patterns recorded for UserExecution error category yet")
     @Test
     public void testUserExecutionErrorTypeNameMatching()
     {
-        fail("No Type name patterns recorded for UserExecution error category yet");
+
     }
 
     @Test
