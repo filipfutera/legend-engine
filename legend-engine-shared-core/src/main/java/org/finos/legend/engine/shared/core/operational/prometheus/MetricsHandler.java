@@ -283,10 +283,11 @@ public class MetricsHandler
                 && cause != null && cause instanceof Exception && !exploredExceptions.contains(cause))
         {
             exploredExceptions.add(cause);
-            errorName = ((Exception) cause).getClass().getSimpleName();
+            exception = (Exception) cause;
+            errorName = exception.getClass().getSimpleName();
             cause = cause.getCause();
         }
-        exception = (Exception) cause;
+
         if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
             errorName = origin + errorName;
