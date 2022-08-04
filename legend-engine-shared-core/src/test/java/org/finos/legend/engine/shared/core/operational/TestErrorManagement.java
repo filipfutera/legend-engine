@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
 import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.UnknownFormatFlagsException;
 
@@ -306,8 +305,10 @@ public class TestErrorManagement
         //test some sql error with column 'loginUsername' and check that it is server error not user authentication
     }
 
+    @Test
+    public void testJSONParsing()
+    {
 
-    //test for each category - matching by keywords, typenameregex and an exceptionoutline -
-    //then test looping exceptions, and convoluted exceptions.
-    // some json parsing tests?
+    }
+
 }
