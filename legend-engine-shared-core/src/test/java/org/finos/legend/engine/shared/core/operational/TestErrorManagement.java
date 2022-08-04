@@ -19,6 +19,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -31,6 +32,15 @@ public class TestErrorManagement
     private final double DELTA = 0.000001d;
     private final String TEST_SERVICE_PATH_ONE = "service/remote/getRegistry";
     private final String TEST_SERVICE_PATH_TWO = "service/remote/getComputers";
+
+    @After
+    public void clearCounterData()
+    {
+        System.out.println(MetricsHandler.getErrorCounter().collect());
+        MetricsHandler.getErrorCounter().clear();
+        System.out.println(MetricsHandler.getErrorCounter().collect());
+    }
+
 
     @Test
     public void testErrorWithValidOriginValidServicePattern()
@@ -104,6 +114,7 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
-    //test for each category - matching by keywords, typenameregex and an exceptionoutline
+    //test for each category - matching by keywords, typenameregex and an exceptionoutline -
+    //then test looping exceptions, and convoluted exceptions.
 
 }
