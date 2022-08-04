@@ -173,7 +173,7 @@ public class TestErrorManagement
         Exception exceptionTwo = new Exception(exceptionOne);
         exceptionOne.initCause(exceptionTwo);
         MetricsHandler.observeError(null, exceptionOne, null);
-        String[] labels = {"Error", "UnknownError", "Unrecognised", "N/A"};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -186,7 +186,7 @@ public class TestErrorManagement
         exceptionThree.initCause(exceptionFour);
         exceptionFour.initCause(exceptionFive);
         MetricsHandler.observeError(null, exceptionThree, null);
-        String[] labels = {"Error", "UnknownError", "Unrecognised", "N/A"};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -195,7 +195,7 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(null, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"RuntimeError", "OtherError", "Unrecognised", "N/A"};
+        String[] labels = {"UnrecognisedRuntimeError", "OtherError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
