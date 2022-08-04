@@ -277,10 +277,15 @@ public class MetricsHandler
     private static synchronized String getErrorLabel(String origin, Exception exception)
     {
         String errorName = exception.getClass().getSimpleName();
+        Throwable cause = exception.getCause();
+        while ((errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName())) && cause != null)
+        {
+            errorName = ((Exception) cause).getClass().getSimpleName();
+            cause = cause.getCause();
+        }
         if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
-            Throwable cause = exception.getCause();
-            errorName = cause == null ? origin + errorName : cause.getClass().getSimpleName();
+            errorName = origin + errorName;
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {
@@ -299,9 +304,9 @@ public class MetricsHandler
      */
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
-        String originFriendlyString = origin == null ? "Unrecognised" : origin.toFriendlyString();
-        String errorLabel = getErrorLabel(originFriendlyString, exception);
-        String source = servicePath == null ? originFriendlyString : "Service";
+        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
+        String errorLabel = getErrorLabel(origin.toFriendlyString(), exception);
+        String source = servicePath == null ? origin.toFriendlyString() : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = getErrorCategory(exception).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();

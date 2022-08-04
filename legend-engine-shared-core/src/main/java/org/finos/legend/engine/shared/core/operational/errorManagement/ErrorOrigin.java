@@ -35,6 +35,8 @@ public enum ErrorOrigin
     TDS_INPUTS,
 
     DSB_EXECUTE,
+
+    UNRECOGNISED,
     ;
 
     public String toFriendlyString()

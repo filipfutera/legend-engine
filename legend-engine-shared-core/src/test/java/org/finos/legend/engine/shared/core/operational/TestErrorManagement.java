@@ -398,9 +398,8 @@ public class TestErrorManagement
     {
         MetricsHandler.observeError(null, new Exception(), null);
         MetricsHandler.observeError(null, new Exception(), null);
-        String[] labels = {"UnknownError", "UnknownError", "Unknown", "N/A"};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 2, DELTA);
     }
 
-    //change label extraction from generic Exception type...
 }
