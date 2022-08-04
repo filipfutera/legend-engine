@@ -36,6 +36,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 public class MetricsHandler
@@ -278,8 +279,8 @@ public class MetricsHandler
     {
         String errorName = exception.getClass().getSimpleName();
         HashSet<Exception> exploredExceptions = new HashSet<>();
-        while ((errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
-                && exception.getCause() != null && exception.getCause() instanceof Exception && !exploredExceptions.contains(exception.getCause()))
+        String[] genericExceptionNames = { RuntimeException.class.getSimpleName(), Exception.class.getSimpleName(), EngineException.class.getSimpleName() };
+        while (Arrays.asList(genericExceptionNames).contains(errorName) && exception.getCause() != null && exception.getCause() instanceof Exception && !exploredExceptions.contains(exception.getCause()))
         {
             exploredExceptions.add(exception);
             exception = (Exception) exception.getCause();
