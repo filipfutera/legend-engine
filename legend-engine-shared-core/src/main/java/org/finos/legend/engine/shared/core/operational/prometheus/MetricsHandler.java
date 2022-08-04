@@ -360,4 +360,9 @@ public class MetricsHandler
         return categories;
     }
 
+    public static Counter getErrorCounter()
+    {
+        return ERROR_COUNTER;
+    }
+
 }
