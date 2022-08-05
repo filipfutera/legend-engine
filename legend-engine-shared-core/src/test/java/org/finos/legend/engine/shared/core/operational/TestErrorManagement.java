@@ -264,7 +264,7 @@ public class TestErrorManagement
     public void testErrorCategorizationToUserAuthenticationErrorWithTypeNameMatching()
     {
         MetricsHandler.observeError(null, new GSSException(1), null);
-        String[] labels = {"NotAuthorizedError", "UserAuthenticationError", "Unrecognised", "N/A"};
+        String[] labels = {"GSSError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
