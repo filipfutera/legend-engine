@@ -22,6 +22,7 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.EngineExc
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
+import org.ietf.jgss.GSSException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.After;
@@ -29,7 +30,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
 
-import javax.ws.rs.NotAuthorizedException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.MissingFormatWidthException;
@@ -263,8 +263,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToUserAuthenticationErrorWithTypeNameMatching()
     {
-
-        MetricsHandler.observeError(null, new NotAuthorizedException(""), null);
+        MetricsHandler.observeError(null, new GSSException(1), null);
         String[] labels = {"NotAuthorizedError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
