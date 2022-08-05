@@ -352,14 +352,16 @@ public class MetricsHandler
         {
             JSONObject errorData = (JSONObject) jsonParser.parse(reader);
             categories = parseErrorData(errorData);
+            LOGGER.info("Successfully read internal error data categorisation file");
         }
         catch (Exception e)
         {
-            LOGGER.info("Could not read internal error data file - attempting to read open source version");
+            LOGGER.info("Could not read internal error data file - attempting to read external version");
             try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_RESOURCE_PATH))
             {
                 JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 categories = parseErrorData(errorData);
+                LOGGER.info("Successfully read external error data categorisation file");
             }
             catch (Exception exception)
             {
