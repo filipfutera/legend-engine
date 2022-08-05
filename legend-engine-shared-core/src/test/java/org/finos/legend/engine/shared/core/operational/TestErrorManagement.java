@@ -410,7 +410,8 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationWithNoSpecifiedMethod()
     {
-        ErrorCategory testCategory = generateSimpleErrorCategoryJSONObject("testCategory", new String[], "testType", "random[a-zA-Z]+", "RuntimeException", "");
+        JSONObject errorCategory = generateSimpleErrorCategoryJSONObject("testCategory", new String[]{}, "testType", "random[a-zA-Z]+", "RuntimeException", "");
+        ErrorCategory testCategory = new ErrorCategory(errorCategory);
         boolean isMatch = testCategory.matches(new RuntimeException("random message"), null);
         assertTrue(isMatch);
     }
