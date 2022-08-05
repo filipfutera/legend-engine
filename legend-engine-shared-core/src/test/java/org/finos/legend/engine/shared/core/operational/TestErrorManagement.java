@@ -408,6 +408,14 @@ public class TestErrorManagement
     }
 
     @Test
+    public void testErrorCategorizationWithNoSpecifiedMethod()
+    {
+        ErrorCategory testCategory = generateSimpleErrorCategoryJSONObject("testCategory", new String[], "testType", "random[a-zA-Z]+", "RuntimeException", "");
+        boolean isMatch = testCategory.matches(new RuntimeException("random message"), null);
+        assertTrue(isMatch);
+    }
+
+    @Test
     public void testErrorOriginToUserFriendlyStringConversion()
     {
         assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toFriendlyString(), "PureQueryExecution");
@@ -454,6 +462,5 @@ public class TestErrorManagement
         String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 2, DELTA);
     }
-
 
 }
