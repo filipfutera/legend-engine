@@ -43,7 +43,7 @@ public class TestErrorManagement
     private final String[] ERROR_LABEL_NAMES = {"errorLabel", "category", "source", "serviceName"};
     private final String METRIC_NAME = "legend_engine_error_total";
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
-    private final double DELTA = 0.000001d;
+    private final double DELTA = 0d;
     private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
 
     @After()
