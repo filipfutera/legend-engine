@@ -20,7 +20,7 @@
             },
             {
               "ExceptionName": "RuntimeException",
-              "MessageRegex": "(SecureConnect|bad) credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types|Failed to authenticate to kerberos"
+              "MessageRegex": "(SecureConnect|bad) credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types|Failed to authenticate to kerberos|Error getting SecureConnect credentials from|Cannot build cookie store."
             },
             {
               "ExceptionName": "LoginException",
@@ -85,7 +85,7 @@
           "TypeExceptionRegex": "Permission|Access"
         }
       ],
-      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket"]
+      "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket", "GSSSO"]
     },
 
 
@@ -110,7 +110,15 @@
             },
             {
               "ExceptionName": "SQLException",
-              "MessageRegex": "Table .* doesn't exist|(Column|Table) .* not found"
+              "MessageRegex": "Table .* doesn't exist|(Column|Table) .* not found|User ID '.*' does not exist"
+            },
+            {
+              "ExceptionName": "JdbcSQLSyntaxErrorException",
+              "MessageRegex": "(Table|Schema|[a-zA-Z]+) .* not found; SQL statement:"
+            },
+            {
+              "ExceptionName": "RedshiftException",
+              "MessageRegex": "Error: relation .* does not exist"
             }
           ],
           "TypeExceptionRegex": ""
@@ -151,7 +159,7 @@
             },
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "service must have more than one owner|test does not match execution type"
+              "MessageRegex": "service must have more than one owner|test does not match execution type|Supported service return types are .* The return type of the provided service is"
             }
           ],
           "TypeExceptionRegex": ""
@@ -195,6 +203,10 @@
             {
               "ExceptionName": "IOException",
               "MessageRegex": "Server returned HTTP response code: 500 for URL|Unable to tunnel through proxy. Proxy returns.*503 Service Unavailable"
+            },
+            {
+              "ExceptionName": "AWSSecurityTokenServiceException",
+              "MessageRegex": "SkyBroker returned HTTP 403"
             }
           ],
           "TypeExceptionRegex": ""
@@ -255,7 +267,7 @@
             },
             {
               "ExceptionName": "JdbcSQLSyntaxErrorException",
-              "MessageRegex": "Syntax error in SQL statement|.*"
+              "MessageRegex": "Syntax error in SQL statement"
             },
             {
               "ExceptionName": "RuntimeException",
@@ -275,7 +287,11 @@
             },
             {
               "ExceptionName": "AvaticaSqlException",
-              "MessageRegex": "remote driver error"
+              "MessageRegex": "remote driver error|not entitled to data store"
+            },
+            {
+              "ExceptionName": "ForbiddenException",
+              "MessageRegex": "not entitled to data store"
             },
             {
               "ExceptionName": "IllegalArgumentException",
@@ -294,7 +310,7 @@
           "Exceptions": [
             {
               "ExceptionName": "EngineException",
-              "MessageRegex": "Unexpected (character|token)|no viable alternative at input|Missing table or alias for column"
+              "MessageRegex": "Unexpected (character|token)|no viable alternative at input|Missing table or alias for column|Bracket operation is not supported|Field '.*' is required"
             }
           ],
           "TypeExceptionRegex": ""
@@ -328,7 +344,7 @@
             },
             {
               "ExceptionName": "InvalidTypeIdException",
-              "MessageRegex": "Could not resolve type id.*as a subtype of|.*"
+              "MessageRegex": "Could not resolve type id.*as a subtype of|Missing type id when trying to resolve subtype of"
             },
             {
               "ExceptionName": "InvalidDefinitionException",
@@ -472,6 +488,10 @@
             {
               "ExceptionName": "EOFException",
               "MessageRegex": "unexpected end of stream"
+            },
+            {
+              "ExceptionName": "SQLException",
+              "MessageRegex": "Connection was terminated"
             }
           ],
           "TypeExceptionRegex": "Connection|Timeout"
