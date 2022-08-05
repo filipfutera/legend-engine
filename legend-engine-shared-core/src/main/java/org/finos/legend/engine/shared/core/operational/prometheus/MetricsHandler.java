@@ -297,7 +297,7 @@ public class MetricsHandler
         {
             errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
         }
-        return (errorName.substring(0,1).toUpperCase() + errorName.substring(1)).replace("Exception", "Error");
+        return (errorName.substring(0,1).toUpperCase() + errorName.substring(1)).substring(0, errorName.lastIndexOf("Exception")) + "Error";
     }
 
     /**
