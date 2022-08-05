@@ -30,9 +30,9 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -346,21 +346,37 @@ public class MetricsHandler
      */
     private static synchronized ArrayList<ErrorCategory> readErrorData()
     {
-        JSONParser jsonParser = new JSONParser();
         ArrayList<ErrorCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_RESOURCE_PATH))
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader(ERROR_DATA_RESOURCE_PATH))
         {
-            JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
-            for (Object errorCategoryData : errorCategories)
+            JSONObject errorData = (JSONObject) jsonParser.parse(reader);
+            categories = parseErrorData(errorData);
+        }
+        catch (Exception e)
+        {
+            LOGGER.info("Could not read internal error data file - attempting to read open source version");
+            try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_RESOURCE_PATH))
             {
-                ErrorCategory category = new ErrorCategory((JSONObject) errorCategoryData);
-                categories.add(category);
+                JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                categories = parseErrorData(errorData);
+            }
+            catch (Exception exception)
+            {
+                LOGGER.error(String.format("Error reading exception categorisation data: %s", exception));
             }
         }
-        catch (Exception exception)
+        return categories;
+    }
+
+    private static synchronized ArrayList<ErrorCategory> parseErrorData(JSONObject errorData)
+    {
+        ArrayList<ErrorCategory> categories = new ArrayList<>();
+        JSONArray errorCategories = (JSONArray) errorData.get("ErrorCategories");
+        for (Object errorCategoryData : errorCategories)
         {
-            LOGGER.error(String.format("Error reading exception categorisation data: %s", exception));
+            ErrorCategory category = new ErrorCategory((JSONObject) errorCategoryData);
+            categories.add(category);
         }
         return categories;
     }
