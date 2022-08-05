@@ -348,7 +348,7 @@ public class MetricsHandler
     {
         ArrayList<ErrorCategory> categories = new ArrayList<>();
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader(ERROR_DATA_RESOURCE_PATH))
+        try (FileReader reader = new FileReader(ERROR_DATA_RESOURCE_PATH.substring(1)))
         {
             JSONObject errorData = (JSONObject) jsonParser.parse(reader);
             categories = parseErrorData(errorData);
@@ -365,7 +365,7 @@ public class MetricsHandler
             }
             catch (Exception exception)
             {
-                LOGGER.error(String.format("Error reading exception categorisation data: %s", exception));
+                LOGGER.error(String.format("Error reading exception categorisation data: %s - could not read external file either", exception));
             }
         }
         return categories;
