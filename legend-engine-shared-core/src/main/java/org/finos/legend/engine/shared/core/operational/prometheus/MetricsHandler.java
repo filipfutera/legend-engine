@@ -239,9 +239,14 @@ public class MetricsHandler
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
     /**
-     * Path to JSON file outlining error data for categorisation
+     * Path to JSON file outlining error data for categorisation available to open source
      */
-    private static final String ERROR_DATA_RESOURCE_PATH = "/ErrorData.json";
+    private static final String EXTERNAL_ERROR_DATA_PATH = "/ErrorData.json";
+
+    /**
+     * Path to JSON file outlining error data for categorisation to use internally
+     */
+    private static final String INTERNAL_ERROR_DATA_DIR = "com.gs.alloy.engine.server.full.Server";
 
     /**
      * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
@@ -341,23 +346,23 @@ public class MetricsHandler
     }
 
     /**
-     * Read JSON file with outline of errors to be used in categorizing the exceptions
-     * @return List of objects corresponding to the categories with their respective data
+     * Find and read JSON file with outline of errors to be used in categorizing the exceptions
+     * @return List of objects corresponding to the error categories with their respective data
      */
     private static synchronized ArrayList<ErrorCategory> readErrorData()
     {
         ArrayList<ErrorCategory> categories = new ArrayList<>();
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader(ERROR_DATA_RESOURCE_PATH.substring(1)))
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(INTERNAL_ERROR_DATA_DIR))
         {
-            JSONObject errorData = (JSONObject) jsonParser.parse(reader);
+            JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             categories = parseErrorData(errorData);
             LOGGER.info("Successfully read internal error data categorisation file");
         }
         catch (Exception e)
         {
             LOGGER.info("Could not read internal error data file - attempting to read external version");
-            try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_RESOURCE_PATH))
+            try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
             {
                 JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 categories = parseErrorData(errorData);
@@ -371,6 +376,11 @@ public class MetricsHandler
         return categories;
     }
 
+    /**
+     * Method to parse the read JSON Object and initialize ErrorCategory objects from it
+     * @param errorData the JSON Object read from the file to be converted to ErrorCategory objects
+     * @return List of objects corresponding to the error categories with their respective data
+     */
     private static synchronized ArrayList<ErrorCategory> parseErrorData(JSONObject errorData)
     {
         ArrayList<ErrorCategory> categories = new ArrayList<>();
