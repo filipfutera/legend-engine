@@ -326,9 +326,9 @@ public class MetricsHandler
         if (exception instanceof EngineException)
         {
             EngineException engineException = (EngineException) exception;
-            if (engineException.getErrorType() != null && engineException.getErrorType() != ERROR_CATEGORIES.UnknownError)
+            if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ERROR_CATEGORIES.UnknownError)
             {
-                return engineException.getErrorType();
+                return engineException.getErrorCategory();
             }
         }
         return matchExceptionToCategory(exception);

@@ -52,42 +52,6 @@ public class TestErrorManagement
         MetricsHandler.getErrorCounter().clear();
     }
 
-    /**
-     * Method to generate a json object that can be parsed into an error category with a type and exception outline
-     * @param categoryName is the name of the error category
-     * @param keywords is the list of words to match for a category
-     * @param typeName is the name of the Type associated with the category
-     * @param typeRegex is the pattern to match exception names against
-     * @param exceptionName is the exact name of an exception for this outline to be matched against
-     * @param exceptionMessage is the message pattern of an exception to match against
-     * @return JSON Object of the ErrorCategory data
-     */
-    private JSONObject generateSimpleErrorCategoryJSONObject(String categoryName, String[] keywords, String typeName, String typeRegex, String exceptionName, String exceptionMessage)
-    {
-        JSONObject testCategory = new JSONObject();
-        testCategory.put("CategoryName", categoryName);
-        JSONArray keywordsArray = new JSONArray();
-        keywordsArray.addAll(Arrays.asList(keywords));
-        testCategory.put("Keywords", keywordsArray);
-
-        JSONArray typeArray = new JSONArray();
-        JSONObject testType = new JSONObject();
-        testType.put("TypeName", typeName);
-        testType.put("TypeExceptionRegex", typeRegex);
-
-        JSONArray outlineArray = new JSONArray();
-        JSONObject testOutline = new JSONObject();
-        testOutline.put("ExceptionName", exceptionName);
-        testOutline.put("MessageRegex", exceptionMessage);
-
-        outlineArray.add(testOutline);
-        testType.put("Exceptions", outlineArray);
-        typeArray.add(testType);
-        testCategory.put("Types", typeArray);
-
-        return testCategory;
-    }
-
     @Test
     public void testErrorWithValidOriginAndValidServicePattern()
     {
@@ -408,15 +372,6 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorCategorizationWithNoSpecifiedMethod()
-    {
-        JSONObject errorCategory = generateSimpleErrorCategoryJSONObject("testCategory", new String[]{}, "testType", "random[a-zA-Z]+", "RuntimeException", "");
-        ErrorCategory testCategory = new ErrorCategory(errorCategory);
-        boolean isMatch = testCategory.matches(new RuntimeException("random message"), null);
-        assertTrue(isMatch);
-    }
-
-    @Test
     public void testErrorOriginToUserFriendlyStringConversion()
     {
         assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toFriendlyString(), "PureQueryExecution");
@@ -438,24 +393,6 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testJsonToErrorCategoryParsing()
-    {
-        String categoryName = "TestCategory";
-        String[] keywords = {"Test", "Sample", "Check"};
-        String typeName = "TypeOne";
-        String typeRegex = "[a-zA-Z]*Exception";
-        String exceptionName = "RuntimeException";
-        String exceptionMessage = "test[s]?";
-        ErrorCategory testCategory = new ErrorCategory(generateSimpleErrorCategoryJSONObject(categoryName, keywords, typeName, typeRegex, exceptionName, exceptionMessage));
-        RuntimeException threeWayMatchException = new RuntimeException("test");
-
-        assertEquals(testCategory.getFriendlyName(), categoryName);
-        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.KeywordsMatching));
-        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.ExceptionOutlineMatching));
-        assertTrue(testCategory.matches(threeWayMatchException, MetricsHandler.MATCHING_METHODS.TypeNameMatching));
-    }
-
-    @Test
     public void testCorrectCounterSampleIncrementation()
     {
         MetricsHandler.observeError(null, new Exception(), null);
@@ -463,5 +400,7 @@ public class TestErrorManagement
         String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 2, DELTA);
     }
+
+    // test EngineException with ErrorCategory values of proper, null, and Unknown
 
 }

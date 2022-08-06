@@ -110,7 +110,7 @@ public class Execute
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("invalid credentials")), null);
         MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos"), null);
         MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("unknown", new RuntimeException("unknown", new RuntimeException())), "/get/ComputerRegistry/{id}");
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
