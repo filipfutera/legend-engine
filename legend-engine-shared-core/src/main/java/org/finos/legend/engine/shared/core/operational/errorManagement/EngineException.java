@@ -16,15 +16,23 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.ERROR_CATEGORIES;
 
 public class EngineException extends RuntimeException
 {
     private EngineErrorType errorType = null;
     private SourceInformation sourceInformation = SourceInformation.getUnknownSourceInformation();
+    private ERROR_CATEGORIES errorCategory = null;
 
     public EngineException(String message)
     {
         super(message);
+    }
+
+    public EngineException(String message, ERROR_CATEGORIES errorCategory)
+    {
+        super(message);
+        this.errorCategory = errorCategory;
     }
 
     public EngineException(String message, Exception cause)
@@ -41,6 +49,21 @@ public class EngineException extends RuntimeException
         }
     }
 
+    public EngineException(String message, Exception cause, ERROR_CATEGORIES errorCategory)
+    {
+        super(message, cause);
+        if (cause instanceof EngineException)
+        {
+            this.errorType = ((EngineException) cause).getErrorType();
+            SourceInformation sourceInfo = ((EngineException) cause).getSourceInformation();
+            if (sourceInfo != null)
+            {
+                this.sourceInformation = sourceInfo;
+            }
+        }
+        this.errorCategory = errorCategory;
+    }
+
     public EngineException(String message, SourceInformation sourceInformation, Throwable cause)
     {
         super(message, cause);
@@ -51,11 +74,30 @@ public class EngineException extends RuntimeException
         }
     }
 
+    public EngineException(String message, SourceInformation sourceInformation, Throwable cause, ERROR_CATEGORIES errorCategory)
+    {
+        super(message, cause);
+        this.sourceInformation = sourceInformation;
+        if (cause instanceof EngineException)
+        {
+            this.errorType = ((EngineException) cause).getErrorType();
+        }
+        this.errorCategory = errorCategory;
+    }
+
     public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type)
     {
         super(message);
         this.sourceInformation = sourceInformation;
         this.errorType = type;
+    }
+
+    public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type, ERROR_CATEGORIES errorCategory)
+    {
+        super(message);
+        this.sourceInformation = sourceInformation;
+        this.errorType = type;
+        this.errorCategory = errorCategory;
     }
 
     public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type, Throwable cause)
@@ -65,9 +107,22 @@ public class EngineException extends RuntimeException
         this.errorType = type;
     }
 
+    public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type, Throwable cause, ERROR_CATEGORIES errorCategory)
+    {
+        super(message, cause);
+        this.sourceInformation = sourceInformation;
+        this.errorType = type;
+        this.errorCategory = errorCategory;
+    }
+
     public EngineErrorType getErrorType()
     {
         return errorType;
+    }
+
+    public ERROR_CATEGORIES getErrorCategory()
+    {
+        return errorCategory;
     }
 
     public SourceInformation getSourceInformation()

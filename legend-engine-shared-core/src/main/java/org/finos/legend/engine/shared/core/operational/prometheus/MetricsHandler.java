@@ -256,7 +256,7 @@ public class MetricsHandler
     /**
      * User friendly error categories
      */
-    private enum ERROR_CATEGORIES
+    public enum ERROR_CATEGORIES
     { UserAuthenticationError, UserExecutionError, InternalServerError, ServerExecutionError, OtherError, UnknownError }
 
     /**
@@ -316,13 +316,31 @@ public class MetricsHandler
     }
 
     /**
-     * Method to categorise the exception that has occurred
-     * If original exception cannot be matched its cause is attempted to be matched until the cause is null
+     * Method to obtain the category of the exception that has occurred
+     * If the error has an associated category it is returned otherwise category matching is invoked.
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
     private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
     {
+        if (exception instanceof EngineException)
+        {
+            EngineException engineException = (EngineException) exception;
+            if (engineException.getErrorType() != null && engineException.getErrorType() != ERROR_CATEGORIES.UnknownError)
+            {
+                return engineException.getErrorType();
+            }
+        }
+        return matchExceptionToCategory(exception);
+    }
+
+    /**
+     * Method to match an exception to a category.
+     * If original exception cannot be matched its cause is attempted to be matched until the cause is null
+     * @param exception the exception to be analysed that has occurred in execution
+     * @return the user-friendly error category
+     */
+    private static synchronized ERROR_CATEGORIES matchExceptionToCategory(Exception exception) {
         Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
