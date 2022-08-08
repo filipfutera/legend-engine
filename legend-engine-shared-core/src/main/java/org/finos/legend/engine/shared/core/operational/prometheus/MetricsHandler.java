@@ -14,7 +14,6 @@
 
 package org.finos.legend.engine.shared.core.operational.prometheus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
@@ -26,12 +25,10 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -39,6 +36,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetricsHandler
 {
@@ -361,12 +360,11 @@ public class MetricsHandler
      */
     private static synchronized ArrayList<ErrorCategory> readErrorData()
     {
-        ArrayList<ErrorCategory> categories = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
+        List<ErrorCategory> categories = new ArrayList<>();
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(INTERNAL_ERROR_DATA_DIR))
         {
-            JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            categories = parseErrorData(errorData);
+            String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+            categories = Arrays.asList(new ObjectMapper().readValue(errorData, ErrorCategory[].class));
             LOGGER.info("Successfully read internal error data categorisation file");
         }
         catch (Exception e)
@@ -374,8 +372,8 @@ public class MetricsHandler
             LOGGER.info("Could not read internal error data file - attempting to read external version");
             try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
             {
-                JSONObject errorData = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                categories = parseErrorData(errorData);
+                String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+                categories = Arrays.asList(new ObjectMapper().readValue(errorData, ErrorCategory[].class));
                 LOGGER.info("Successfully read external error data categorisation file");
             }
             catch (Exception exception)
@@ -383,24 +381,7 @@ public class MetricsHandler
                 LOGGER.error(String.format("Error reading exception categorisation data: %s - could not read external file either", exception));
             }
         }
-        return categories;
-    }
-
-    /**
-     * Method to parse the read JSON Object and initialize ErrorCategory objects from it
-     * @param errorData the JSON Object read from the file to be converted to ErrorCategory objects
-     * @return List of objects corresponding to the error categories with their respective data
-     */
-    private static synchronized ArrayList<ErrorCategory> parseErrorData(JSONObject errorData)
-    {
-        ArrayList<ErrorCategory> categories = new ArrayList<>();
-        JSONArray errorCategories = (JSONArray) errorData.get("ErrorCategories");
-        for (Object errorCategoryData : errorCategories)
-        {
-            ErrorCategory category = new ErrorCategory((JSONObject) errorCategoryData);
-            categories.add(category);
-        }
-        return categories;
+        return (ArrayList<ErrorCategory>) categories;
     }
 
     /**

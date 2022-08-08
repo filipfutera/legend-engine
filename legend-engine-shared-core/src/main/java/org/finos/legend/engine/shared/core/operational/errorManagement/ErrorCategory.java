@@ -15,9 +15,9 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MATCHING_METHODS;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -44,26 +44,16 @@ public class ErrorCategory
      */
     private final ArrayList<ErrorType> errorTypes;
 
-    /**
-     * Constructor to read a JSONObject and extract aforementioned data into its correct fields
-     * @param errorCategory is the JSONObject storing the data relating to this particular category
-     */
-    public ErrorCategory(JSONObject errorCategory)
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public ErrorCategory(@JsonProperty("CategoryName") String friendlyName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ErrorType> errorTypes)
     {
-        this.friendlyName = errorCategory.get("CategoryName").toString();
-
-        JSONArray regexKeywords = ((JSONArray) errorCategory.get("Keywords"));
+        this.friendlyName = friendlyName;
         this.keywords = new ArrayList<>();
-        for (Object regexKeyword : regexKeywords)
+        for (String keyword : keywords)
         {
-            this.keywords.add(Pattern.compile(regexKeyword.toString(), Pattern.CASE_INSENSITIVE));
+            this.keywords.add(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE));
         }
-        this.errorTypes = new ArrayList<>();
-        for (Object typeObject : (JSONArray) errorCategory.get("Types"))
-        {
-            ErrorType type = new ErrorType((JSONObject) typeObject);
-            this.errorTypes.add(type);
-        }
+        this.errorTypes = errorTypes;
     }
 
     /**
@@ -153,21 +143,11 @@ public class ErrorCategory
          */
         private final ArrayList<ErrorExceptionOutline> exceptionOutlines;
 
-        /**
-         * Constructor that reads the Type data and initialises the ErrorExceptionOutlines and populates aforementioned fields
-         * @param type is the JSON data specific to this error type.
-         */
-        public ErrorType(JSONObject type)
-        {
-            this.typeName = type.get("TypeName").toString();
-            this.typeExceptionRegex = Pattern.compile(type.get("TypeExceptionRegex").toString(), Pattern.CASE_INSENSITIVE);
-
-            this.exceptionOutlines = new ArrayList();
-            for (Object jsonException : (JSONArray) type.get("Exceptions"))
-            {
-                ErrorExceptionOutline exceptionOutline = new ErrorExceptionOutline((JSONObject) jsonException);
-                this.exceptionOutlines.add(exceptionOutline);
-            }
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        public ErrorType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines) {
+            this.typeName = typeName;
+            this.typeExceptionRegex = Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
+            this.exceptionOutlines = exceptionOutlines;
         }
 
         /**
@@ -217,15 +197,11 @@ public class ErrorCategory
              */
             private final Pattern exceptionMessage;
 
-            /**
-             * Constructor to define an exception outline holding an exception class name and message regex pair
-             * @param exceptionOutline is the JSONObject holding the associated exception outline data.
-             */
-            public ErrorExceptionOutline(JSONObject exceptionOutline)
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+            public ErrorExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
             {
-                this.exceptionName = exceptionOutline.get("ExceptionName").toString();
-                String messageRegex = exceptionOutline.get("MessageRegex").toString();
-                this.exceptionMessage = Pattern.compile(messageRegex, Pattern.CASE_INSENSITIVE);
+                this.exceptionName = exceptionName;
+                this.exceptionMessage = Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
             }
 
             /**
