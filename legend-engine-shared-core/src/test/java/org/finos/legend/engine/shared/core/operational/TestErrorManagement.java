@@ -398,7 +398,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingValidCategoryFromEngineException()
     {
-        MetricsHandler.observeError(null, new EngineException("some message", MetricsHandler.ERROR_CATEGORIES.InternalServerError), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new EngineException("some message", ErrorCategory.InternalServerError), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -406,7 +406,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingUnknownCategoryFromEngineException()
     {
-        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", MetricsHandler.ERROR_CATEGORIES.UnknownError), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", ErrorCategory.UnknownError), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -414,7 +414,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingNullCategoryFromEngineException()
     {
-        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", (MetricsHandler.ERROR_CATEGORIES) null), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", (ErrorCategory) null), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -422,7 +422,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingValidCategoryFromNestedEngineException()
     {
-        MetricsHandler.observeError(null, new Exception(new EngineException("some message", MetricsHandler.ERROR_CATEGORIES.InternalServerError)), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new Exception(new EngineException("some message", ErrorCategory.InternalServerError)), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }

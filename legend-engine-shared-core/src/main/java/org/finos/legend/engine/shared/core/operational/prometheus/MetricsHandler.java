@@ -24,6 +24,7 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -254,12 +255,6 @@ public class MetricsHandler
     private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
-     * User friendly error categories
-     */
-    public enum ERROR_CATEGORIES
-    { UserAuthenticationError, UserExecutionError, InternalServerError, ServerExecutionError, OtherError, UnknownError }
-
-    /**
      * Types of error matching techniques that can be performed on an incoming exceptions
      */
     public enum MATCHING_METHODS
@@ -268,7 +263,7 @@ public class MetricsHandler
     /**
      * List of objects corresponding to the error categories holding their associated exception data
      */
-    private static final List<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
+    private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
@@ -321,7 +316,7 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
+    private static synchronized ErrorCategory getErrorCategory(Exception exception)
     {
         Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
@@ -331,7 +326,7 @@ public class MetricsHandler
             if (exception instanceof EngineException)
             {
                 EngineException engineException = (EngineException) exception;
-                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ERROR_CATEGORIES.UnknownError)
+                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UnknownError)
                 {
                     return engineException.getErrorCategory();
                 }
@@ -339,11 +334,11 @@ public class MetricsHandler
             // try to match exception to category
             for (MATCHING_METHODS method : MATCHING_METHODS.values())
             {
-                for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
+                for (ExceptionCategory category : ERROR_CATEGORY_DATA_OBJECTS)
                 {
                     if (category.matches(exception, method))
                     {
-                        return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
+                        return ErrorCategory.valueOf(category.getFriendlyName());
                     }
                 }
             }
@@ -351,20 +346,20 @@ public class MetricsHandler
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
         LOGGER.warn(String.format("Unknown error - Exception Name: %s. Exception Message: %s. Add it to the ErrorData json file!", originalException.getClass().getSimpleName(), originalException.getMessage()));
-        return ERROR_CATEGORIES.UnknownError;
+        return ErrorCategory.UnknownError;
     }
 
     /**
      * Find and read JSON file with outline of errors to be used in categorizing the exceptions
      * @return List of objects corresponding to the error categories with their respective data
      */
-    private static synchronized List<ErrorCategory> readErrorData()
+    private static synchronized List<ExceptionCategory> readErrorData()
     {
-        List<ErrorCategory> categories = new ArrayList<>();
+        List<ExceptionCategory> categories = new ArrayList<>();
         try (InputStream inputStream = Class.forName(INTERNAL_ERROR_DATA_DIR).getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
         {
             String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
-            categories = Arrays.asList(new ObjectMapper().readValue(errorData, ErrorCategory[].class));
+            categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
             LOGGER.info("Successfully read internal error data categorisation file");
         }
         catch (Exception e)
@@ -373,7 +368,7 @@ public class MetricsHandler
             try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
             {
                 String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
-                categories = Arrays.asList(new ObjectMapper().readValue(errorData, ErrorCategory[].class));
+                categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
                 LOGGER.info("Successfully read external error data categorisation file");
             }
             catch (Exception exception)
