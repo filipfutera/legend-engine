@@ -50,7 +50,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndValidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH, null);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedError", "UnknownError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -58,7 +58,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndInvalidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null, null);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
+        String[] labels = {"UnrecognisedError", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -106,7 +106,7 @@ public class TestErrorManagement
     public void testErrorLabelExtractionWithEngineExceptionWithoutTypeWithOrigin()
     {
         MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, new EngineException(null), null, null);
-        String[] labels = {"CompileModelEngineError", "UnknownError", "CompileModel", "N/A"};
+        String[] labels = {"UnrecognisedEngineError", "UnknownError", "CompileModel", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -353,7 +353,7 @@ public class TestErrorManagement
     public void testErrorCategorizationMatchingMethodPrioritizationOfExceptionOutlineToKeywords()
     {
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("Can't resolve the builder for function 'get/Login/Kerberos"), TEST_SERVICE_PATH, null);
-        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
