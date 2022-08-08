@@ -428,6 +428,8 @@ public class TestErrorManagement
     }
 
     //ToDo tests need to be adapted to account for origin -> eventType change in generating errorLabels
-    //ToDo tests need to be written and combined with existing tests for new LoggingEventType eventType parameter and functionality
+    //ToDo tests need to be written for eventType parameter for errorLabel generation
+    //ToDo tests need to be written for eventType parameter for categorization of exception
+    //ToDo ibid includes new categorization tests but also priority of EventType to any other matching method
 
 }

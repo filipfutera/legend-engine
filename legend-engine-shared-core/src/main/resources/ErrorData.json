@@ -167,7 +167,7 @@
 
     ],
     "Keywords": ["[a-zA-Z]* '.*' not found"],
-    "Events": []
+    "Events": ["TEMP_FILE_DELETE_ERROR"]
   },
 
 
@@ -251,7 +251,7 @@
       }
     ],
     "Keywords": ["proxy","buffers"],
-    "Events": []
+    "Events": ["TEMP_FILE_DELETE_ERROR", "GENERATE_SEED_DATA_ERROR"]
   },
 
 
@@ -460,7 +460,7 @@
 
     ],
     "Keywords": ["mapping error","Error in '.*::.*':" ],
-    "Events": []
+    "Events": ["GRAPH_ERROR", "GENERATE_JAVA_ERROR", "TRANSFORM_GRAMMAR_TO_JSON_ERROR", "TRANSFORM_JSON_TO_GRAMMAR_ERROR", "JSON_PARSING_ERROR"]
   },
 
 
