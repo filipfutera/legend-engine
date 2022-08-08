@@ -144,7 +144,8 @@ public class ErrorCategory
         private final ArrayList<ErrorExceptionOutline> exceptionOutlines;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public ErrorType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines) {
+        public ErrorType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines)
+        {
             this.typeName = typeName;
             this.typeExceptionRegex = Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
             this.exceptionOutlines = exceptionOutlines;

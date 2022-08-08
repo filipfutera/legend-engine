@@ -322,7 +322,8 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception) {
+    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
+    {
         Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
