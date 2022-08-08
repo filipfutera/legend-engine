@@ -27,7 +27,6 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCate
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

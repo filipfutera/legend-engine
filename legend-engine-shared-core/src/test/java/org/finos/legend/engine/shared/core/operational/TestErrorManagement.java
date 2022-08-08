@@ -27,11 +27,9 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
-
 import java.io.IOException;
 import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
-
 import static org.junit.Assert.assertEquals;
 
 public class TestErrorManagement
