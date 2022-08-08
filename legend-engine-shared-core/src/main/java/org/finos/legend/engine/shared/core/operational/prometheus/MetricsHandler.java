@@ -269,7 +269,7 @@ public class MetricsHandler
     /**
      * List of objects corresponding to the error categories holding their associated exception data
      */
-    private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
+    private static final List<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
@@ -358,7 +358,7 @@ public class MetricsHandler
      * Find and read JSON file with outline of errors to be used in categorizing the exceptions
      * @return List of objects corresponding to the error categories with their respective data
      */
-    private static synchronized ArrayList<ErrorCategory> readErrorData()
+    private static synchronized List<ErrorCategory> readErrorData()
     {
         List<ErrorCategory> categories = new ArrayList<>();
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(INTERNAL_ERROR_DATA_DIR))
@@ -381,7 +381,7 @@ public class MetricsHandler
                 LOGGER.error(String.format("Error reading exception categorisation data: %s - could not read external file either", exception));
             }
         }
-        return (ArrayList<ErrorCategory>) categories;
+        return categories;
     }
 
     /**

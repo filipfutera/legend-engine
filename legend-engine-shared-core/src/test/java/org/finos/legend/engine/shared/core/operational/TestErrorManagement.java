@@ -23,20 +23,16 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCate
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.ietf.jgss.GSSException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class TestErrorManagement
 {
