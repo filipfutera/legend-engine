@@ -14,6 +14,8 @@
 
 package org.finos.legend.engine.shared.core.operational.prometheus;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -316,35 +318,26 @@ public class MetricsHandler
     }
 
     /**
-     * Method to obtain the category of the exception that has occurred
-     * If the error has an associated category it is returned otherwise category matching is invoked.
-     * @param exception the exception to be analysed that has occurred in execution
-     * @return the user-friendly error category
-     */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
-    {
-        if (exception instanceof EngineException)
-        {
-            EngineException engineException = (EngineException) exception;
-            if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ERROR_CATEGORIES.UnknownError)
-            {
-                return engineException.getErrorCategory();
-            }
-        }
-        return matchExceptionToCategory(exception);
-    }
-
-    /**
-     * Method to match an exception to a category.
+     * Method to obtain the error category from an exception either by matching or extracting from EngineException.
      * If original exception cannot be matched its cause is attempted to be matched until the cause is null
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized ERROR_CATEGORIES matchExceptionToCategory(Exception exception) {
+    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception) {
         Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
+            // try to extract category from exception itself
+            if (exception instanceof EngineException)
+            {
+                EngineException engineException = (EngineException) exception;
+                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ERROR_CATEGORIES.UnknownError)
+                {
+                    return engineException.getErrorCategory();
+                }
+            }
+            // try to match exception to category
             for (MATCHING_METHODS method : MATCHING_METHODS.values())
             {
                 for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
@@ -358,7 +351,7 @@ public class MetricsHandler
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
-        LOGGER.warn(String.format("Unknown error - Exception Name: %s. Exception Message: %s. Add it to ErrorData.json!", originalException.getClass().getSimpleName(), originalException.getMessage()));
+        LOGGER.warn(String.format("Unknown error - Exception Name: %s. Exception Message: %s. Add it to the ErrorData json file!", originalException.getClass().getSimpleName(), originalException.getMessage()));
         return ERROR_CATEGORIES.UnknownError;
     }
 
