@@ -14,6 +14,10 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
+/**
+ * Enum telling us where the error occurred
+ * LoggingEventType is used to show what process caused the error to occur
+ */
 public enum ErrorOrigin
 {
     PURE_QUERY_EXECUTION,
