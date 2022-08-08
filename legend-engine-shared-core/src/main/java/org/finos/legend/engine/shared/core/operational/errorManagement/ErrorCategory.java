@@ -44,6 +44,12 @@ public class ErrorCategory
      */
     private final ArrayList<ErrorType> errorTypes;
 
+    /**
+     * Constructor to create an error category object containing data to be used in categorising occurring exceptions
+     * @param friendlyName is the name of the category meant to be end user understandable
+     * @param keywords are a list of regexes used in classifying an exception to this category
+     * @param errorTypes list of error types (subcategories) used in classifying an exception to this category
+     */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public ErrorCategory(@JsonProperty("CategoryName") String friendlyName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ErrorType> errorTypes)
     {
@@ -143,6 +149,12 @@ public class ErrorCategory
          */
         private final ArrayList<ErrorExceptionOutline> exceptionOutlines;
 
+        /**
+         * Constructor to create an error type holding data to be used in categorizing an exception to its correct category
+         * @param typeName is the name of this error Type
+         * @param typeExceptionRegex is the regex matching exception names to this Type
+         * @param exceptionOutlines is the list of exception name and message regex pairs to be used in matching
+         */
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public ErrorType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines)
         {
@@ -198,6 +210,11 @@ public class ErrorCategory
              */
             private final Pattern exceptionMessage;
 
+            /**
+             * Constructor to create an exception outline object
+             * @param exceptionName is the simple name of the exception
+             * @param exceptionMessage is the regex corresponding to the message in the exception
+             */
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             public ErrorExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
             {
