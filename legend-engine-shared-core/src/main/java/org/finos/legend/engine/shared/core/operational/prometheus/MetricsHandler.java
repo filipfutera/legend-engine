@@ -362,7 +362,7 @@ public class MetricsHandler
     private static synchronized List<ErrorCategory> readErrorData()
     {
         List<ErrorCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(INTERNAL_ERROR_DATA_DIR))
+        try (InputStream inputStream = Class.forName(INTERNAL_ERROR_DATA_DIR).getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
         {
             String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
             categories = Arrays.asList(new ObjectMapper().readValue(errorData, ErrorCategory[].class));

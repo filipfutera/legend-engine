@@ -397,6 +397,35 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 2, DELTA);
     }
 
-    // test EngineException with ErrorCategory values of proper, null, and Unknown
+    @Test
+    public void testErrorCategorizationExtractingValidCategoryFromEngineException()
+    {
+        MetricsHandler.observeError(null, new EngineException("some message", MetricsHandler.ERROR_CATEGORIES.InternalServerError), TEST_SERVICE_PATH);
+        String[] labels = {"UnknownEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
 
+    @Test
+    public void testErrorCategorizationExtractingUnknownCategoryFromEngineException()
+    {
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", MetricsHandler.ERROR_CATEGORIES.UnknownError), TEST_SERVICE_PATH);
+        String[] labels = {"UnknownEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorCategorizationExtractingNullCategoryFromEngineException()
+    {
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", (MetricsHandler.ERROR_CATEGORIES) null), TEST_SERVICE_PATH);
+        String[] labels = {"UnknownEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testErrorCategorizationExtractingValidCategoryFromNestedEngineException()
+    {
+        MetricsHandler.observeError(null, new Exception(new EngineException("some message", MetricsHandler.ERROR_CATEGORIES.InternalServerError)), TEST_SERVICE_PATH);
+        String[] labels = {"UnknownEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
 }
