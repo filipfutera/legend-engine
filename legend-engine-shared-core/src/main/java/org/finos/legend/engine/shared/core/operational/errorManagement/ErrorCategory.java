@@ -16,6 +16,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MATCHING_METHODS;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -43,13 +44,18 @@ public class ErrorCategory
     private final ArrayList<ErrorType> errorTypes;
 
     /**
+     * List of error types (essentially sub-categories of errors) associated with this category
+     */
+    private final ArrayList<LoggingEventType> eventTypes;
+
+    /**
      * Constructor to create an error category object containing data to be used in categorising occurring exceptions
      * @param friendlyName is the name of the category meant to be end user understandable
      * @param keywords are a list of regexes used in classifying an exception to this category
      * @param errorTypes list of error types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ErrorCategory(@JsonProperty("CategoryName") String friendlyName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ErrorType> errorTypes)
+    public ErrorCategory(@JsonProperty("CategoryName") String friendlyName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ErrorType> errorTypes, @JsonProperty("Events") ArrayList<String> eventTypes)
     {
         this.friendlyName = friendlyName;
         this.keywords = new ArrayList<>();
@@ -58,6 +64,11 @@ public class ErrorCategory
             this.keywords.add(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE));
         }
         this.errorTypes = errorTypes;
+        this.eventTypes = new ArrayList<>();
+        for (String eventType : eventTypes)
+        {
+            this.eventTypes.add(LoggingEventType.valueOf(eventType));
+        }
     }
 
     /**
@@ -66,7 +77,7 @@ public class ErrorCategory
      * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean matches(Exception exception, MATCHING_METHODS method)
+    public boolean matches(Exception exception, MATCHING_METHODS method, LoggingEventType eventType)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
@@ -81,6 +92,10 @@ public class ErrorCategory
         else if (method == MATCHING_METHODS.TypeNameMatching)
         {
             return hasMatchingTypeName(name);
+        }
+        else if (method == MATCHING_METHODS.EventTypeMatching)
+        {
+            return hasMatchingEventType(eventType);
         }
         return hasMatchingExceptionOutline(name, message) || hasMatchingKeywords(name, message) || hasMatchingTypeName(name);
     }
@@ -115,6 +130,11 @@ public class ErrorCategory
     private boolean hasMatchingTypeName(String name)
     {
         return this.errorTypes.stream().anyMatch(type -> type.hasMatchingTypeName(name));
+    }
+
+    private boolean hasMatchingEventType(LoggingEventType eventType)
+    {
+        return this.eventTypes.contains(eventType);
     }
 
     /**

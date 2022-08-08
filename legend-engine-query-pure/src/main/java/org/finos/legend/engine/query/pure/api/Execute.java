@@ -103,13 +103,13 @@ public class Execute
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
     public Response test()
     {
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("", new RuntimeException("testing slang exception testing")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("invalid credentials")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos"), null);
-        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("unknown", new RuntimeException("unknown", new RuntimeException())), "/get/ComputerRegistry/{id}");
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("", new RuntimeException("testing slang exception testing")), null, null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("invalid credentials")), null, null);
+        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null, null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null, null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos"), null, null);
+        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null, null);
+        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("unknown", new RuntimeException("unknown", new RuntimeException())), "/get/ComputerRegistry/{id}", null);
         return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
     }
     //TEST
@@ -144,7 +144,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null, LoggingEventType.EXECUTE_INTERACTIVE_ERROR);
             return response;
         }
     }
@@ -170,7 +170,7 @@ public class Execute
         {
             PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -198,7 +198,7 @@ public class Execute
         {
             PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -246,7 +246,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath, LoggingEventType.EXECUTE_INTERACTIVE_ERROR);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }

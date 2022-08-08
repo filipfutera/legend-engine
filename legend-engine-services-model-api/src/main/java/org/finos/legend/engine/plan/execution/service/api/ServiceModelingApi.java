@@ -102,7 +102,7 @@ public class ServiceModelingApi
             Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, ex, invokedService == null ? null : invokedService.getPath());
+            MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, ex, invokedService == null ? null : invokedService.getPath(), LoggingEventType.SERVICE_ERROR);
             return response;
         }
     }

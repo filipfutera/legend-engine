@@ -25,6 +25,7 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
@@ -263,7 +264,7 @@ public class MetricsHandler
      * Types of error matching techniques that can be performed on an incoming exceptions
      */
     public enum MATCHING_METHODS
-    { ExceptionOutlineMatching, KeywordsMatching, TypeNameMatching }
+    { EventTypeMatching, ExceptionOutlineMatching, KeywordsMatching, TypeNameMatching }
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data
@@ -273,11 +274,11 @@ public class MetricsHandler
     /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
      * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
-     * @param origin the stage in execution at which the error occurred
+     * @param overview the stage in execution at which the error occurred
      * @param exception the exception to be analysed that has occurred in execution
      * @return the error label generated for the error
      */
-    private static synchronized String getErrorLabel(String origin, Exception exception)
+    private static synchronized String getErrorLabel(String overview, Exception exception)
     {
         String errorName = exception.getClass().getSimpleName();
         HashSet<Exception> exploredExceptions = new HashSet<>();
@@ -290,11 +291,11 @@ public class MetricsHandler
         }
         if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
         {
-            errorName = origin + errorName;
+            errorName = overview + errorName;
         }
         else if (errorName.equals(EngineException.class.getSimpleName()))
         {
-            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
+            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : overview + errorName;
         }
         return (errorName.substring(0,1).toUpperCase() + errorName.substring(1)).substring(0, errorName.lastIndexOf("Exception")) + "Error";
     }
@@ -305,13 +306,14 @@ public class MetricsHandler
      * @param exception the non-null exception to be analysed that has occurred in execution
      * @param servicePath the name of the service whose execution invoked the error
      */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath, LoggingEventType eventType)
     {
         origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(origin.toFriendlyString(), exception);
+        String eventTypeString = eventType == null ? "Unrecognised" : eventType.toFriendlyString();
+        String errorLabel = getErrorLabel(eventTypeString, exception);
         String source = servicePath == null ? origin.toFriendlyString() : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = getErrorCategory(exception).toString();
+        String errorCategory = getErrorCategory(exception, eventType).toString();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
     }
 
@@ -321,7 +323,7 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution
      * @return the user-friendly error category
      */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
+    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception, LoggingEventType eventType)
     {
         Exception originalException = exception;
         HashSet<Exception> exceptionHistory = new HashSet();
@@ -341,7 +343,7 @@ public class MetricsHandler
             {
                 for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
                 {
-                    if (category.matches(exception, method))
+                    if (category.matches(exception, method, eventType))
                     {
                         return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
                     }

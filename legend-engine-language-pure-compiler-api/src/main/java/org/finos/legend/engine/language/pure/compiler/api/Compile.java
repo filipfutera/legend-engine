@@ -93,7 +93,7 @@ public class Compile
         {
             PureModelContextData data = ((PureModelContextData) model).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, service != null ? service.getPath() : null, LoggingEventType.COMPILE_ERROR);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -124,7 +124,7 @@ public class Compile
         {
             PureModelContextData data = ((PureModelContextData) lambdaReturnTypeInput.model).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, service != null ? service.getPath() : null, LoggingEventType.COMPILE_ERROR);
             return handleException(uriInfo, profiles, start, ex);
         }
     }

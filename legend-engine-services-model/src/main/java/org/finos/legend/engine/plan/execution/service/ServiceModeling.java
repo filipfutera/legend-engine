@@ -46,6 +46,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.engine.shared.core.deployment.DeploymentMode;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.finos.legend.engine.shared.core.operational.prometheus.Prometheus;
 import org.finos.legend.engine.shared.javaCompiler.JavaCompileException;
@@ -123,7 +124,7 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, service == null ? null : service.getPath());
+            MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, service == null ? null : service.getPath(), LoggingEventType.SERVICE_ERROR);
             throw new RuntimeException(e);
         }
     }

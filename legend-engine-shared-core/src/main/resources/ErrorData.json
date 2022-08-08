@@ -84,7 +84,8 @@
         "TypeExceptionRegex": "Permission|Access"
       }
     ],
-    "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket", "GSSSO"]
+    "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket", "GSSSO"],
+    "Events": []
   },
 
 
@@ -165,7 +166,8 @@
       }
 
     ],
-    "Keywords": ["[a-zA-Z]* '.*' not found"]
+    "Keywords": ["[a-zA-Z]* '.*' not found"],
+    "Events": []
   },
 
 
@@ -248,7 +250,8 @@
         "TypeExceptionRegex": ""
       }
     ],
-    "Keywords": ["proxy","buffers"]
+    "Keywords": ["proxy","buffers"],
+    "Events": []
   },
 
 
@@ -456,7 +459,8 @@
       }
 
     ],
-    "Keywords": ["mapping error","Error in '.*::.*':" ]
+    "Keywords": ["mapping error","Error in '.*::.*':" ],
+    "Events": []
   },
 
 
@@ -515,6 +519,7 @@
         "TypeExceptionRegex": ""
       }
     ],
-    "Keywords": ["test|timeout"]
+    "Keywords": ["test|timeout"],
+    "Events": []
   }
 ]
