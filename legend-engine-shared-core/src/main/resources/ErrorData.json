@@ -82,6 +82,28 @@
           }
         ],
         "TypeExceptionRegex": "Permission|Access"
+      },
+
+      {
+        "TypeName": "ConfigurationError",
+        "Exceptions": [
+          {
+            "ExceptionName": "RuntimeException",
+            "MessageRegex": "has not been configured properly"
+          }
+        ],
+        "TypeExceptionRegex": "Config[a-z]*"
+      },
+
+      {
+        "TypeName": "IOError",
+        "Exceptions": [
+          {
+            "ExceptionName": "ZipException",
+            "MessageRegex": "ZipFile invalid LOC header"
+          }
+        ],
+        "TypeExceptionRegex": "IO"
       }
     ],
     "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket", "GSSSO"]
@@ -209,21 +231,6 @@
           }
         ],
         "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "ConfigurationError",
-        "Exceptions": [
-          {
-            "ExceptionName": "ZipException",
-            "MessageRegex": "ZipFile invalid LOC header"
-          },
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "GSExceptionSlang"
-          }
-        ],
-        "TypeExceptionRegex": "Config[a-z]*"
       },
 
       {
