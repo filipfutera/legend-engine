@@ -6,85 +6,26 @@
         "TypeName": "CredentialsError",
         "Exceptions": [
           {
-            "ExceptionName": "SnowflakeSQLException",
-            "MessageRegex": "username|password"
-          }, //External Library
-          {
             "ExceptionName": "EngineException",
-            "MessageRegex": "username|password|GSSAPI credentials|kerberos.*is not valid|A 'Secure Connect' or a Kerberos connection can't be built outside of a user call"
-          }, // username-password external. kerberos.*is not valid - alloy. A 'Secure Connect' or a Kerberos connection can't be built - engine
+            "MessageRegex": "A 'Secure Connect' or a Kerberos connection can't be built outside of a user call|Failed to initialize pool"
+          },
           {
             "ExceptionName": "UnsupportedOperationException",
             "MessageRegex": "Kerberos|credential"
-          }, //legend-engine
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "bad credentials|does not contain one of the expected credential types|Identity does not contain one of the expected credential types|Failed to authenticate to kerberos|Error getting SecureConnect credentials from|Cannot build cookie store."
-          }, //cookie store, identity does not contain.. and secureconnect is alloy, bad credentials and failed to authenticate kerberos are external
-          {
-            "ExceptionName": "LoginException",
-            "MessageRegex": ""
-          }, //alloy
-          {
-            "ExceptionName": "GSSException",
-            "MessageRegex": "No valid credentials provided|defective token detected"
-          }, //external
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "Expired SecureConnect token|GSSException is caught when getting a ticket from JGSS|Invalid user ID or password"
-          }, //external
-          {
-            "ExceptionName": "SQLInvalidAuthorizationSpecException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "PoolInitializationException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "EngineException",
-            "MessageRegex": "Failed to initialize pool"
-          }, //external but some engine test includes this exact message for snowflake exception
-          {
-            "ExceptionName": "AuthenticationFailedException",
-            "MessageRegex": "401 Unauthorized"
-          }, //external
-          {
-            "ExceptionName": "IOException",
-            "MessageRegex": "Server returned HTTP response code: 401 for URL"
-          }, //external
-          {
-            "ExceptionName": "Exception",
-            "MessageRegex": "Identity does not contain [one of the ]?expected credential type[s]?"
-          } //alloy
+          }
         ],
-        "TypeExceptionRegex": "Authenticat[a-z]+|Pool|Credential|GSS|Authoriz[a-z]+"
+        "TypeExceptionRegex": "Pool|Kerberos|SecureConnect|credential[s]?"
       },
 
       {
         "TypeName": "PermissionsError",
         "Exceptions": [
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "not part of .* Write service|access denied"
-          }, //not part of write service is alloy, access denied is external
-          {
-            "ExceptionName": "SnowflakeSQLException",
-            "MessageRegex": "no default role has been assigned to the user|session does not have a current database|no active warehouse selected in the current session|Role .* specified in the connect string is not granted to this user"
-          }, //external
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "permission denied|access denied"
-          }, //external
-          {
-            "ExceptionName": "FailureException",
-            "MessageRegex": "access denied"
-          } //external
+
         ],
         "TypeExceptionRegex": "Permission|Access"
       }
     ],
-    "Keywords": ["login", "kerberos", "credential", "username", "password", "authenticat[a-z]+", "permission", "initialize pool", "ticket", "GSSSO"]
+    "Keywords": ["kerberos", "credential", "username", "password", "permission", "initialize pool"]
   },
 
 
@@ -98,27 +39,7 @@
           {
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find a match for function"
-          }, //engine
-          {
-            "ExceptionName": "SnowflakeSQLException",
-            "MessageRegex": "sql compilation error.*object.*does not exist or not authorized"
-          }, //external
-          {
-            "ExceptionName": "AvaticaSqlException",
-            "MessageRegex": "not entitled to data store"
-          }, //external
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "Table .* doesn't exist|(Column|Table) .* not found|User ID '.*' does not exist"
-          }, //external
-          {
-            "ExceptionName": "JdbcSQLSyntaxErrorException",
-            "MessageRegex": "(Table|Schema|[a-zA-Z]+) .* not found; SQL statement:"
-          }, //external
-          {
-            "ExceptionName": "RedshiftException",
-            "MessageRegex": "Error: relation .* does not exist"
-          } //external
+          }
         ],
         "TypeExceptionRegex": ""
       },
@@ -127,13 +48,9 @@
         "TypeName": "DatabaseNotFoundError",
         "Exceptions": [
           {
-            "ExceptionName": "SQLSyntaxErrorException",
-            "MessageRegex": "unknown (database|column)"
-          }, //external
-          {
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find database"
-          }  // engine
+          }
         ],
         "TypeExceptionRegex": ""
       },
@@ -141,10 +58,7 @@
       {
         "TypeName": "UserRequestError",
         "Exceptions": [
-          {
-            "ExceptionName": "IllegalArgumentException",
-            "MessageRegex": "No service found with uri"
-          } //alloy
+
         ],
         "TypeExceptionRegex": ""
       },
@@ -152,20 +66,13 @@
       {
         "TypeName": "ServiceUpdateError",
         "Exceptions": [
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "new data for the service doesn't have the right pattern"
-          }, //alloy
-          {
-            "ExceptionName": "EngineException",
-            "MessageRegex": "service must have more than one owner|test does not match execution type|Supported service return types are .* The return type of the provided service is"
-          } //alloy
+
         ],
         "TypeExceptionRegex": ""
       }
 
     ],
-    "Keywords": ["[a-zA-Z]* '.*' not found"]
+    "Keywords": ["[a-zA-Z]+ '.*' not found"]
   },
 
 
@@ -176,22 +83,7 @@
       {
         "TypeName": "MissingItemError",
         "Exceptions": [
-          {
-            "ExceptionName": "WebApplicationException",
-            "MessageRegex": "no registration found"
-          }, //external
-          {
-            "ExceptionName": "RefreshFailedException",
-            "MessageRegex": "unexpected"
-          }, //external
-          {
-            "ExceptionName": "ReflectionsException",
-            "MessageRegex": "could not get type for name"
-          }, //external
-          {
-            "ExceptionName": "NotFoundException",
-            "MessageRegex": "HTTP 404 Not Found"
-          } //external
+
         ],
         "TypeExceptionRegex": "Missing|NotFound"
       },
@@ -199,14 +91,7 @@
       {
         "TypeName": "APIError",
         "Exceptions": [
-          {
-            "ExceptionName": "IOException",
-            "MessageRegex": "Server returned HTTP response code: 500 for URL|Unable to tunnel through proxy. Proxy returns.*503 Service Unavailable"
-          }, //external
-          {
-            "ExceptionName": "AWSSecurityTokenServiceException",
-            "MessageRegex": "SkyBroker returned HTTP 403"
-          } //alloy
+
         ],
         "TypeExceptionRegex": ""
       },
@@ -214,10 +99,7 @@
       {
         "TypeName": "JavaError",
         "Exceptions": [
-          {
-            "ExceptionName": "InterruptedException",
-            "MessageRegex": ""
-          } //external
+
         ],
         "TypeExceptionRegex": ""
       },
@@ -225,10 +107,7 @@
       {
         "TypeName": "ServerOverloadError",
         "Exceptions": [
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "Insufficient buffers for '.*"
-          } //external
+
         ],
         "TypeExceptionRegex": ""
       },
@@ -239,7 +118,7 @@
           {
             "ExceptionName": "RuntimeException",
             "MessageRegex": "has not been configured properly"
-          } //engine
+          }
         ],
         "TypeExceptionRegex": "Config[a-z]*"
       },
@@ -248,14 +127,14 @@
         "TypeName": "IOError",
         "Exceptions": [
           {
-            "ExceptionName": "ZipException",
-            "MessageRegex": "ZipFile invalid LOC header"
-          } //external
+            "ExceptionName": "FlatDataSchemaParseException",
+            "MessageRegex": "Unexpected token"
+          }
         ],
         "TypeExceptionRegex": "IO"
       }
     ],
-    "Keywords": ["proxy","buffers"]
+    "Keywords": ["overload", "configur[ation|ed]"]
   },
 
 
@@ -267,46 +146,7 @@
       {
         "TypeName": "DatabaseError",
         "Exceptions": [
-          {
-            "ExceptionName": "JdbcSQLIntegrityConstraintViolationException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "JdbcSQLSyntaxErrorException",
-            "MessageRegex": "Syntax error in SQL statement"
-          },//external
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "Redshift"
-          },//external
-          {
-            "ExceptionName": "MongoCommandException",
-            "MessageRegex": "changed during processing"
-          },//external
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "reading GridFS|writing to the Stream"
-          },//external
-          {
-            "ExceptionName": "JdbcSQLDataException",
-            "MessageRegex": "Value too long for column"
-          },//external
-          {
-            "ExceptionName": "AvaticaSqlException",
-            "MessageRegex": "remote driver error"
-          },//external
-          {
-            "ExceptionName": "ForbiddenException",
-            "MessageRegex": "not entitled to data store"
-          },//external
-          {
-            "ExceptionName": "IllegalArgumentException",
-            "MessageRegex": "invalid hexadecimal representation of an ObjectId"
-          },//external
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "Cannot use view '.*' because it is invalid|Data exception - data type conversion is not possible"
-          }//external
+
         ],
         "TypeExceptionRegex": "SQL"
       },
@@ -316,8 +156,8 @@
         "Exceptions": [
           {
             "ExceptionName": "EngineException",
-            "MessageRegex": "Unexpected (character|token)|no viable alternative at input|Missing table or alias for column|Bracket operation is not supported|Field '.*' is required"
-          } //unexpected token, missing table or alias for column, bracket operation not supported, field xyz is required - engine. unexpected character, no viable alternative at input - external,
+            "MessageRegex": "Unexpected token|Missing table or alias for column|Bracket operation is not supported|Field '.*' is required"
+          }
         ],
         "TypeExceptionRegex": ""
       },
@@ -327,12 +167,12 @@
         "Exceptions": [
           {
             "ExceptionName": "PureExecutionException",
-            "MessageRegex": "Execution error at .*(cast exception|ERROR unhandled type for value)|cannot cast [a ]?collection of size 0 to multiplicity"
-          }, //cannot cast [a]? collection of size.. is engine, rest is external?
+            "MessageRegex": "cannot cast [a ]?collection of size 0 to multiplicity"
+          },
           {
             "ExceptionName": "EngineException",
-            "MessageRegex": "Engine was unable to load information from the Pure SDLC|Can't find mapping|Assert failure at"
-          }  //engine was unable, can't find mapping - engine, assert failure at - external
+            "MessageRegex": "Engine was unable to load information from the Pure SDLC|Can't find mapping"
+          }
         ],
         "TypeExceptionRegex": "Pure"
       },
@@ -341,21 +181,9 @@
         "TypeName": "JSONError",
         "Exceptions": [
           {
-            "ExceptionName": "JsonParseException",
-            "MessageRegex": "Unexpected (character|token)"
-          }, //token - engine, character - external
-          {
-            "ExceptionName": "UnrecognizedPropertyException",
-            "MessageRegex": "Unrecognised field.*not marked as ignorable|.*"
-          }, //external
-          {
-            "ExceptionName": "InvalidTypeIdException",
-            "MessageRegex": "Could not resolve type id.*as a subtype of|Missing type id when trying to resolve subtype of"
-          }, //external
-          {
-            "ExceptionName": "InvalidDefinitionException",
-            "MessageRegex": "Direct self-reference leading to cycle|.*"
-          } //external
+            "ExceptionName": "FlatDataSchemaParseException",
+            "MessageRegex": "Unexpected token"
+          }
         ],
         "TypeExceptionRegex": "JSON"
       },
@@ -365,12 +193,12 @@
         "Exceptions": [
           {
             "ExceptionName": "EngineException",
-            "MessageRegex": "Error in.*Can't (find [the ]?(property|store|type|profile|packageable element|Connection|SchemaSet|table.*in schema.*and database.*)|build the message function for constraint .* of class)"
-          }, //build the message function for constraint .* of class) - external, rest is engine
+            "MessageRegex": "Error in.*Can't find [the ]?(property|store|type|profile|packageable element|Connection|SchemaSet|table.*in schema.*and database.*)"
+          },
           {
             "ExceptionName": "EngineException",
-            "MessageRegex": "Error in.*[all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity|Execution error at]?"
-          } //Milestone column.*not found on table definition and Collection element must have a multiplicity and all required service parameters should be mapped and mapping error - engine, execution error at is external
+            "MessageRegex": "Error in.*[all required service parameters should be mapped|Mapping error: the join .* does not contain the source table|Milestone column.*not found on table definition|Collection element must have a multiplicity]?"
+          }
         ],
         "TypeExceptionRegex": "Graph"
       },
@@ -379,27 +207,15 @@
         "TypeName": "JavaErrors",
         "Exceptions": [
           {
-            "ExceptionName": "JavaCompileException",
-            "MessageRegex": "incompatible type"
-          },//external
-          {
-            "ExceptionName": "ClassCastException",
-            "MessageRegex": ""
-          },//external
-          {
-            "ExceptionName": "NonStringOrTemplateOutputException",
-            "MessageRegex": ""
-          }, //external
-          {
             "ExceptionName": "IllegalArgumentException",
             "MessageRegex": "Missing external parameter"
-          }, //engine
+          },
           {
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find property .* in (class|association)"
-          } //engine
+          }
         ],
-        "TypeExceptionRegex": ""
+        "TypeExceptionRegex": "IllegalArgumentException"
       },
 
       {
@@ -407,29 +223,18 @@
       "Exceptions": [
         {
           "ExceptionName": "IllegalArgumentException",
-          "MessageRegex": "Error loading service|Invalid provided parameter|Reprocessing sql failed with vars"
-        }, //invalid provided parameter and reprocessing sql failed with vars - engine; error loading service - external
+          "MessageRegex": "Invalid provided parameter|Reprocessing sql failed with vars"
+        },
         {
           "ExceptionName": "RuntimeException",
-          "MessageRegex": "HTTP request.*failed with error|Invalid Input: null|Input stream was not provided|The following PackageableElementPointers.*do not exist in the project data loaded from the metadata server"
-        }, //invalid input - alloy, rest is engine
+          "MessageRegex": "HTTP request.*failed with error|Input stream was not provided|The following PackageableElementPointers.*do not exist in the project data loaded from the metadata server"
+        },
         {
           "ExceptionName": "EngineException",
-          "MessageRegex": "Can't resolve the builder for function|Can't find model for ID|No generation found with id|Can't find service"
-        } //can't resolve the builder, can't find service - engine, can't find model, no generation found with id - alloy
+          "MessageRegex": "Can't resolve the builder for function|Can't find service"
+        }
       ],
       "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "SlangError",
-        "Exceptions": [
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "slang exception"
-          } //none ??? delete from OS
-        ],
-        "TypeExceptionRegex": ""
       },
 
       {
@@ -437,16 +242,8 @@
         "Exceptions": [
           {
             "ExceptionName": "RuntimeException",
-            "MessageRegex": "Issue processing freemarker function|MiscTemplateException"
-          }, //issue processing freemarker - engine, misctemplateexception - external
-          {
-            "ExceptionName": "_MiscTemplateException",
-            "MessageRegex": "When calling function.*required parameter.*was specified, but had null/missing value"
-          }, //external
-          {
-            "ExceptionName": "StopException",
-            "MessageRegex": "no metadata found"
-          } //external
+            "MessageRegex": "Issue processing freemarker function"
+          }
         ],
         "TypeExceptionRegex": ""
       },
@@ -454,10 +251,7 @@
       {
         "TypeName": "RegexError",
         "Exceptions": [
-          {
-            "ExceptionName": "PatternSyntaxException",
-            "MessageRegex": "Illegal repetition"
-          } // external
+
         ],
         "TypeExceptionRegex": ""
       }
@@ -471,34 +265,13 @@
   {
     "CategoryName": "OtherError",
     "Types": [
-
       {
         "TypeName": "ConnectionError",
         "Exceptions": [
           {
             "ExceptionName": "ConnectionException",
             "MessageRegex": ""
-          }, //engine
-          {
-            "ExceptionName": "SQLTransientConnectionException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "SocketTimeoutException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "MappableException",
-            "MessageRegex": ""
-          }, //external
-          {
-            "ExceptionName": "EOFException",
-            "MessageRegex": "unexpected end of stream"
-          }, //external
-          {
-            "ExceptionName": "SQLException",
-            "MessageRegex": "Connection was terminated"
-          } //external
+          }
         ],
         "TypeExceptionRegex": "Connection|Timeout"
       },
@@ -507,17 +280,9 @@
         "TypeName": "TestingError",
         "Exceptions": [
           {
-            "ExceptionName": "IllegalArgumentException",
-            "MessageRegex": "Error running tests"
-          }, //external
-          {
-            "ExceptionName": "RuntimeException",
-            "MessageRegex": "Checked exception caught in Procedure"
-          }, //external
-          {
             "ExceptionName": "PureAssertFailException",
-            "MessageRegex": "exception occurred executing service test suites|Assert failure at*trees are not supported yet|.*"
-          } //exception occured executing service test suites - engine, assert failure at - external
+            "MessageRegex": "exception occurred executing service test suites"
+          }
         ],
         "TypeExceptionRegex": ""
       }
