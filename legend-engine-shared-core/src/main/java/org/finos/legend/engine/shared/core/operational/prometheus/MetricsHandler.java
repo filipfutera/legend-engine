@@ -356,25 +356,14 @@ public class MetricsHandler
     private static synchronized List<ExceptionCategory> readErrorData()
     {
         List<ExceptionCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = Class.forName(INTERNAL_ERROR_DATA_DIR).getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
         {
             String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
             categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
-            LOGGER.info("Successfully read internal error data categorisation file");
         }
         catch (Exception e)
         {
-            LOGGER.info("Could not read internal error data file - attempting to read external version");
-            try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(EXTERNAL_ERROR_DATA_PATH))
-            {
-                String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
-                categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
-                LOGGER.info("Successfully read external error data categorisation file");
-            }
-            catch (Exception exception)
-            {
-                LOGGER.error(String.format("Error reading exception categorisation data: %s - could not read external file either", exception));
-            }
+                LOGGER.error(String.format("Error reading exception categorisation data: %s", e));
         }
         return categories;
     }

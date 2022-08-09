@@ -131,10 +131,10 @@
             "MessageRegex": "Unexpected token"
           }
         ],
-        "TypeExceptionRegex": "IO"
+        "TypeExceptionRegex": "Read[A-Z]+|Write|Input|Output"
       }
     ],
-    "Keywords": ["overload", "configur[ation|ed]"]
+    "Keywords": ["overload"]
   },
 
 
