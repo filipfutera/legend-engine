@@ -256,26 +256,27 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution.
      * @return the error label generated for the error.
      */
-    private static synchronized String getErrorLabel(String origin, Exception exception)
+    private static synchronized String getErrorLabel(String origin, Throwable exception)
     {
-        String errorName = exception.getClass().getSimpleName();
-        HashSet<Exception> exploredExceptions = new HashSet<>();
-        String[] genericExceptionNames = { RuntimeException.class.getSimpleName(), Exception.class.getSimpleName(), EngineException.class.getSimpleName() };
-        while (Arrays.asList(genericExceptionNames).contains(errorName) && exception.getCause() != null && exception.getCause() instanceof Exception && !exploredExceptions.contains(exception.getCause()))
+        Class errorClass = exception.getClass();
+        String errorLabel = exception.getClass().getSimpleName();
+        HashSet<Throwable> exploredExceptions = new HashSet<>();
+        Class[] genericExceptionClasses = { RuntimeException.class, Exception.class, EngineException.class };
+        while (Arrays.asList(genericExceptionClasses).contains(errorClass) && exception.getCause() != null && !exploredExceptions.contains(exception.getCause()))
         {
             exploredExceptions.add(exception);
-            exception = (Exception) exception.getCause();
-            errorName = exception.getClass().getSimpleName();
+            exception = exception.getCause();
+            errorClass = exception.getClass();
         }
-        if (errorName.equals(RuntimeException.class.getSimpleName()) || errorName.equals(Exception.class.getSimpleName()))
+        if (errorClass.equals(RuntimeException.class) || errorClass.equals(Exception.class))
         {
-            errorName = origin + errorName;
+            errorLabel = origin + errorClass.getSimpleName();
         }
-        else if (errorName.equals(EngineException.class.getSimpleName()))
+        else if (exception instanceof EngineException)
         {
-            errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
+            errorLabel = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorClass.getSimpleName() : origin + errorClass.getSimpleName();
         }
-        return convertErrorLabelToPrettyString(errorName);
+        return convertErrorLabelToPrettyString(errorLabel);
     }
 
     /**
@@ -292,7 +293,7 @@ public class MetricsHandler
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error(String.format("Error - Label: %s. Category: %s. Source: %s. Service: %s. Exception %s.", errorLabel, errorCategory, source, servicePattern, exception));
+        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. Exception {}.", errorLabel, errorCategory, source, servicePattern, exception);
     }
 
     /**
@@ -300,10 +301,10 @@ public class MetricsHandler
      * @param exception the exception to be analysed that has occurred in execution.
      * @return the user-friendly error category.
      */
-    private static synchronized ErrorCategory getErrorCategory(Exception exception)
+    private static synchronized ErrorCategory getErrorCategory(Throwable exception)
     {
         ErrorCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
-        return engineExceptionCategory != ErrorCategory.UNKNOWN_ERROR ? engineExceptionCategory : tryMatchExceptionToErrorCategory(exception);
+        return engineExceptionCategory != ErrorCategory.UNKNOWN_ERROR ? engineExceptionCategory : tryMatchExceptionToErrorDataFile(exception);
     }
 
     /**
@@ -312,9 +313,9 @@ public class MetricsHandler
      * @param exception is the original exception that occurred in the engine.
      * @return Error category belonging to the exception.
      */
-    private static synchronized ErrorCategory tryMatchExceptionToErrorCategory(Exception exception)
+    private static synchronized ErrorCategory tryMatchExceptionToErrorDataFile(Throwable exception)
     {
-        HashSet<Exception> exceptionHistory = new HashSet();
+        HashSet<Throwable> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
             for (MatchingMethod method : MatchingMethod.values())
@@ -328,7 +329,7 @@ public class MetricsHandler
                 }
             }
             exceptionHistory.add(exception);
-            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
+            exception = exception.getCause();
         }
         return ErrorCategory.UNKNOWN_ERROR;
     }
@@ -339,9 +340,9 @@ public class MetricsHandler
      * @param exception is the original exception that occurred in the engine.
      * @return Error category belonging to the exception or UnknownError if no meaningful data could be obtained from a possible EngineException.
      */
-    private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Exception exception)
+    private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
     {
-        HashSet<Exception> exceptionHistory = new HashSet();
+        HashSet<Throwable> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
             if (exception instanceof EngineException)
@@ -353,7 +354,7 @@ public class MetricsHandler
                 }
             }
             exceptionHistory.add(exception);
-            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
+            exception = exception.getCause();
         }
         return ErrorCategory.UNKNOWN_ERROR;
     }
@@ -367,13 +368,13 @@ public class MetricsHandler
         List<ExceptionCategory> categories = new ArrayList<>();
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_PATH))
         {
-            String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
-            categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
-            LOGGER.info(String.format("Successfully read %s error data file", MetricsHandler.class.getResource(ERROR_DATA_PATH).toString().contains("legend-engine-shared-core") ? "external" : "internal"));
+            categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ExceptionCategory[].class));
+            LOGGER.info("Successfully read {} error data file", MetricsHandler.class.getResource(ERROR_DATA_PATH));
         }
         catch (Exception e)
         {
-                LOGGER.warn(String.format("Error reading exception categorisation data: %s", e));
+                LOGGER.warn("Error reading exception categorisation data: {}", e);
+                throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
         }
         return categories;
     }

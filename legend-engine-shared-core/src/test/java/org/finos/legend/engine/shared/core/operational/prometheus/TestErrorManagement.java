@@ -21,7 +21,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;

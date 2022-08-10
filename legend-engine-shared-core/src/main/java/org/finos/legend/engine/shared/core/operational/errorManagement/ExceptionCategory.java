@@ -66,7 +66,7 @@ public class ExceptionCategory
      * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean matches(Exception exception, MatchingMethod method)
+    public boolean matches(Throwable exception, MatchingMethod method)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
