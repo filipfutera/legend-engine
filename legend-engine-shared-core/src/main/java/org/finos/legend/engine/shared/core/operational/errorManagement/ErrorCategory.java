@@ -1,4 +1,4 @@
-// Copyright 2020 Goldman Sachs
+// Copyright 2022 Goldman Sachs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,25 +14,30 @@
 
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * User friendly error categories
  */
 public enum ErrorCategory
 {
+    @JsonProperty("UserAuthenticationError")
     USER_AUTHENTICATION_ERROR,
+    @JsonProperty("UserExecutionError")
     USER_EXECUTION_ERROR,
+    @JsonProperty("InternalServerError")
     INTERNAL_SERVER_ERROR,
+    @JsonProperty("ServerExecutionError")
     SERVER_EXECUTION_ERROR,
+    @JsonProperty("OtherError")
     OTHER_ERROR,
     UNKNOWN_ERROR,
     ;
 
     public String toCamelCase()
     {
-        String errorOrigin = this.toString().toLowerCase();
-        String[] elements = errorOrigin.split("_");
+        String errorCategory = this.toString().toLowerCase();
+        String[] elements = errorCategory.split("_");
         StringBuilder output = new StringBuilder();
         for (String element : elements)
         {
@@ -41,11 +46,6 @@ public enum ErrorCategory
         return output.toString();
     }
 
-    public static ErrorCategory valueOfCamelCase(String errorCategory)
-    {
-        String snakeCaseErrorCategory = String.join("_", Arrays.asList(errorCategory.split("(?=[A-Z])")));
-        return ErrorCategory.valueOf(snakeCaseErrorCategory);
-    }
 }
 
 

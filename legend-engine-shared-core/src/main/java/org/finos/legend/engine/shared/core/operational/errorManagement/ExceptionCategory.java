@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
 public class ExceptionCategory
 {
     /**
-     * User-friendly string overviewing the error category
+     * User-friendly string for the error category
      */
-    private final String friendlyName;
+    private final ErrorCategory categoryName;
 
     /**
      * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
@@ -44,14 +44,14 @@ public class ExceptionCategory
 
     /**
      * Constructor to create an error category object containing data to be used in categorising occurring exceptions
-     * @param friendlyName is the name of the category meant to be end user understandable
+     * @param categoryName is the name of the category meant to be end user understandable
      * @param keywords are a list of regexes used in classifying an exception to this category
      * @param exceptionTypes list of error types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ExceptionCategory(@JsonProperty("CategoryName") String friendlyName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
+    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory categoryName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
     {
-        this.friendlyName = friendlyName;
+        this.categoryName = categoryName;
         this.keywords = new ArrayList<>();
         for (String keyword : keywords)
         {
@@ -120,9 +120,9 @@ public class ExceptionCategory
     /**
      * @return user-friendly string corresponding to this error category
      */
-    public String getFriendlyName()
+    public ErrorCategory getCategoryName()
     {
-        return friendlyName;
+        return categoryName;
     }
 
     /**

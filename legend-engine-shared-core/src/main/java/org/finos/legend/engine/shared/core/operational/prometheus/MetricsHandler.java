@@ -334,7 +334,7 @@ public class MetricsHandler
                 {
                     if (category.matches(exception, method))
                     {
-                        return ErrorCategory.valueOfCamelCase(category.getFriendlyName());
+                        return category.getCategoryName();
                     }
                 }
             }
