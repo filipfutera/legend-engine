@@ -32,20 +32,6 @@ public enum ErrorCategory
     @JsonProperty("OtherError")
     OTHER_ERROR,
     UNKNOWN_ERROR,
-    ;
-
-    public String toCamelCase()
-    {
-        String errorCategory = this.toString().toLowerCase();
-        String[] elements = errorCategory.split("_");
-        StringBuilder output = new StringBuilder();
-        for (String element : elements)
-        {
-            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
-        }
-        return output.toString();
-    }
-
 }
 
 

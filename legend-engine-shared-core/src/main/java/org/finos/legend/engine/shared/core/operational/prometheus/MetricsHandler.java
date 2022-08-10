@@ -225,17 +225,6 @@ public class MetricsHandler
         }
     }
 
-    @Deprecated
-    public static String generateMetricName(String name, boolean isErrorMetric)
-    {
-        return METRIC_PREFIX + name
-                .replace("/", "_")
-                .replace("-", "_")
-                .replace("{", "")
-                .replace("}", "")
-                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
-    }
-
     // -------------------------------------- ERROR HANDLING -------------------------------------
 
     /**
@@ -252,8 +241,8 @@ public class MetricsHandler
     /**
      * Types of error matching techniques that can be performed on an incoming exceptions.
      */
-    public enum MATCHING_METHODS
-    { ExceptionOutlineMatching, KeywordsMatching, TypeNameMatching }
+    public enum MatchingMethod
+    { EXCEPTION_OUTLINE_MATCHING, KEYWORDS_MATCHING, TYPE_NAME_MATCHING }
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
@@ -298,10 +287,10 @@ public class MetricsHandler
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
         origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(origin.toCamelCase(), exception);
-        String source = servicePath == null ? origin.toCamelCase() : "Service";
+        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
+        String source = servicePath == null ? toCamelCase(origin) : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = getErrorCategory(exception).toCamelCase();
+        String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
         LOGGER.error(String.format("Error - Label: %s. Category: %s. Source: %s. Service: %s. Exception %s.", errorLabel, errorCategory, source, servicePattern, exception));
     }
@@ -328,13 +317,13 @@ public class MetricsHandler
         HashSet<Exception> exceptionHistory = new HashSet();
         while (exception != null && !exceptionHistory.contains(exception))
         {
-            for (MATCHING_METHODS method : MATCHING_METHODS.values())
+            for (MatchingMethod method : MatchingMethod.values())
             {
                 for (ExceptionCategory category : ERROR_CATEGORY_DATA_OBJECTS)
                 {
                     if (category.matches(exception, method))
                     {
-                        return category.getCategoryName();
+                        return category.getErrorCategory();
                     }
                 }
             }
@@ -396,6 +385,31 @@ public class MetricsHandler
     public static Counter getErrorCounter()
     {
         return ERROR_COUNTER;
+    }
+
+    // -------------------------------------- END OF ERROR HANDLING -------------------------------------
+
+    @Deprecated
+    public static String generateMetricName(String name, boolean isErrorMetric)
+    {
+        return METRIC_PREFIX + name
+                .replace("/", "_")
+                .replace("-", "_")
+                .replace("{", "")
+                .replace("}", "")
+                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
+    }
+
+    public static String toCamelCase(Enum value)
+    {
+        String snakeCaseString = value.toString();
+        String[] elements = snakeCaseString.toLowerCase().split("_");
+        StringBuilder output = new StringBuilder();
+        for (String element : elements)
+        {
+            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
+        }
+        return output.toString();
     }
 
 }

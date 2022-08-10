@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
 import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
+import static org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.toCamelCase;
 import static org.junit.Assert.assertEquals;
 
 public class TestErrorManagement
@@ -56,7 +57,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndInvalidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toCamelCase(), "N/A"};
+        String[] labels = {"ServiceTestExecuteError", "UnknownError", toCamelCase(ErrorOrigin.SERVICE_TEST_EXECUTE), "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -364,24 +365,13 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorOriginToUserFriendlyStringConversion()
+    public void testEnumToUserFriendlyStringConversion()
     {
-        assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toCamelCase(), "PureQueryExecution");
-        assertEquals(ErrorOrigin.GENERATE_PLAN.toCamelCase(), "GeneratePlan");
-        assertEquals(ErrorOrigin.LAMBDA_RETURN_TYPE.toCamelCase(), "LambdaReturnType");
-        assertEquals(ErrorOrigin.COMPILE_MODEL.toCamelCase(), "CompileModel");
-        assertEquals(ErrorOrigin.MODEL_RESOLVE.toCamelCase(), "ModelResolve");
-        assertEquals(ErrorOrigin.SERVICE_TEST_EXECUTE.toCamelCase(), "ServiceTestExecute");
-        assertEquals(ErrorOrigin.SERVICE_EXECUTE.toCamelCase(), "ServiceExecute");
-        assertEquals(ErrorOrigin.TDS_PROTOCOL.toCamelCase(), "TdsProtocol");
-        assertEquals(ErrorOrigin.TDS_EXECUTE.toCamelCase(), "TdsExecute");
-        assertEquals(ErrorOrigin.TDS_GENERATE_CODE.toCamelCase(), "TdsGenerateCode");
-        assertEquals(ErrorOrigin.TDS_SCHEMA.toCamelCase(), "TdsSchema");
-        assertEquals(ErrorOrigin.TDS_LAMBDA.toCamelCase(), "TdsLambda");
-        assertEquals(ErrorOrigin.TDS_METADATA.toCamelCase(), "TdsMetadata");
-        assertEquals(ErrorOrigin.TDS_INPUTS.toCamelCase(), "TdsInputs");
-        assertEquals(ErrorOrigin.DSB_EXECUTE.toCamelCase(), "DsbExecute");
-        assertEquals(ErrorOrigin.UNRECOGNISED.toCamelCase(), "Unrecognised");
+        assertEquals(toCamelCase(ErrorOrigin.PURE_QUERY_EXECUTION), "PureQueryExecution");
+        assertEquals(toCamelCase(ErrorOrigin.GENERATE_PLAN), "GeneratePlan");
+        assertEquals(toCamelCase(ErrorOrigin.UNRECOGNISED), "Unrecognised");
+        assertEquals(toCamelCase(ErrorCategory.USER_AUTHENTICATION_ERROR), "UserAuthenticationError");
+        assertEquals(toCamelCase(ErrorCategory.UNKNOWN_ERROR), "UnknownError");
     }
 
     @Test
@@ -426,7 +416,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorCategorizationExtractingValidCategoryFromNestedEngineExceptionBeforeMatching()
+    public void testErrorCategorizationMatchingTechniquePrioritizationOfCategorisedExceptionToMatching()
     {
         MetricsHandler.observeError(null, new Exception("kerberos", new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};

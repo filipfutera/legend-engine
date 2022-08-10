@@ -37,17 +37,4 @@ public enum ErrorOrigin
     DSB_EXECUTE,
 
     UNRECOGNISED,
-    ;
-
-    public String toCamelCase()
-    {
-        String errorOrigin = this.toString().toLowerCase();
-        String[] elements = errorOrigin.split("_");
-        StringBuilder output = new StringBuilder();
-        for (String element : elements)
-        {
-            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
-        }
-        return output.toString();
-    }
 }

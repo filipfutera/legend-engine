@@ -16,7 +16,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MATCHING_METHODS;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MatchingMethod;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +30,7 @@ public class ExceptionCategory
     /**
      * User-friendly string for the error category
      */
-    private final ErrorCategory categoryName;
+    private final ErrorCategory errorCategory;
 
     /**
      * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
@@ -44,14 +44,14 @@ public class ExceptionCategory
 
     /**
      * Constructor to create an error category object containing data to be used in categorising occurring exceptions
-     * @param categoryName is the name of the category meant to be end user understandable
+     * @param errorCategory is the name of the category meant to be end user understandable
      * @param keywords are a list of regexes used in classifying an exception to this category
      * @param exceptionTypes list of error types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory categoryName, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
+    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
     {
-        this.categoryName = categoryName;
+        this.errorCategory = errorCategory;
         this.keywords = new ArrayList<>();
         for (String keyword : keywords)
         {
@@ -66,23 +66,21 @@ public class ExceptionCategory
      * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
-    public boolean matches(Exception exception, MATCHING_METHODS method)
+    public boolean matches(Exception exception, MatchingMethod method)
     {
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        if (method == MATCHING_METHODS.ExceptionOutlineMatching)
+        switch (method)
         {
-            return hasMatchingExceptionOutline(name, message);
+            case EXCEPTION_OUTLINE_MATCHING:
+                return hasMatchingExceptionOutline(name, message);
+            case KEYWORDS_MATCHING:
+                return hasMatchingKeywords(name, message);
+            case TYPE_NAME_MATCHING:
+                return hasMatchingTypeName(name);
+            default:
+                throw new EngineException("Invalid matching method specified for error handling", ErrorCategory.INTERNAL_SERVER_ERROR);
         }
-        else if (method == MATCHING_METHODS.KeywordsMatching)
-        {
-            return hasMatchingKeywords(name, message);
-        }
-        else if (method == MATCHING_METHODS.TypeNameMatching)
-        {
-            return hasMatchingTypeName(name);
-        }
-        return hasMatchingExceptionOutline(name, message) || hasMatchingKeywords(name, message) || hasMatchingTypeName(name);
     }
 
     /**
@@ -120,9 +118,9 @@ public class ExceptionCategory
     /**
      * @return user-friendly string corresponding to this error category
      */
-    public ErrorCategory getCategoryName()
+    public ErrorCategory getErrorCategory()
     {
-        return categoryName;
+        return errorCategory;
     }
 
     /**
