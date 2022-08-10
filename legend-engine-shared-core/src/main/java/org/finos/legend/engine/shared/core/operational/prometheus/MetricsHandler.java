@@ -288,7 +288,7 @@ public class MetricsHandler
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. Exception {}.", errorLabel, errorCategory, source, servicePattern, exception);
+        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. Exception {}.", errorLabel, errorCategory, source, servicePattern, exception.toString());
     }
 
     /**

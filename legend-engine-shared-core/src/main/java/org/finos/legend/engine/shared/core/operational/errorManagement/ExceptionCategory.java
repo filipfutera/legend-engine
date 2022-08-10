@@ -79,7 +79,7 @@ public class ExceptionCategory
             case TYPE_NAME_MATCHING:
                 return hasMatchingTypeName(name);
             default:
-                throw new EngineException("Invalid matching method specified for error handling", ErrorCategory.INTERNAL_SERVER_ERROR);
+                throw new EngineException("Invalid matching method specified for error handling", ErrorCategory.OTHER_ERROR);
         }
     }
 
