@@ -288,7 +288,7 @@ public class MetricsHandler
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. Exception {}.", errorLabel, errorCategory, source, servicePattern, exception.toString());
+        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. Exception {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
@@ -368,7 +368,7 @@ public class MetricsHandler
         }
         catch (Exception e)
         {
-                LOGGER.warn("Error reading exception categorisation data: {}", e);
+                LOGGER.warn("Error reading exception categorisation data: {}", exceptionToPrettyString(e));
                 throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
         }
         return categories;
@@ -415,6 +415,19 @@ public class MetricsHandler
         String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
         String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
         return labelWithRemovedWord + "Error";
+    }
+
+    /**
+     * Method to pretty print an exception with the purpose of adding it to the error data file
+     * @param exception is the exception to be pretty printed
+     * @return pretty print formatted exception string
+     */
+    private static String exceptionToPrettyString(Exception exception)
+    {
+        String name = exception.getClass().getSimpleName();
+        String message = exception.getMessage();
+        String cause = exception.getCause() == null ? "None" : exception.getCause().toString();
+        return String.format("Exception: %s. Message: %s. Cause: %s", name, message, cause);
     }
 
 }
