@@ -17,18 +17,15 @@ package org.finos.legend.engine.shared.core.operational;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.http.ConnectionClosedException;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
-import org.ietf.jgss.GSSException;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
-import java.io.IOException;
 import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
 import static org.junit.Assert.assertEquals;
@@ -213,17 +210,17 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToUserAuthenticationErrorWithExceptionOutlineMatching()
     {
-        RuntimeException permissionsError = new UnsupportedOperationException("credentials issues");
+        UnsupportedOperationException permissionsError = new UnsupportedOperationException("credentials issues");
         MetricsHandler.observeError(null, permissionsError, null);
-        String[] labels = {"UnrecognisedRuntimeError", "UserAuthenticationError", "Unrecognised", "N/A"};
+        String[] labels = {"UnsupportedOperationError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
     public void testErrorCategorizationToUserAuthenticationErrorWithTypeNameMatching()
     {
-        MetricsHandler.observeError(null, new ConnectionPoolTimeoutException("user invalid details"), null);
-        String[] labels = {"ConnectionPoolTimeoutError", "UserAuthenticationError", "Unrecognised", "N/A"};
+        MetricsHandler.observeError(null, new IllegalAccessException("user invalid details"), null);
+        String[] labels = {"IllegalAccessError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
