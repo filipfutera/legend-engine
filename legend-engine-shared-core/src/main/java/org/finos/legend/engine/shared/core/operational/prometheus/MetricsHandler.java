@@ -298,10 +298,10 @@ public class MetricsHandler
     public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
     {
         origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(origin.toFriendlyString(), exception);
-        String source = servicePath == null ? origin.toFriendlyString() : "Service";
+        String errorLabel = getErrorLabel(origin.toCamelCase(), exception);
+        String source = servicePath == null ? origin.toCamelCase() : "Service";
         String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = getErrorCategory(exception).toString();
+        String errorCategory = getErrorCategory(exception).toCamelCase();
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
         LOGGER.error(String.format("Error - Label: %s. Category: %s. Source: %s. Service: %s. Exception %s.", errorLabel, errorCategory, source, servicePattern, exception));
     }
@@ -314,7 +314,7 @@ public class MetricsHandler
     private static synchronized ErrorCategory getErrorCategory(Exception exception)
     {
         ErrorCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
-        return engineExceptionCategory != ErrorCategory.UnknownError ? engineExceptionCategory : tryMatchExceptionToErrorCategory(exception);
+        return engineExceptionCategory != ErrorCategory.UNKNOWN_ERROR ? engineExceptionCategory : tryMatchExceptionToErrorCategory(exception);
     }
 
     /**
@@ -334,14 +334,14 @@ public class MetricsHandler
                 {
                     if (category.matches(exception, method))
                     {
-                        return ErrorCategory.valueOf(category.getFriendlyName());
+                        return ErrorCategory.valueOfCamelCase(category.getFriendlyName());
                     }
                 }
             }
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
-        return ErrorCategory.UnknownError;
+        return ErrorCategory.UNKNOWN_ERROR;
     }
 
     /**
@@ -358,7 +358,7 @@ public class MetricsHandler
             if (exception instanceof EngineException)
             {
                 EngineException engineException = (EngineException) exception;
-                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UnknownError)
+                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UNKNOWN_ERROR)
                 {
                     return engineException.getErrorCategory();
                 }
@@ -366,7 +366,7 @@ public class MetricsHandler
             exceptionHistory.add(exception);
             exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
         }
-        return ErrorCategory.UnknownError;
+        return ErrorCategory.UNKNOWN_ERROR;
     }
 
     /**

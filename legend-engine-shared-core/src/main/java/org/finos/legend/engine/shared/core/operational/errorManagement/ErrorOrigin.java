@@ -39,7 +39,7 @@ public enum ErrorOrigin
     UNRECOGNISED,
     ;
 
-    public String toFriendlyString()
+    public String toCamelCase()
     {
         String errorOrigin = this.toString().toLowerCase();
         String[] elements = errorOrigin.split("_");

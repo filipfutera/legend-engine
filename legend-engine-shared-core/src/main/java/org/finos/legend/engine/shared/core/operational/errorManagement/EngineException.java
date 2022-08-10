@@ -21,7 +21,7 @@ public class EngineException extends RuntimeException
 {
     private EngineErrorType errorType = null;
     private SourceInformation sourceInformation = SourceInformation.getUnknownSourceInformation();
-    private ErrorCategory errorCategory = ErrorCategory.UnknownError;
+    private ErrorCategory errorCategory = ErrorCategory.UNKNOWN_ERROR;
 
     public EngineException(String message)
     {
@@ -30,7 +30,7 @@ public class EngineException extends RuntimeException
 
     public EngineException(String message, ErrorCategory errorCategory)
     {
-        super(message);
+        this(message);
         this.errorCategory = errorCategory;
     }
 
@@ -50,16 +50,7 @@ public class EngineException extends RuntimeException
 
     public EngineException(String message, Exception cause, ErrorCategory errorCategory)
     {
-        super(message, cause);
-        if (cause instanceof EngineException)
-        {
-            this.errorType = ((EngineException) cause).getErrorType();
-            SourceInformation sourceInfo = ((EngineException) cause).getSourceInformation();
-            if (sourceInfo != null)
-            {
-                this.sourceInformation = sourceInfo;
-            }
-        }
+        this(message, cause);
         this.errorCategory = errorCategory;
     }
 
@@ -75,12 +66,7 @@ public class EngineException extends RuntimeException
 
     public EngineException(String message, SourceInformation sourceInformation, Throwable cause, ErrorCategory errorCategory)
     {
-        super(message, cause);
-        this.sourceInformation = sourceInformation;
-        if (cause instanceof EngineException)
-        {
-            this.errorType = ((EngineException) cause).getErrorType();
-        }
+        this(message, sourceInformation, cause);
         this.errorCategory = errorCategory;
     }
 
@@ -93,9 +79,7 @@ public class EngineException extends RuntimeException
 
     public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type, ErrorCategory errorCategory)
     {
-        super(message);
-        this.sourceInformation = sourceInformation;
-        this.errorType = type;
+        this(message, sourceInformation, type);
         this.errorCategory = errorCategory;
     }
 
@@ -108,9 +92,7 @@ public class EngineException extends RuntimeException
 
     public EngineException(String message, SourceInformation sourceInformation, EngineErrorType type, Throwable cause, ErrorCategory errorCategory)
     {
-        super(message, cause);
-        this.sourceInformation = sourceInformation;
-        this.errorType = type;
+        this(message, sourceInformation, type, cause);
         this.errorCategory = errorCategory;
     }
 

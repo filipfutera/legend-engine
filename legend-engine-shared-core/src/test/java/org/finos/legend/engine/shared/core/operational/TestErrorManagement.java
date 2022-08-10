@@ -56,7 +56,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndInvalidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), null);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "N/A"};
+        String[] labels = {"ServiceTestExecuteError", "UnknownError", ErrorOrigin.SERVICE_TEST_EXECUTE.toCamelCase(), "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -366,22 +366,22 @@ public class TestErrorManagement
     @Test
     public void testErrorOriginToUserFriendlyStringConversion()
     {
-        assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toFriendlyString(), "PureQueryExecution");
-        assertEquals(ErrorOrigin.GENERATE_PLAN.toFriendlyString(), "GeneratePlan");
-        assertEquals(ErrorOrigin.LAMBDA_RETURN_TYPE.toFriendlyString(), "LambdaReturnType");
-        assertEquals(ErrorOrigin.COMPILE_MODEL.toFriendlyString(), "CompileModel");
-        assertEquals(ErrorOrigin.MODEL_RESOLVE.toFriendlyString(), "ModelResolve");
-        assertEquals(ErrorOrigin.SERVICE_TEST_EXECUTE.toFriendlyString(), "ServiceTestExecute");
-        assertEquals(ErrorOrigin.SERVICE_EXECUTE.toFriendlyString(), "ServiceExecute");
-        assertEquals(ErrorOrigin.TDS_PROTOCOL.toFriendlyString(), "TdsProtocol");
-        assertEquals(ErrorOrigin.TDS_EXECUTE.toFriendlyString(), "TdsExecute");
-        assertEquals(ErrorOrigin.TDS_GENERATE_CODE.toFriendlyString(), "TdsGenerateCode");
-        assertEquals(ErrorOrigin.TDS_SCHEMA.toFriendlyString(), "TdsSchema");
-        assertEquals(ErrorOrigin.TDS_LAMBDA.toFriendlyString(), "TdsLambda");
-        assertEquals(ErrorOrigin.TDS_METADATA.toFriendlyString(), "TdsMetadata");
-        assertEquals(ErrorOrigin.TDS_INPUTS.toFriendlyString(), "TdsInputs");
-        assertEquals(ErrorOrigin.DSB_EXECUTE.toFriendlyString(), "DsbExecute");
-        assertEquals(ErrorOrigin.UNRECOGNISED.toFriendlyString(), "Unrecognised");
+        assertEquals(ErrorOrigin.PURE_QUERY_EXECUTION.toCamelCase(), "PureQueryExecution");
+        assertEquals(ErrorOrigin.GENERATE_PLAN.toCamelCase(), "GeneratePlan");
+        assertEquals(ErrorOrigin.LAMBDA_RETURN_TYPE.toCamelCase(), "LambdaReturnType");
+        assertEquals(ErrorOrigin.COMPILE_MODEL.toCamelCase(), "CompileModel");
+        assertEquals(ErrorOrigin.MODEL_RESOLVE.toCamelCase(), "ModelResolve");
+        assertEquals(ErrorOrigin.SERVICE_TEST_EXECUTE.toCamelCase(), "ServiceTestExecute");
+        assertEquals(ErrorOrigin.SERVICE_EXECUTE.toCamelCase(), "ServiceExecute");
+        assertEquals(ErrorOrigin.TDS_PROTOCOL.toCamelCase(), "TdsProtocol");
+        assertEquals(ErrorOrigin.TDS_EXECUTE.toCamelCase(), "TdsExecute");
+        assertEquals(ErrorOrigin.TDS_GENERATE_CODE.toCamelCase(), "TdsGenerateCode");
+        assertEquals(ErrorOrigin.TDS_SCHEMA.toCamelCase(), "TdsSchema");
+        assertEquals(ErrorOrigin.TDS_LAMBDA.toCamelCase(), "TdsLambda");
+        assertEquals(ErrorOrigin.TDS_METADATA.toCamelCase(), "TdsMetadata");
+        assertEquals(ErrorOrigin.TDS_INPUTS.toCamelCase(), "TdsInputs");
+        assertEquals(ErrorOrigin.DSB_EXECUTE.toCamelCase(), "DsbExecute");
+        assertEquals(ErrorOrigin.UNRECOGNISED.toCamelCase(), "Unrecognised");
     }
 
     @Test
@@ -396,7 +396,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingValidCategoryFromEngineException()
     {
-        MetricsHandler.observeError(null, new EngineException("some message", ErrorCategory.InternalServerError), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -404,7 +404,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingUnknownCategoryFromEngineException()
     {
-        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", ErrorCategory.UnknownError), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", ErrorCategory.UNKNOWN_ERROR), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -420,7 +420,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingValidCategoryFromNestedEngineException()
     {
-        MetricsHandler.observeError(null, new Exception(new EngineException("some message", ErrorCategory.InternalServerError)), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new Exception(new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
@@ -428,7 +428,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationExtractingValidCategoryFromNestedEngineExceptionBeforeMatching()
     {
-        MetricsHandler.observeError(null, new Exception("kerberos", new EngineException("some message", ErrorCategory.InternalServerError)), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(null, new Exception("kerberos", new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
