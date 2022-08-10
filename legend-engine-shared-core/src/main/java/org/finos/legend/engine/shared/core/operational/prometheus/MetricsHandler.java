@@ -236,7 +236,7 @@ public class MetricsHandler
      * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
      * the label given to the error, the category of the error and source of the error.
      */
-    private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
+    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
      * Types of error matching techniques that can be performed on an incoming exceptions.
@@ -376,15 +376,6 @@ public class MetricsHandler
                 LOGGER.warn(String.format("Error reading exception categorisation data: %s", e));
         }
         return categories;
-    }
-
-    /**
-     * Accessor for the Prometheus Collector for errors
-     * @return Counter measuring error frequency
-     */
-    public static Counter getErrorCounter()
-    {
-        return ERROR_COUNTER;
     }
 
     // -------------------------------------- STRING UTILS -------------------------------------

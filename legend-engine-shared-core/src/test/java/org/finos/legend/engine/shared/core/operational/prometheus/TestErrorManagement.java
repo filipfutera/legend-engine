@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.shared.core.operational;
+package org.finos.legend.engine.shared.core.operational.prometheus;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import io.prometheus.client.CollectorRegistry;
@@ -42,7 +42,7 @@ public class TestErrorManagement
     @After()
     public void clearCounterData()
     {
-        MetricsHandler.getErrorCounter().clear();
+        MetricsHandler.ERROR_COUNTER.clear();
     }
 
     @Test
