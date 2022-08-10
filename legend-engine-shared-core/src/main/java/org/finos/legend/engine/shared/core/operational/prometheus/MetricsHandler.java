@@ -275,7 +275,7 @@ public class MetricsHandler
         {
             errorName = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
         }
-        return (errorName.substring(0,1).toUpperCase() + errorName.substring(1)).substring(0, errorName.lastIndexOf("Exception")) + "Error";
+        return convertErrorLabelToPrettyString(errorName);
     }
 
     /**
@@ -387,7 +387,7 @@ public class MetricsHandler
         return ERROR_COUNTER;
     }
 
-    // -------------------------------------- END OF ERROR HANDLING -------------------------------------
+    // -------------------------------------- STRING UTILS -------------------------------------
 
     @Deprecated
     public static String generateMetricName(String name, boolean isErrorMetric)
@@ -410,6 +410,13 @@ public class MetricsHandler
             output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
         }
         return output.toString();
+    }
+
+    private static String convertErrorLabelToPrettyString(String errorLabel)
+    {
+        String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
+        String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
+        return labelWithRemovedWord + "Error";
     }
 
 }
