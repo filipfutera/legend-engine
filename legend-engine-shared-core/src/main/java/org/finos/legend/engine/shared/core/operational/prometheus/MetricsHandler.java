@@ -364,7 +364,7 @@ public class MetricsHandler
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_PATH))
         {
             categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ExceptionCategory[].class));
-            LOGGER.info("Successfully read {} error data file", MetricsHandler.class.getResource(ERROR_DATA_PATH));
+            LOGGER.info("Successfully read error data from {}.", MetricsHandler.class.getResource(ERROR_DATA_PATH));
         }
         catch (Exception e)
         {
