@@ -28,16 +28,11 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.Exception
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetricsHandler
 {
@@ -304,7 +299,7 @@ public class MetricsHandler
     private static synchronized ErrorCategory getErrorCategory(Throwable exception)
     {
         ErrorCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
-        return engineExceptionCategory != ErrorCategory.UNKNOWN_ERROR ? engineExceptionCategory : tryMatchExceptionToErrorDataFile(exception);
+        return engineExceptionCategory == ErrorCategory.UNKNOWN_ERROR ? tryMatchExceptionToErrorDataFile(exception) : engineExceptionCategory;
     }
 
     /**
@@ -365,7 +360,7 @@ public class MetricsHandler
      */
     private static synchronized List<ExceptionCategory> readErrorData()
     {
-        List<ExceptionCategory> categories = new ArrayList<>();
+        List<ExceptionCategory> categories;
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_PATH))
         {
             categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ExceptionCategory[].class));
@@ -392,6 +387,11 @@ public class MetricsHandler
                 .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
     }
 
+    /**
+     * Method to convert a snake case enum value to camel case for pretty printing for metrics
+     * @param value enum value to be converted
+     * @return camelCase string of enum value
+     */
     public static String toCamelCase(Enum value)
     {
         String snakeCaseString = value.toString();
@@ -404,6 +404,12 @@ public class MetricsHandler
         return output.toString();
     }
 
+    /**
+     * Method to take a label and change it to a pretty printed string by capitalising the first letter
+     * and replacing 'Exception' with 'Error'
+     * @param errorLabel is the string to be pretty printed
+     * @return pretty print version of error label for error metrics
+     */
     private static String convertErrorLabelToPrettyString(String errorLabel)
     {
         String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
