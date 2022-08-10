@@ -28,7 +28,6 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.Exception
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -381,7 +380,7 @@ public class MetricsHandler
         {
             String errorData = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
             categories = Arrays.asList(new ObjectMapper().readValue(errorData, ExceptionCategory[].class));
-            LOGGER.info("Successfully read %s error data file", MetricsHandler.class.getResource(ERROR_DATA_PATH).toString().contains("legend-engine-shared-core") ? "external" : "internal");
+            LOGGER.info(String.format("Successfully read %s error data file", MetricsHandler.class.getResource(ERROR_DATA_PATH).toString().contains("legend-engine-shared-core") ? "external" : "internal"));
         }
         catch (Exception e)
         {

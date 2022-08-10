@@ -46,7 +46,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variabl
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
-import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
@@ -63,7 +62,6 @@ import org.slf4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -72,7 +70,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.sql.SQLException;
 import static org.finos.legend.engine.plan.execution.api.result.ResultManager.manageResult;
 import static org.finos.legend.engine.shared.core.operational.http.InflateInterceptor.APPLICATION_ZLIB;
 
@@ -95,24 +92,6 @@ public class Execute
         this.transformers = transformers;
         MetricsHandler.createMetrics(this.getClass());
     }
-
-    //TEST
-
-    @GET
-    @Path("test/check/error/handling")
-    @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
-    public Response test()
-    {
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("", new RuntimeException("testing slang exception testing")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("invalid credentials")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unexpected token someetoken"), null);
-        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("unknown", new RuntimeException("unknown", new RuntimeException())), "/get/ComputerRegistry/{id}");
-        return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
-    }
-    //TEST
 
     @POST
     @ApiOperation(value = "Execute a Pure query (function) in the context of a Mapping and a Runtime. Full Interactive and Semi Interactive modes are supported by giving the appropriate PureModelContext (respectively PureModelDataContext and PureModelContextComposite). Production executions need to use the Service interface.")
