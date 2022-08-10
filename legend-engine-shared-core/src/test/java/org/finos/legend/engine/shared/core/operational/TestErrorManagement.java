@@ -17,6 +17,7 @@ package org.finos.legend.engine.shared.core.operational;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.http.ConnectionClosedException;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
@@ -212,7 +213,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToUserAuthenticationErrorWithExceptionOutlineMatching()
     {
-        RuntimeException permissionsError = new RuntimeException("some_user is not part of write service for some_service");
+        RuntimeException permissionsError = new UnsupportedOperationException("credentials issues");
         MetricsHandler.observeError(null, permissionsError, null);
         String[] labels = {"UnrecognisedRuntimeError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
@@ -221,8 +222,8 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToUserAuthenticationErrorWithTypeNameMatching()
     {
-        MetricsHandler.observeError(null, new GSSException(1), null);
-        String[] labels = {"GSSError", "UserAuthenticationError", "Unrecognised", "N/A"};
+        MetricsHandler.observeError(null, new ConnectionPoolTimeoutException("user invalid details"), null);
+        String[] labels = {"ConnectionPoolTimeoutError", "UserAuthenticationError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -260,8 +261,8 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToInternalServerErrorWithExceptionOutlineMatching()
     {
-        MetricsHandler.observeError(null, new IOException("Server returned HTTP response code: 500 for URL 'https://someUrl.com/get'"), null);
-        String[] labels = {"IOError", "InternalServerError", "Unrecognised", "N/A"};
+        MetricsHandler.observeError(null, new RuntimeException("something has not been configured properly"), null);
+        String[] labels = {"UnrecognisedRuntimeError", "InternalServerError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -276,7 +277,7 @@ public class TestErrorManagement
     @Test
     public void testErrorCategorizationToInternalServerErrorWithKeywordsMatching()
     {
-        MetricsHandler.observeError(null, new Exception("unreachable proxy"), null);
+        MetricsHandler.observeError(null, new Exception("overloaded servers"), null);
         String[] labels = {"UnrecognisedError", "InternalServerError", "Unrecognised", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
