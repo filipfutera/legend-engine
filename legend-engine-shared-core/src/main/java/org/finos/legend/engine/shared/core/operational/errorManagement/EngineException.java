@@ -21,7 +21,7 @@ public class EngineException extends RuntimeException
 {
     private EngineErrorType errorType = null;
     private SourceInformation sourceInformation = SourceInformation.getUnknownSourceInformation();
-    private ErrorCategory errorCategory = null;
+    private ErrorCategory errorCategory = ErrorCategory.UnknownError;
 
     public EngineException(String message)
     {

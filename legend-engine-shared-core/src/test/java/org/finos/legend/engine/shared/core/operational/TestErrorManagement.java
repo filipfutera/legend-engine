@@ -426,4 +426,12 @@ public class TestErrorManagement
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
+
+    @Test
+    public void testErrorCategorizationExtractingValidCategoryFromNestedEngineExceptionBeforeMatching()
+    {
+        MetricsHandler.observeError(null, new Exception("kerberos", new EngineException("some message", ErrorCategory.InternalServerError)), TEST_SERVICE_PATH);
+        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
 }
