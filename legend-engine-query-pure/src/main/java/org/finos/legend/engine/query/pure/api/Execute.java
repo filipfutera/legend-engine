@@ -14,7 +14,6 @@
 
 package org.finos.legend.engine.query.pure.api;
 
-import com.zaxxer.hikari.pool.HikariPool;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import io.swagger.annotations.Api;
@@ -39,7 +38,7 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
-import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
@@ -48,7 +47,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variabl
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
-import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
@@ -62,11 +60,9 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jax.rs.annotations.Pac4JProfileManager;
 import org.slf4j.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -75,9 +71,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import java.sql.SQLException;
-
 import static org.finos.legend.engine.plan.execution.api.result.ResultManager.manageResult;
 import static org.finos.legend.engine.shared.core.operational.http.InflateInterceptor.APPLICATION_ZLIB;
 
@@ -101,27 +94,6 @@ public class Execute
         MetricsHandler.createMetrics(this.getClass());
     }
 
-    //TEST
-
-    @GET
-    @Path("test/check/error/handling")
-    @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
-    public Response test()
-    {
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("check2", new HikariPool.PoolInitializationException(new Exception())), "/test/tempService");
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("", new RuntimeException("testing slang exception testing")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("", new EngineException("can't find table: test")), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new RuntimeException("nothing", new EngineException("failed to initialize pool")), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new RuntimeException("testing not lang exception testing"), null);
-        MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("cannot connect to kerberos", null), null);
-        MetricsHandler.observeError(ErrorOrigin.TDS_PROTOCOL, new EngineException("can't find a match for function query::help"), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_EXECUTE, new ArithmeticException(), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new ClassCastException(), null);
-        MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new SQLException("check sqlerror type regex"), "test/sql/computers/dell/getAllPurchases");
-        return ExceptionTool.exceptionManager(new RuntimeException(), LoggingEventType.EXECUTE_INTERACTIVE_ERROR, null);
-    }
-    //TEST
-
     @POST
     @ApiOperation(value = "Execute a Pure query (function) in the context of a Mapping and a Runtime. Full Interactive and Semi Interactive modes are supported by giving the appropriate PureModelContext (respectively PureModelDataContext and PureModelContextComposite). Production executions need to use the Service interface.")
     @Path("execute")
@@ -130,8 +102,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+        String servicePath = getServicePath(executeInput.model);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -142,7 +113,7 @@ public class Execute
                     executeInput.runtime,
                     executeInput.context,
                     clientVersion,
-                    profiles, request.getRemoteUser(), format, service != null ? service.getPath() : null);
+                    profiles, request.getRemoteUser(), format, servicePath);
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
                 MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
@@ -152,7 +123,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
             return response;
         }
     }
@@ -176,9 +147,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -204,9 +173,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -258,5 +225,21 @@ public class Execute
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
+    }
+
+    private String getServicePath(PureModelContext context)
+    {
+        String servicePath = null;
+        try
+        {
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            servicePath = service == null ? null : service.getPath();
+        }
+        catch (Exception exception)
+        {
+            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
+        }
+        return servicePath;
     }
 }

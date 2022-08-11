@@ -74,6 +74,10 @@
             <groupId>org.finos.legend.engine</groupId>
             <artifactId>legend-engine-language-pure-modelManager</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.engine</groupId>
+            <artifactId>legend-engine-language-pure-dsl-service</artifactId>
+        </dependency>
         <!-- ENGINE -->
 
         <dependency>
@@ -180,16 +184,5 @@
             <scope>test</scope>
         </dependency>
         <!-- TEST -->
-
-        <!-- temp for testing -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <!-- necessary dependency -->
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-language-pure-dsl-service</artifactId>
-        </dependency>
     </dependencies>
 </project>

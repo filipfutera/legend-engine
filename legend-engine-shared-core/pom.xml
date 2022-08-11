@@ -175,10 +175,6 @@
             <artifactId>commons-io</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-        </dependency>
         <!-- TEST -->
     </dependencies>
 </project>

@@ -26,7 +26,6 @@ public enum ErrorOrigin
     SERVICE_TEST_EXECUTE,
     SERVICE_EXECUTE,
 
-
     TDS_PROTOCOL,
     TDS_EXECUTE,
     TDS_GENERATE_CODE,
@@ -36,17 +35,6 @@ public enum ErrorOrigin
     TDS_INPUTS,
 
     DSB_EXECUTE,
-    ;
 
-    public String toFriendlyString()
-    {
-        String errorOrigin = this.toString().toLowerCase();
-        String[] elements = errorOrigin.split("_");
-        StringBuilder output = new StringBuilder();
-        for (String element : elements)
-        {
-            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
-        }
-        return output.toString();
-    }
+    UNRECOGNISED,
 }

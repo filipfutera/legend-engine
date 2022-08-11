@@ -14,6 +14,7 @@
 
 package org.finos.legend.engine.shared.core.operational.prometheus;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -23,19 +24,15 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class MetricsHandler
 {
@@ -223,6 +220,162 @@ public class MetricsHandler
         }
     }
 
+    // -------------------------------------- ERROR HANDLING -------------------------------------
+
+    /**
+     * Path to JSON file outlining error data for categorisation available to open source.
+     */
+    private static final String ERROR_DATA_PATH = "/ErrorData.json";
+
+    /**
+     * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
+     * the label given to the error, the category of the error and source of the error.
+     */
+    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
+
+    /**
+     * Types of error matching techniques that can be performed on an incoming exceptions.
+     */
+    public enum MatchingMethod
+    { EXCEPTION_OUTLINE_MATCHING, KEYWORDS_MATCHING, TYPE_NAME_MATCHING }
+
+    /**
+     * List of objects corresponding to the error categories holding their associated exception data.
+     */
+    private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
+
+    /**
+     * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
+     * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
+     * @param origin the stage in execution at which the error occurred.
+     * @param exception the exception to be analysed that has occurred in execution.
+     * @return the error label generated for the error.
+     */
+    private static synchronized String getErrorLabel(String origin, Throwable exception)
+    {
+        Class errorClass = exception.getClass();
+        HashSet<Throwable> exploredExceptions = new HashSet<>();
+        Class[] genericExceptionClasses = { RuntimeException.class, Exception.class, EngineException.class };
+        while (Arrays.asList(genericExceptionClasses).contains(errorClass) && exception.getCause() != null && !exploredExceptions.contains(exception.getCause()))
+        {
+            exploredExceptions.add(exception);
+            exception = exception.getCause();
+            errorClass = exception.getClass();
+        }
+        String errorLabel = exception.getClass().getSimpleName();
+        if (errorClass.equals(RuntimeException.class) || errorClass.equals(Exception.class))
+        {
+            errorLabel = origin + errorClass.getSimpleName();
+        }
+        else if (exception instanceof EngineException)
+        {
+            errorLabel = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorClass.getSimpleName() : origin + errorClass.getSimpleName();
+        }
+        return convertErrorLabelToPrettyString(errorLabel);
+    }
+
+    /**
+     * Method to record an error occurring during execution and add it to the metrics.
+     * @param origin the stage in execution at which the error occurred.
+     * @param exception the non-null exception to be analysed that has occurred in execution.
+     * @param servicePath the name of the service whose execution invoked the error.
+     */
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    {
+        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
+        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
+        String source = servicePath == null ? toCamelCase(origin) : "Service";
+        String servicePattern = servicePath == null ? "N/A" : servicePath;
+        String errorCategory = toCamelCase(getErrorCategory(exception));
+        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
+        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
+    }
+
+    /**
+     * Method to delegate obtaining the error category from an exception either by matching or extracting from EngineException.
+     * @param exception the exception to be analysed that has occurred in execution.
+     * @return the user-friendly error category.
+     */
+    private static synchronized ErrorCategory getErrorCategory(Throwable exception)
+    {
+        ErrorCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
+        return engineExceptionCategory == ErrorCategory.UNKNOWN_ERROR ? tryMatchExceptionToErrorDataFile(exception) : engineExceptionCategory;
+    }
+
+    /**
+     * Method to try and match an exception to an error category using the matching methods.
+     * If an initial exception can't be matched its cause it matched.
+     * @param exception is the original exception that occurred in the engine.
+     * @return Error category belonging to the exception.
+     */
+    private static synchronized ErrorCategory tryMatchExceptionToErrorDataFile(Throwable exception)
+    {
+        HashSet<Throwable> exceptionHistory = new HashSet();
+        while (exception != null && !exceptionHistory.contains(exception))
+        {
+            for (MatchingMethod method : MatchingMethod.values())
+            {
+                for (ExceptionCategory category : ERROR_CATEGORY_DATA_OBJECTS)
+                {
+                    if (category.matches(exception, method))
+                    {
+                        return category.getErrorCategory();
+                    }
+                }
+            }
+            exceptionHistory.add(exception);
+            exception = exception.getCause();
+        }
+        return ErrorCategory.UNKNOWN_ERROR;
+    }
+
+    /**
+     * Method to try and get an error category from a possible engine exception in the original exception's trace.
+     * If the original exception is not an EngineException or does not have its category field populated the cause is analysed.
+     * @param exception is the original exception that occurred in the engine.
+     * @return Error category belonging to the exception or UnknownError if no meaningful data could be obtained from a possible EngineException.
+     */
+    private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
+    {
+        HashSet<Throwable> exceptionHistory = new HashSet();
+        while (exception != null && !exceptionHistory.contains(exception))
+        {
+            if (exception instanceof EngineException)
+            {
+                EngineException engineException = (EngineException) exception;
+                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UNKNOWN_ERROR)
+                {
+                    return engineException.getErrorCategory();
+                }
+            }
+            exceptionHistory.add(exception);
+            exception = exception.getCause();
+        }
+        return ErrorCategory.UNKNOWN_ERROR;
+    }
+
+    /**
+     * Find and read JSON file with outline of errors to be used in categorizing the exceptions
+     * @return List of objects corresponding to the error categories with their respective data
+     */
+    private static synchronized List<ExceptionCategory> readErrorData()
+    {
+        List<ExceptionCategory> categories;
+        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_PATH))
+        {
+            categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ExceptionCategory[].class));
+            LOGGER.info("Successfully read error data from {}.", MetricsHandler.class.getResource(ERROR_DATA_PATH));
+        }
+        catch (Exception e)
+        {
+                LOGGER.warn("Error reading exception categorisation data: {}", exceptionToPrettyString(e));
+                throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
+        }
+        return categories;
+    }
+
+    // -------------------------------------- STRING UTILS -------------------------------------
+
     @Deprecated
     public static String generateMetricName(String name, boolean isErrorMetric)
     {
@@ -234,114 +387,47 @@ public class MetricsHandler
                 .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
     }
 
-    // -------------------------------------- ERROR HANDLING -------------------------------------
-
     /**
-     * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
-     * the label given to the error, the category of the error and source of the error
+     * Method to convert a snake case enum value to camel case for pretty printing for metrics
+     * @param value enum value to be converted
+     * @return camelCase string of enum value
      */
-    private static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
-
-    /**
-     * User friendly error categories
-     */
-    private enum ERROR_CATEGORIES
-    { UserAuthenticationError, UserExecutionError, ServerInternalError, ServerExecutionError, OtherError, UnknownError }
-
-    /**
-     * List of objects corresponding to the error categories holding their associated exception data
-     */
-    private static final ArrayList<ErrorCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
-
-    /**
-     * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
-     * If RuntimeException - Extract label from exception's cause - if it is null then label is UnknownRuntimeError
-     * If EngineException - Prefix EngineError with its Type - if type is null then use error origin value as prefix.
-     * @param origin the stage in execution at which the error occurred
-     * @param exception the exception to be analysed that has occurred in execution
-     * @return the error label generated for the error
-     */
-    private static synchronized String extractErrorLabel(String origin, Exception exception)
+    public static String toCamelCase(Enum value)
     {
-        String errorName = exception.getClass().getSimpleName();
-        if (errorName.equals(RuntimeException.class.getSimpleName()))
+        String snakeCaseString = value.toString();
+        String[] elements = snakeCaseString.toLowerCase().split("_");
+        StringBuilder output = new StringBuilder();
+        for (String element : elements)
         {
-            Throwable cause = exception.getCause();
-            errorName = cause == null ? origin + RuntimeException.class.getSimpleName() : cause.getClass().getSimpleName();
+            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
         }
-        else if (errorName.equals(EngineException.class.getSimpleName()))
-        {
-            errorName = ((EngineException) exception).getErrorType() != null ?
-                    ((EngineException) exception).getErrorType().toString().toLowerCase() + errorName : origin + errorName;
-        }
-        errorName = errorName.substring(0,1).toUpperCase() + errorName.substring(1);
-        return errorName.replace("Exception", "Error");
+        return output.toString();
     }
 
     /**
-     * Method to record an error occurring during execution and add it to the metrics
-     * @param origin the stage in execution at which the error occurred
-     * @param exception the exception to be analysed that has occurred in execution
-     * @param servicePath the name of the service whose execution invoked the error
+     * Method to take a label and change it to a pretty printed string by capitalising the first letter
+     * and replacing 'Exception' with 'Error'
+     * @param errorLabel is the string to be pretty printed
+     * @return pretty print version of error label for error metrics
      */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    private static String convertErrorLabelToPrettyString(String errorLabel)
     {
-        String errorLabel = extractErrorLabel(origin.toFriendlyString(), exception);
-        String source = servicePath == null ? origin.toFriendlyString() : "Service";
-        String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = getErrorCategory(exception).toString();
-        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error(String.format("Error: %s. Exception: %s. Label: %s. Service: %s. Category: %s", origin, exception, errorLabel, servicePath, errorCategory));
-
+        String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
+        String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
+        return labelWithRemovedWord + "Error";
     }
 
     /**
-     * Method to categorise the exception that has occurred
-     * If original exception cannot be matched its cause is attempted to be matched until the cause is null
-     * @param exception the exception to be analysed that has occurred in execution
-     * @return the user-friendly error category
+     * Method to pretty print an exception with the purpose of adding it to the error data file
+     * @param exception is the exception to be pretty printed
+     * @return pretty print formatted exception string
      */
-    private static synchronized ERROR_CATEGORIES getErrorCategory(Exception exception)
+    private static String exceptionToPrettyString(Exception exception)
     {
-        HashSet<Exception> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
-        {
-            for (ErrorCategory category : ERROR_CATEGORY_DATA_OBJECTS)
-            {
-                if (category.match(exception))
-                {
-                    return ERROR_CATEGORIES.valueOf(category.getFriendlyName());
-                }
-            }
-            exceptionHistory.add(exception);
-            exception = exception.getCause() != null && exception.getCause() instanceof Exception ? (Exception) exception.getCause() : null;
-        }
-        return ERROR_CATEGORIES.UnknownError;
-    }
-
-    /**
-     * Read JSON file with outline of errors to be used in categorizing the exceptions
-     * @return List of objects corresponding to the categories with their respective data
-     */
-    private static synchronized ArrayList<ErrorCategory> readErrorData()
-    {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<ErrorCategory> categories = new ArrayList<>();
-        try (InputStream inputStream = MetricsHandler.class.getResourceAsStream("/ErrorData.json"))
-        {
-            JSONObject object = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            JSONArray errorCategories = (JSONArray) object.get("ErrorCategories");
-            for (Object errorCategory : errorCategories)
-            {
-                ErrorCategory category = new ErrorCategory((JSONObject) errorCategory);
-                categories.add(category);
-            }
-        }
-        catch (Exception e)
-        {
-            LOGGER.error(e.toString());
-        }
-        return categories;
+        String name = exception.getClass().getSimpleName();
+        String message = exception.getMessage();
+        String cause = exception.getCause() == null ? "None" : exception.getCause().toString();
+        return String.format("Exception: %s. Message: %s. Cause: %s", name, message, cause);
     }
 
 }
