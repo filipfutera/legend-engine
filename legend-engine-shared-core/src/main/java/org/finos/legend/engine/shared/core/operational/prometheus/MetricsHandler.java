@@ -22,6 +22,10 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.utility.Iterate;
+import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
+import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
@@ -372,6 +376,21 @@ public class MetricsHandler
                 throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
         }
         return categories;
+    }
+
+    public static String getServicePathFromContext(PureModelContext context)
+    {
+        Service service = null;
+        try
+        {
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+        }
+        catch (Exception exception)
+        {
+            LOGGER.warn("Cannot extract service path from context ", context);
+        }
+        return service == null ? null : service.getPath();
     }
 
     // -------------------------------------- STRING UTILS -------------------------------------

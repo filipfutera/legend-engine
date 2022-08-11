@@ -25,7 +25,6 @@ import org.eclipse.collections.api.block.function.Function0;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperRuntimeBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperValueSpecificationBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.PureModel;
@@ -38,10 +37,8 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variable;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
@@ -101,8 +98,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+        String servicePath = MetricsHandler.getServicePathFromContext(executeInput.model);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -113,7 +109,7 @@ public class Execute
                     executeInput.runtime,
                     executeInput.context,
                     clientVersion,
-                    profiles, request.getRemoteUser(), format, service != null ? service.getPath() : null);
+                    profiles, request.getRemoteUser(), format, servicePath);
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
                 MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
@@ -123,7 +119,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
             return response;
         }
     }
@@ -147,9 +143,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            String servicePath = MetricsHandler.getServicePathFromContext(executeInput.model);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, servicePath);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -175,9 +170,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            String servicePath = MetricsHandler.getServicePathFromContext(executeInput.model);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, servicePath);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }

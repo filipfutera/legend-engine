@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.modelManager.ModelManager;
 import org.finos.legend.engine.plan.execution.service.ServiceModeling;
 import org.finos.legend.engine.plan.execution.service.test.TestResult;
@@ -79,30 +78,29 @@ public class ServiceModelingApi
     @ApiOperation(value = "Test a service. Only Full_Interactive mode is supported by giving appropriate PureModelContext (i.e. PureModelContextData)")
     @Consumes({MediaType.APPLICATION_JSON, APPLICATION_ZLIB})
     @Prometheus(name = "service test", doc = "Service test execution duration")
-    public Response doTest(PureModelContext service, @ApiParam(hidden = true) @Pac4JProfileManager ProfileManager<CommonProfile> pm, @Context UriInfo uriInfo)
+    public Response doTest(PureModelContext context, @ApiParam(hidden = true) @Pac4JProfileManager ProfileManager<CommonProfile> pm, @Context UriInfo uriInfo)
     {
         MutableList<CommonProfile> profiles  = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
         try
         {
-            if (!(service instanceof PureModelContextData))
+            if (!(context instanceof PureModelContextData))
             {
-                throw new RuntimeException("Only Full Interactive mode currently supported.  Received " + service.getClass().getName());
+                throw new RuntimeException("Only Full Interactive mode currently supported.  Received " + context.getClass().getName());
             }
             LOGGER.info(new LogInfo(profiles, LoggingEventType.SERVICE_FACADE_R_TEST_SERVICE_FULL_INTERACTIVE, "").toString());
             String metricContext = uriInfo != null ? uriInfo.getPath() : null;
-            List<TestResult> results = this.serviceModeling.testService(profiles, service, metricContext);
+            List<TestResult> results = this.serviceModeling.testService(profiles, context, metricContext);
             MetricsHandler.observe("service test", start, System.currentTimeMillis());
             MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
             return Response.ok(objectMapper.writeValueAsString(results), MediaType.APPLICATION_JSON_TYPE).build();
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) service).shallowCopy();
-            Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            String servicePath = MetricsHandler.getServicePathFromContext(context);
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, ex, invokedService == null ? null : invokedService.getPath());
+            MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, ex, servicePath);
             return response;
         }
     }
