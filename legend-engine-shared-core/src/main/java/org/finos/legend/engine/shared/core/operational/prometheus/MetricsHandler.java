@@ -22,6 +22,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -388,11 +389,11 @@ public class MetricsHandler
         try
         {
             PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            // Service service = (Service) Iterate.detect(data.getElements(), e -> e.getClass.getSimpleName().equals("Service"));
-            if (data.getElements().size() > 0)
-            {
-                servicePath = data.getElements().get(0).getPath();
-            }
+            servicePath = Iterate.detect(data.getElements(), e -> e.getClass().getSimpleName().equals("Service")).getPath();
+        }
+        catch (NullPointerException nullPointerException)
+        {
+            LOGGER.debug("Error not caused by service or service cannot be tracked from error");
         }
         catch (Exception exception)
         {
