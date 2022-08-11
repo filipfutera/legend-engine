@@ -38,6 +38,7 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
+import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
@@ -101,8 +102,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+        String servicePath = getServicePath(executeInput.model);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -113,7 +113,7 @@ public class Execute
                     executeInput.runtime,
                     executeInput.context,
                     clientVersion,
-                    profiles, request.getRemoteUser(), format, service != null ? service.getPath() : null);
+                    profiles, request.getRemoteUser(), format, servicePath);
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
                 MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
@@ -123,7 +123,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
             return response;
         }
     }
@@ -147,9 +147,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -175,9 +173,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) executeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -229,5 +225,21 @@ public class Execute
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
+    }
+
+    private String getServicePath(PureModelContext context)
+    {
+        String servicePath = null;
+        try
+        {
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            servicePath = service == null ? null : service.getPath();
+        }
+        catch (Exception exception)
+        {
+            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
+        }
+        return servicePath;
     }
 }

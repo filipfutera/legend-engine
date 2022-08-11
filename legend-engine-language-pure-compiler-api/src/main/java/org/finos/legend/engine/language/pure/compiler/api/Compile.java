@@ -41,7 +41,6 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jax.rs.annotations.Pac4JProfileManager;
 import org.slf4j.Logger;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -91,9 +90,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, getServicePath(model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -122,9 +119,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) lambdaReturnTypeInput.model).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, service != null ? service.getPath() : null);
+            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, getServicePath(lambdaReturnTypeInput.model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -140,5 +135,21 @@ public class Compile
             Response errorResponse = ExceptionTool.exceptionManager(ex, LoggingEventType.COMPILE_ERROR, profiles);
             return errorResponse;
         }
+    }
+
+    private String getServicePath(PureModelContext context)
+    {
+        String servicePath = null;
+        try
+        {
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            servicePath = service == null ? null : service.getPath();
+        }
+        catch (Exception exception)
+        {
+            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
+        }
+        return servicePath;
     }
 }
