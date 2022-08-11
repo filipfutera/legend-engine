@@ -26,7 +26,7 @@
     <name>Legend Engine</name>
     <groupId>org.finos.legend.engine</groupId>
     <artifactId>legend-engine</artifactId>
-    <version>3.8.2-SNAPSHOT</version>
+    <version>3.11.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -50,6 +50,10 @@
         <module>legend-engine-xt-persistence-grammar</module>
         <module>legend-engine-xt-persistence-protocol</module>
         <module>legend-engine-xt-persistence-pure</module>
+
+        <module>legend-engine-xt-persistence-cloud-grammar</module>
+        <module>legend-engine-xt-persistence-cloud-protocol</module>
+        <module>legend-engine-xt-persistence-cloud-pure</module>
 
         <module>legend-engine-xt-serviceStore-executionPlan</module>
         <module>legend-engine-xt-serviceStore-protocol</module>
@@ -80,10 +84,13 @@
         <module>legend-engine-xt-relationalStore-executionPlan-connection-api</module>
         <module>legend-engine-xt-relationalStore-executionPlan-connection-tests-api</module>
         <module>legend-engine-xt-relationalStore-pure</module>
-        <module>legend-engine-xt-relationalStore-sqlserver-pure</module>
+        <module>legend-engine-xt-relationalStore-postgres-execution-tests</module>
         <module>legend-engine-xt-relationalStore-api</module>
         <module>legend-engine-xt-relationalStore-grammar</module>
         <module>legend-engine-xt-relationalStore-protocol</module>
+
+        <module>legend-engine-xt-relationalStore-sqlserver-execution</module>
+        <module>legend-engine-xt-relationalStore-sqlserver-pure</module>
 
         <module>legend-engine-xt-avro</module>
         <module>legend-engine-xt-avro-pure</module>
@@ -112,10 +119,10 @@
         <module>legend-engine-xt-data-space-api</module>
 
         <module>legend-engine-xt-analytics-mapping-api</module>
+        <module>legend-engine-xt-analytics-mapping-protocol</module>
         <module>legend-engine-xt-analytics-mapping-pure</module>
 
         <module>legend-engine-pure-code-compiled-core</module>
-        <module>legend-engine-pure-code-compiled-core-external-shared</module>
 
         <module>legend-engine-pure-ide-light</module>
         <module>legend-engine-pure-ide-light-metadata-pure</module>
@@ -125,6 +132,7 @@
         <module>legend-engine-executionPlan-execution</module>
         <module>legend-engine-executionPlan-execution-api</module>
         <module>legend-engine-xt-relationalStore-executionPlan-connection-authentication</module>
+        <module>legend-engine-xt-relationalStore-executionPlan-connection-authentication-default</module>
         <module>legend-engine-executionPlan-execution-store-inMemory</module>
         <module>legend-engine-external-shared</module>
         <module>legend-engine-external-shared-format-model</module>
@@ -146,7 +154,6 @@
         <module>legend-engine-configuration</module>
         <module>legend-engine-protocol</module>
         <module>legend-engine-protocol-generation</module>
-        <module>legend-engine-protocol-external-shared-format</module>
         <module>legend-engine-protocol-pure</module>
         <module>legend-engine-application-query</module>
         <module>legend-engine-query-pure</module>
@@ -162,7 +169,7 @@
 
     <properties>
         <!-- Legend -->
-        <legend.pure.version>3.1.0</legend.pure.version>
+        <legend.pure.version>3.3.0</legend.pure.version>
         <legend.shared.version>0.22.0</legend.shared.version>
 
         <!-- SONAR -->
@@ -291,7 +298,8 @@
                     </executions>
                     <configuration>
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                        <generateGitPropertiesFilename>src/main/resources/legendExecutionVersion.json</generateGitPropertiesFilename>
+                        <generateGitPropertiesFilename>src/main/resources/legendExecutionVersion.json
+                        </generateGitPropertiesFilename>
                         <format>json</format>
                         <includeOnlyProperties>
                             <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
@@ -670,7 +678,17 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-relationalStore-sqlserver-execution</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
                 <artifactId>legend-engine-xt-relationalStore-sqlserver-pure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-relationalStore-postgres-execution-tests</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -708,6 +726,22 @@
             <dependency>
                 <groupId>org.finos.legend.engine</groupId>
                 <artifactId>legend-engine-xt-persistence-pure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-persistence-cloud-protocol</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-persistence-cloud-grammar</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-persistence-cloud-pure</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -918,6 +952,11 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-analytics-mapping-protocol</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
                 <artifactId>legend-engine-xt-analytics-mapping-pure</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -940,6 +979,11 @@
             <dependency>
                 <groupId>org.finos.legend.engine</groupId>
                 <artifactId>legend-engine-xt-relationalStore-executionPlan-connection-authentication</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-xt-relationalStore-executionPlan-connection-authentication-default</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -1012,11 +1056,6 @@
             <dependency>
                 <groupId>org.finos.legend.engine</groupId>
                 <artifactId>legend-engine-protocol-pure</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-protocol-external-shared-format</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -1144,12 +1183,6 @@
                 <artifactId>legend-engine-pure-code-compiled-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-pure-code-compiled-core-external-shared</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- ENGINE -->
 
             <!-- PURE -->
@@ -1953,7 +1986,7 @@
             </dependency>
             <dependency>
                 <groupId>com.amazon.redshift</groupId>
-                 <artifactId>redshift-jdbc42</artifactId>
+                <artifactId>redshift-jdbc42</artifactId>
                 <scope>runtime</scope>
                 <version>${redshiftJDBC.version}</version>
             </dependency>

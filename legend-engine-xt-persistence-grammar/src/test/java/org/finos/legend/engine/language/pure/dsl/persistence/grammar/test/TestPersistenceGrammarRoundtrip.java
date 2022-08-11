@@ -20,7 +20,7 @@ import org.junit.Test;
 public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGrammarRoundtripTestSuite
 {
     @Test
-    public void permitOptionalFieldsToBeEmptyFlat()
+    public void persistencePermitOptionalFieldsToBeEmptyFlat()
     {
         test("###Persistence\n" +
                 "import test::*;\n" +
@@ -33,6 +33,7 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "  {\n" +
                 "    sink: Relational\n" +
                 "    {\n" +
+                "      database: test::Database;\n" +
                 "    }\n" +
                 "    ingestMode: BitemporalSnapshot\n" +
                 "    {\n" +
@@ -63,7 +64,7 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
     }
 
     @Test
-    public void permitOptionalFieldsToBeEmptyMultiFlat()
+    public void persistencePermitOptionalFieldsToBeEmptyMultiFlat()
     {
         test("###Persistence\n" +
                 "import test::*;\n" +
@@ -76,6 +77,7 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "  {\n" +
                 "    sink: Relational\n" +
                 "    {\n" +
+                "      database: test::Database;\n" +
                 "    }\n" +
                 "    ingestMode: BitemporalDelta\n" +
                 "    {\n" +
@@ -134,14 +136,7 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "  {\n" +
                 "    sink: Relational\n" +
                 "    {\n" +
-                "      connection:\n" +
-                "      #{\n" +
-                "        JsonModelConnection\n" +
-                "        {\n" +
-                "          class: org::dxl::Animal;\n" +
-                "          url: 'my_url2';\n" +
-                "        }\n" +
-                "      }#\n" +
+                "      database: test::Database;\n" +
                 "    }\n" +
                 "    ingestMode: BitemporalSnapshot\n" +
                 "    {\n" +
@@ -189,7 +184,52 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "      {\n" +
                 "        url: 'https://x.com';\n" +
                 "      }\n" +
-                "    ]\n" +
+                "    ];\n" +
+                "  }\n" +
+                "}\n");
+
+        test("###Persistence\n" +
+                "import test::*;\n" +
+                "Persistence test::TestPersistence\n" +
+                "{\n" +
+                "  doc: 'test doc';\n" +
+                "  trigger: Manual;\n" +
+                "  service: test::service::Service;\n" +
+                "  persister: Batch\n" +
+                "  {\n" +
+                "    sink: Relational\n" +
+                "    {\n" +
+                "      database: test::Database;\n" +
+                "    }\n" +
+                "    ingestMode: AppendOnly\n" +
+                "    {\n" +
+                "      auditing: None;\n" +
+                "      filterDuplicates: true;\n" +
+                "    }\n" +
+                "    targetShape: Flat\n" +
+                "    {\n" +
+                "      modelClass: test::ModelClass;\n" +
+                "      targetName: 'TestDataset1';\n" +
+                "      partitionFields: [propertyA, propertyB];\n" +
+                "      deduplicationStrategy: MaxVersion\n" +
+                "      {\n" +
+                "        versionField: version;\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "  notifier:\n" +
+                "  {\n" +
+                "    notifyees:\n" +
+                "    [\n" +
+                "      Email\n" +
+                "      {\n" +
+                "        address: 'x.y@z.com';\n" +
+                "      },\n" +
+                "      PagerDuty\n" +
+                "      {\n" +
+                "        url: 'https://x.com';\n" +
+                "      }\n" +
+                "    ];\n" +
                 "  }\n" +
                 "}\n");
     }
@@ -209,14 +249,6 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "    sink: ObjectStorage\n" +
                 "    {\n" +
                 "      binding: test::Binding;\n" +
-                "      connection:\n" +
-                "      #{\n" +
-                "        JsonModelConnection\n" +
-                "        {\n" +
-                "          class: org::dxl::Animal;\n" +
-                "          url: 'my_url2';\n" +
-                "        }\n" +
-                "      }#\n" +
                 "    }\n" +
                 "    ingestMode: BitemporalDelta\n" +
                 "    {\n" +
@@ -286,7 +318,7 @@ public class TestPersistenceGrammarRoundtrip extends TestGrammarRoundtrip.TestGr
                 "      {\n" +
                 "        url: 'https://x.com';\n" +
                 "      }\n" +
-                "    ]\n" +
+                "    ];\n" +
                 "  }\n" +
                 "}\n");
     }

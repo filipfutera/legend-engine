@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.finos.legend.engine</groupId>
         <artifactId>legend-engine</artifactId>
-        <version>3.8.2-SNAPSHOT</version>
+        <version>3.11.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>legend-engine-server</artifactId>
@@ -75,6 +75,7 @@
                         <exclude>**/Test_Relational_DbSpecific_Databricks_UsingPureClientTestSuite.java</exclude>
                         <exclude>**/Test_Relational_DbSpecific_Redshift_UsingPureClientTestSuite.java</exclude>
                         <exclude>**/Test_Relational_DbSpecific_Snowflake_UsingPureClientTestSuite.java</exclude>
+                        <exclude>**/Test_Relational_DbSpecific_Postgres_UsingPureClientTestSuite.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -125,10 +126,6 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-xt-relationalStore-executionPlan-connection-authentication</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
             <artifactId>legend-engine-language-pure-compiler-api</artifactId>
         </dependency>
         <dependency>
@@ -158,6 +155,11 @@
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
             <artifactId>legend-engine-xt-persistence-grammar</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.engine</groupId>
+            <artifactId>legend-engine-xt-persistence-cloud-grammar</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -328,6 +330,16 @@
             <groupId>org.finos.legend.engine</groupId>
             <artifactId>legend-engine-xt-analytics-mapping-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.engine</groupId>
+            <artifactId>legend-engine-xt-relationalStore-sqlserver-execution</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.engine</groupId>
+            <artifactId>legend-engine-xt-relationalStore-executionPlan-connection-authentication-default</artifactId>
+        </dependency>
+
         <!-- ENGINE -->
 
         <!-- Shared Drop Wizard Bundles -->
