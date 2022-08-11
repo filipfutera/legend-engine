@@ -22,10 +22,8 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
@@ -314,8 +312,8 @@ public class MetricsHandler
      */
     private static synchronized ErrorCategory tryMatchExceptionToErrorDataFile(Throwable exception)
     {
-        HashSet<Throwable> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
+        HashSet<Throwable> exploredExceptions = new HashSet();
+        while (exception != null && !exploredExceptions.contains(exception))
         {
             for (MatchingMethod method : MatchingMethod.values())
             {
@@ -327,7 +325,7 @@ public class MetricsHandler
                     }
                 }
             }
-            exceptionHistory.add(exception);
+            exploredExceptions.add(exception);
             exception = exception.getCause();
         }
         return ErrorCategory.UNKNOWN_ERROR;
@@ -341,8 +339,8 @@ public class MetricsHandler
      */
     private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
     {
-        HashSet<Throwable> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
+        HashSet<Throwable> exploredExceptions = new HashSet();
+        while (exception != null && !exploredExceptions.contains(exception))
         {
             if (exception instanceof EngineException)
             {
@@ -352,7 +350,7 @@ public class MetricsHandler
                     return engineException.getErrorCategory();
                 }
             }
-            exceptionHistory.add(exception);
+            exploredExceptions.add(exception);
             exception = exception.getCause();
         }
         return ErrorCategory.UNKNOWN_ERROR;
@@ -378,19 +376,29 @@ public class MetricsHandler
         return categories;
     }
 
+    /**
+     * Method to obtain the path of service invoking an error from a context
+     * Needs to be tested - Elements might not be service and thus path might be inappropriate
+     * @param context is the context from which to obtain the service path
+     * @return path of service whose invocation caused the error.
+     */
     public static String getServicePathFromContext(PureModelContext context)
     {
-        Service service = null;
+        String servicePath = null;
         try
         {
             PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            // Service service = (Service) Iterate.detect(data.getElements(), e -> e.getClass.getSimpleName().equals("Service"));
+            if (data.getElements().size() > 0)
+            {
+                servicePath = data.getElements().get(0).getPath();
+            }
         }
         catch (Exception exception)
         {
             LOGGER.warn("Cannot extract service path from context ", context);
         }
-        return service == null ? null : service.getPath();
+        return servicePath;
     }
 
     // -------------------------------------- STRING UTILS -------------------------------------
