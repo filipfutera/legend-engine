@@ -248,6 +248,23 @@ public class MetricsHandler
     private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
+     * Method to record an error occurring during execution and add it to the metrics.
+     * @param origin the stage in execution at which the error occurred.
+     * @param exception the non-null exception to be analysed that has occurred in execution.
+     * @param servicePath the name of the service whose execution invoked the error.
+     */
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    {
+        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
+        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
+        String source = servicePath == null ? toCamelCase(origin) : "Service";
+        String servicePattern = servicePath == null ? "N/A" : servicePath;
+        String errorCategory = toCamelCase(getErrorCategory(exception));
+        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
+        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
+    }
+
+    /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
      * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
      * @param origin the stage in execution at which the error occurred.
@@ -278,23 +295,6 @@ public class MetricsHandler
     }
 
     /**
-     * Method to record an error occurring during execution and add it to the metrics.
-     * @param origin the stage in execution at which the error occurred.
-     * @param exception the non-null exception to be analysed that has occurred in execution.
-     * @param servicePath the name of the service whose execution invoked the error.
-     */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
-    {
-        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : "Service";
-        String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = toCamelCase(getErrorCategory(exception));
-        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
-    }
-
-    /**
      * Method to delegate obtaining the error category from an exception either by matching or extracting from EngineException.
      * @param exception the exception to be analysed that has occurred in execution.
      * @return the user-friendly error category.
@@ -303,6 +303,31 @@ public class MetricsHandler
     {
         ErrorCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
         return engineExceptionCategory == ErrorCategory.UNKNOWN_ERROR ? tryMatchExceptionToErrorDataFile(exception) : engineExceptionCategory;
+    }
+
+    /**
+     * Method to try and get an error category from a possible engine exception in the original exception's trace.
+     * If the original exception is not an EngineException or does not have its category field populated the cause is analysed.
+     * @param exception is the original exception that occurred in the engine.
+     * @return Error category belonging to the exception or UnknownError if no meaningful data could be obtained from a possible EngineException.
+     */
+    private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
+    {
+        HashSet<Throwable> exploredExceptions = new HashSet();
+        while (exception != null && !exploredExceptions.contains(exception))
+        {
+            if (exception instanceof EngineException)
+            {
+                EngineException engineException = (EngineException) exception;
+                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UNKNOWN_ERROR)
+                {
+                    return engineException.getErrorCategory();
+                }
+            }
+            exploredExceptions.add(exception);
+            exception = exception.getCause();
+        }
+        return ErrorCategory.UNKNOWN_ERROR;
     }
 
     /**
@@ -324,31 +349,6 @@ public class MetricsHandler
                     {
                         return category.getErrorCategory();
                     }
-                }
-            }
-            exploredExceptions.add(exception);
-            exception = exception.getCause();
-        }
-        return ErrorCategory.UNKNOWN_ERROR;
-    }
-
-    /**
-     * Method to try and get an error category from a possible engine exception in the original exception's trace.
-     * If the original exception is not an EngineException or does not have its category field populated the cause is analysed.
-     * @param exception is the original exception that occurred in the engine.
-     * @return Error category belonging to the exception or UnknownError if no meaningful data could be obtained from a possible EngineException.
-     */
-    private static synchronized ErrorCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
-    {
-        HashSet<Throwable> exploredExceptions = new HashSet();
-        while (exception != null && !exploredExceptions.contains(exception))
-        {
-            if (exception instanceof EngineException)
-            {
-                EngineException engineException = (EngineException) exception;
-                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ErrorCategory.UNKNOWN_ERROR)
-                {
-                    return engineException.getErrorCategory();
                 }
             }
             exploredExceptions.add(exception);
