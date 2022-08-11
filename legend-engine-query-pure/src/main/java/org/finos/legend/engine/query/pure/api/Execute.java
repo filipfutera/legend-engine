@@ -238,7 +238,7 @@ public class Execute
         }
         catch (Exception exception)
         {
-            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
+            LOGGER.debug("Error was not caused by service execution or cannot track service from error");
         }
         return servicePath;
     }
