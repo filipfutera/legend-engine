@@ -102,7 +102,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        String servicePath = getServicePath(executeInput.model);
+        String servicePath = getServicePathFromContext(executeInput.model);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -147,7 +147,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePathFromContext(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -173,7 +173,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
+            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePathFromContext(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -227,7 +227,7 @@ public class Execute
         }
     }
 
-    private String getServicePath(PureModelContext context)
+    private String getServicePathFromContext(PureModelContext context)
     {
         String servicePath = null;
         try

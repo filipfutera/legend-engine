@@ -89,7 +89,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, getServicePath(model));
+            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, getServicePathFromContext(model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -118,7 +118,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, getServicePath(lambdaReturnTypeInput.model));
+            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, getServicePathFromContext(lambdaReturnTypeInput.model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -136,7 +136,7 @@ public class Compile
         }
     }
 
-    private String getServicePath(PureModelContext context)
+    private String getServicePathFromContext(PureModelContext context)
     {
         String servicePath = null;
         try
