@@ -139,15 +139,11 @@ public class Compile
     private String getServicePathFromContext(PureModelContext context)
     {
         String servicePath = null;
-        try
+        if (context instanceof PureModelContextData)
         {
             PureModelContextData data = ((PureModelContextData) context).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             servicePath = service == null ? null : service.getPath();
-        }
-        catch (Exception exception)
-        {
-            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
         }
         return servicePath;
     }

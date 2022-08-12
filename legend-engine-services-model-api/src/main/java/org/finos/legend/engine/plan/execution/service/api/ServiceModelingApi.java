@@ -96,15 +96,11 @@ public class ServiceModelingApi
         catch (Exception ex)
         {
             String servicePath = null;
-            try
+            if (service instanceof PureModelContextData)
             {
                 PureModelContextData data = ((PureModelContextData) service).shallowCopy();
                 Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
                 servicePath = invokedService == null ? null : invokedService.getPath();
-            }
-            catch (Exception exception)
-            {
-                LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
             }
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);

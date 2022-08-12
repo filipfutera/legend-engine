@@ -376,20 +376,9 @@ public class MetricsHandler
 
     // -------------------------------------- STRING UTILS -------------------------------------
 
-    @Deprecated
-    public static String generateMetricName(String name, boolean isErrorMetric)
-    {
-        return METRIC_PREFIX + name
-                .replace("/", "_")
-                .replace("-", "_")
-                .replace("{", "")
-                .replace("}", "")
-                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
-    }
-
     /**
      * Method to convert a snake case enum value to camel case for pretty printing for metrics
-     * @param value enum value to be converted
+     * @param value NonNull enum value to be converted
      * @return camelCase string of enum value
      */
     public static String toCamelCase(Enum value)
@@ -397,10 +386,7 @@ public class MetricsHandler
         String snakeCaseString = value.toString();
         String[] elements = snakeCaseString.toLowerCase().split("_");
         StringBuilder output = new StringBuilder();
-        for (String element : elements)
-        {
-            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
-        }
+        Arrays.stream(elements).forEach(element -> output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1)));
         return output.toString();
     }
 
@@ -430,4 +416,14 @@ public class MetricsHandler
         return String.format("Exception: %s. Message: %s. Cause: %s", name, message, cause);
     }
 
+    @Deprecated
+    public static String generateMetricName(String name, boolean isErrorMetric)
+    {
+        return METRIC_PREFIX + name
+                .replace("/", "_")
+                .replace("-", "_")
+                .replace("{", "")
+                .replace("}", "")
+                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
+    }
 }
