@@ -392,6 +392,11 @@ public class MetricsHandler
         return output.toString();
     }
 
+    /**
+     * Method to delete the suffix "Error" to a camel case string if it exists.
+     * @param string the string whose suffix to remove
+     * @return string without the suffix "Error" if applicable.
+     */
     private static String removeErrorSuffix(String string)
     {
         return string.endsWith("Error") ? string.substring(0, string.indexOf("Error")) : string;
