@@ -48,7 +48,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndValidServicePattern()
     {
         MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, new Exception(), TEST_SERVICE_PATH);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"ServiceTestExecuteError", "UnknownError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -64,7 +64,7 @@ public class TestErrorManagement
     public void testErrorWithInvalidOriginAndValidServicePattern()
     {
         MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedError", "UnknownError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -84,7 +84,7 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, new NullPointerException(), TEST_SERVICE_PATH);
-        labels = new String[]{"NullPointerError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        labels = new String[]{"NullPointerError", "UnknownError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -96,7 +96,7 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("unknown message",null, EngineErrorType.PARSER), TEST_SERVICE_PATH);
-        labels = new String[]{"ParserEngineError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        labels = new String[]{"ParserEngineError", "UnknownError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -120,7 +120,7 @@ public class TestErrorManagement
     public void testErrorLabelExtractionWithRuntimeExceptionWithCause()
     {
         MetricsHandler.observeError(null, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH);
-        String[] labels = {"ArithmeticError", "UnknownError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"ArithmeticError", "UnknownError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -351,7 +351,7 @@ public class TestErrorManagement
     public void testErrorCategorizationMatchingMethodPrioritizationOfExceptionOutlineToKeywords()
     {
         MetricsHandler.observeError(ErrorOrigin.DSB_EXECUTE, new EngineException("Can't resolve the builder for function 'get/Login/Kerberos"), TEST_SERVICE_PATH);
-        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"DsbExecuteEngineError", "ServerExecutionError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -359,7 +359,7 @@ public class TestErrorManagement
     public void testErrorCategorizationMatchingMethodPrioritizationOfKeywordsToTypeName()
     {
         MetricsHandler.observeError(null, new JsonGenerationException("can't get kerberos authentication"), TEST_SERVICE_PATH);
-        String[] labels = {"JsonGenerationError", "UserAuthenticationError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"JsonGenerationError", "UserAuthenticationError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -386,7 +386,7 @@ public class TestErrorManagement
     public void testErrorCategorizationExtractingValidCategoryFromEngineException()
     {
         MetricsHandler.observeError(null, new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -394,7 +394,7 @@ public class TestErrorManagement
     public void testErrorCategorizationExtractingUnknownCategoryFromEngineException()
     {
         MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", ErrorCategory.UNKNOWN_ERROR), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -402,7 +402,7 @@ public class TestErrorManagement
     public void testErrorCategorizationExtractingNullCategoryFromEngineException()
     {
         MetricsHandler.observeError(null, new EngineException("Error in 'some::graph': Couldn't resolve test", (ErrorCategory) null), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "ServerExecutionError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -410,7 +410,7 @@ public class TestErrorManagement
     public void testErrorCategorizationExtractingValidCategoryFromNestedEngineException()
     {
         MetricsHandler.observeError(null, new Exception(new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -418,7 +418,7 @@ public class TestErrorManagement
     public void testErrorCategorizationMatchingTechniquePrioritizationOfCategorisedExceptionToMatching()
     {
         MetricsHandler.observeError(null, new Exception("kerberos", new EngineException("some message", ErrorCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "Service", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedEngineError", "InternalServerError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 }

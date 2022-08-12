@@ -254,7 +254,7 @@ public class MetricsHandler
     {
         origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
         String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : "Service";
+        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(ErrorOrigin.SERVICE_EXECUTE);
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
