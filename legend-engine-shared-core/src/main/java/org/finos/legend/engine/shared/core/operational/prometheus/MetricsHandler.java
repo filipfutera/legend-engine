@@ -253,8 +253,8 @@ public class MetricsHandler
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
         origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
-        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR);
+        String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
+        String source = servicePath == null ? toCamelCase(origin) : removeErrorSuffix(toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
@@ -392,6 +392,11 @@ public class MetricsHandler
         return output.toString();
     }
 
+    private static String removeErrorSuffix(String string)
+    {
+        return string.endsWith("Error") ? string.substring(0, string.indexOf("Error")) : string;
+    }
+
     /**
      * Method to take a label and change it to a pretty printed string by capitalising the first letter
      * and replacing 'Exception' with 'Error'
@@ -402,7 +407,7 @@ public class MetricsHandler
     {
         String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
         String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
-        return labelWithRemovedWord.endsWith("Error") ? labelWithRemovedWord : labelWithRemovedWord + "Error";
+        return removeErrorSuffix(labelWithRemovedWord) + "Error";
     }
 
     /**
