@@ -245,6 +245,23 @@ public class MetricsHandler
     private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
+     * Method to record an error occurring during execution and add it to the metrics.
+     * @param origin the stage in execution at which the error occurred.
+     * @param exception the non-null exception to be analysed that has occurred in execution.
+     * @param servicePath the name of the service whose execution invoked the error.
+     */
+    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    {
+        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
+        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
+        String source = servicePath == null ? toCamelCase(origin) : "Service";
+        String servicePattern = servicePath == null ? "N/A" : servicePath;
+        String errorCategory = toCamelCase(getErrorCategory(exception));
+        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
+        LOGGER.info("Error added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
+    }
+
+    /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
      * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
      * @param origin the stage in execution at which the error occurred.
@@ -272,23 +289,6 @@ public class MetricsHandler
             errorLabel = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorClass.getSimpleName() : origin + errorClass.getSimpleName();
         }
         return convertErrorLabelToPrettyString(errorLabel);
-    }
-
-    /**
-     * Method to record an error occurring during execution and add it to the metrics.
-     * @param origin the stage in execution at which the error occurred.
-     * @param exception the non-null exception to be analysed that has occurred in execution.
-     * @param servicePath the name of the service whose execution invoked the error.
-     */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
-    {
-        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : "Service";
-        String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = toCamelCase(getErrorCategory(exception));
-        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
@@ -369,7 +369,9 @@ public class MetricsHandler
         catch (Exception e)
         {
                 LOGGER.warn("Error reading exception categorisation data: {}", exceptionToPrettyString(e));
-                throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
+                EngineException engineException = new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
+                observeError(ErrorOrigin.ERROR_MANAGEMENT, engineException, null);
+                throw engineException;
         }
         return categories;
     }

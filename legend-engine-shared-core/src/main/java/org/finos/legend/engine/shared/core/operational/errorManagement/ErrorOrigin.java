@@ -36,5 +36,7 @@ public enum ErrorOrigin
 
     DSB_EXECUTE,
 
+    ERROR_MANAGEMENT,
+
     UNRECOGNISED,
 }
