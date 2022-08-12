@@ -32,7 +32,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lambda;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
@@ -89,7 +88,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, getServicePathFromContext(model));
+            MetricsHandler.observeError(LoggingEventType.COMPILE_MODEL_ERROR, ex, getServicePathFromContext(model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -118,7 +117,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, getServicePathFromContext(lambdaReturnTypeInput.model));
+            MetricsHandler.observeError(LoggingEventType.LAMBDA_RETURN_TYPE_ERROR, ex, getServicePathFromContext(lambdaReturnTypeInput.model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }

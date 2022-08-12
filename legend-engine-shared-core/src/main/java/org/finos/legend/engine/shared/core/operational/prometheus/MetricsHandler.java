@@ -25,7 +25,7 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.InputStream;
@@ -250,11 +250,11 @@ public class MetricsHandler
      * @param exception the non-null exception to be analysed that has occurred in execution.
      * @param servicePath the name of the service whose execution invoked the error.
      */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
+    public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
+        origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
         String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(ErrorOrigin.SERVICE_EXECUTE);
+        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR);
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
@@ -370,7 +370,7 @@ public class MetricsHandler
         {
                 LOGGER.warn("Error reading exception categorisation data: {}", exceptionToPrettyString(e));
                 EngineException engineException = new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
-                observeError(ErrorOrigin.ERROR_MANAGEMENT, engineException, null);
+                observeError(LoggingEventType.ERROR_MANAGEMENT_ERROR, engineException, null);
                 throw engineException;
         }
         return categories;
@@ -402,7 +402,7 @@ public class MetricsHandler
     {
         String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
         String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
-        return labelWithRemovedWord + "Error";
+        return labelWithRemovedWord.endsWith("Error") ? labelWithRemovedWord : labelWithRemovedWord + "Error";
     }
 
     /**
