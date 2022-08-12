@@ -122,7 +122,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR , ex, servicePath);
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR, ex, servicePath);
             return response;
         }
     }
