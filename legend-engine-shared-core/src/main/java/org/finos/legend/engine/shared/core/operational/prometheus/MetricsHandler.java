@@ -254,7 +254,8 @@ public class MetricsHandler
     {
         origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
         String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
-        String source = servicePath == null ? toCamelCase(origin) : removeErrorSuffix(toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR));
+        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR);
+        source = removeErrorSuffix(source);
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
