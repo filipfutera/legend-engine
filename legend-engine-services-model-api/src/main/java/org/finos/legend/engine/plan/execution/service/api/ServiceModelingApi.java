@@ -29,7 +29,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.engine.shared.core.deployment.DeploymentMode;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
@@ -39,9 +38,7 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jax.rs.annotations.Pac4JProfileManager;
 import org.slf4j.Logger;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -49,9 +46,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import java.util.List;
-
 import static org.finos.legend.engine.shared.core.operational.http.InflateInterceptor.APPLICATION_ZLIB;
 
 @Api(tags = "Service")
@@ -98,11 +93,16 @@ public class ServiceModelingApi
         }
         catch (Exception ex)
         {
-            PureModelContextData data = ((PureModelContextData) service).shallowCopy();
-            Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            String servicePath = null;
+            if (service instanceof PureModelContextData)
+            {
+                PureModelContextData data = ((PureModelContextData) service).shallowCopy();
+                Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+                servicePath = invokedService == null ? null : invokedService.getPath();
+            }
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.SERVICE_TEST_EXECUTE, ex, invokedService == null ? null : invokedService.getPath());
+            MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, ex, servicePath);
             return response;
         }
     }

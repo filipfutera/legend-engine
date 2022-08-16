@@ -47,7 +47,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variabl
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LogInfo;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
@@ -102,7 +101,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        String servicePath = getServicePath(executeInput.model);
+        String servicePath = getServicePathFromContext(executeInput.model);
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -123,7 +122,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR, ex, servicePath);
             return response;
         }
     }
@@ -147,7 +146,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
+            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, getServicePathFromContext(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -173,7 +172,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.GENERATE_PLAN, ex, getServicePath(executeInput.model));
+            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, getServicePathFromContext(executeInput.model));
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -221,24 +220,20 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.PURE_QUERY_EXECUTION, ex, servicePath);
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR, ex, servicePath);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
     }
 
-    private String getServicePath(PureModelContext context)
+    private String getServicePathFromContext(PureModelContext context)
     {
         String servicePath = null;
-        try
+        if (context instanceof PureModelContextData)
         {
             PureModelContextData data = ((PureModelContextData) context).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             servicePath = service == null ? null : service.getPath();
-        }
-        catch (Exception exception)
-        {
-            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
         }
         return servicePath;
     }

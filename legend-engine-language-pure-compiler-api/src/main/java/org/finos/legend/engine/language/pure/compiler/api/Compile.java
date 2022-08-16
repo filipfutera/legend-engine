@@ -32,7 +32,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lambda;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionTool;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
@@ -51,7 +50,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.finos.legend.engine.shared.core.operational.http.InflateInterceptor.APPLICATION_ZLIB;
 
 @Api(tags = "Pure - Compiler")
@@ -90,7 +88,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.COMPILE_MODEL, ex, getServicePath(model));
+            MetricsHandler.observeError(LoggingEventType.COMPILE_MODEL_ERROR, ex, getServicePathFromContext(model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -119,7 +117,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(ErrorOrigin.LAMBDA_RETURN_TYPE, ex, getServicePath(lambdaReturnTypeInput.model));
+            MetricsHandler.observeError(LoggingEventType.LAMBDA_RETURN_TYPE_ERROR, ex, getServicePathFromContext(lambdaReturnTypeInput.model));
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -137,18 +135,14 @@ public class Compile
         }
     }
 
-    private String getServicePath(PureModelContext context)
+    private String getServicePathFromContext(PureModelContext context)
     {
         String servicePath = null;
-        try
+        if (context instanceof PureModelContextData)
         {
             PureModelContextData data = ((PureModelContextData) context).shallowCopy();
             Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
             servicePath = service == null ? null : service.getPath();
-        }
-        catch (Exception exception)
-        {
-            LOGGER.debug("Error was not caused by a service execution or cannot track service from error");
         }
         return servicePath;
     }

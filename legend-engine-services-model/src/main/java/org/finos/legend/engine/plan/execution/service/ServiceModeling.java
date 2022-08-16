@@ -45,7 +45,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.engine.shared.core.deployment.DeploymentMode;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.finos.legend.engine.shared.core.operational.prometheus.Prometheus;
 import org.finos.legend.engine.shared.javaCompiler.JavaCompileException;
@@ -55,7 +55,6 @@ import org.finos.legend.pure.generated.Root_meta_legend_service_metamodel_Servic
 import org.finos.legend.pure.generated.Root_meta_pure_extension_Extension;
 import org.finos.legend.pure.m3.coreinstance.Package;
 import org.pac4j.core.profile.CommonProfile;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -95,11 +94,13 @@ public class ServiceModeling
     @Prometheus(name = "service test model resolve", doc = "Model resolution duration summary within service test execution")
     public List<TestResult> testService(MutableList<CommonProfile> profiles, PureModelContext context, String metricsContext)
     {
-        PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-        Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+        Service invokedService = null;
         try
         {
             long start = System.currentTimeMillis();
+            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
+            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
+            invokedService = service;
             PureModelContextData dataWithoutService = PureModelContextData.newBuilder().withOrigin(data.getOrigin()).withSerializer(data.getSerializer()).withElements(LazyIterate.select(data.getElements(), e -> e != service)).build();
             PureModel pureModel  = new PureModel(dataWithoutService, profiles, deploymentMode);
             Pair<PureModelContextData, PureModel> pureModelAndData  = Tuples.pair(dataWithoutService, pureModel);
@@ -123,7 +124,7 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            MetricsHandler.observeError(ErrorOrigin.MODEL_RESOLVE, e, service == null ? null : service.getPath());
+            MetricsHandler.observeError(LoggingEventType.MODEL_RESOLVE_ERROR, e, invokedService == null ? null : invokedService.getPath());
             throw new RuntimeException(e);
         }
     }

@@ -25,7 +25,7 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorOrigin;
+import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.InputStream;
@@ -245,6 +245,24 @@ public class MetricsHandler
     private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
 
     /**
+     * Method to record an error occurring during execution and add it to the metrics.
+     * @param origin the stage in execution at which the error occurred.
+     * @param exception the non-null exception to be analysed that has occurred in execution.
+     * @param servicePath the name of the service whose execution invoked the error.
+     */
+    public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
+    {
+        origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
+        String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
+        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR);
+        source = removeErrorSuffix(source);
+        String servicePattern = servicePath == null ? "N/A" : servicePath;
+        String errorCategory = toCamelCase(getErrorCategory(exception));
+        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
+        LOGGER.info("Error added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
+    }
+
+    /**
      * Method to obtain a label for the error that has occurred - Mostly converts exception class name directly to label except:
      * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their origin value.
      * @param origin the stage in execution at which the error occurred.
@@ -272,23 +290,6 @@ public class MetricsHandler
             errorLabel = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + errorClass.getSimpleName() : origin + errorClass.getSimpleName();
         }
         return convertErrorLabelToPrettyString(errorLabel);
-    }
-
-    /**
-     * Method to record an error occurring during execution and add it to the metrics.
-     * @param origin the stage in execution at which the error occurred.
-     * @param exception the non-null exception to be analysed that has occurred in execution.
-     * @param servicePath the name of the service whose execution invoked the error.
-     */
-    public static synchronized void observeError(ErrorOrigin origin, Exception exception, String servicePath)
-    {
-        origin = origin == null ? ErrorOrigin.UNRECOGNISED : origin;
-        String errorLabel = getErrorLabel(toCamelCase(origin), exception);
-        String source = servicePath == null ? toCamelCase(origin) : "Service";
-        String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String errorCategory = toCamelCase(getErrorCategory(exception));
-        ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.error("Error - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
@@ -369,27 +370,18 @@ public class MetricsHandler
         catch (Exception e)
         {
                 LOGGER.warn("Error reading exception categorisation data: {}", exceptionToPrettyString(e));
-                throw new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
+                EngineException engineException = new EngineException("Cannot read error data file properly", e, ErrorCategory.INTERNAL_SERVER_ERROR);
+                observeError(LoggingEventType.ERROR_MANAGEMENT_ERROR, engineException, null);
+                throw engineException;
         }
         return categories;
     }
 
     // -------------------------------------- STRING UTILS -------------------------------------
 
-    @Deprecated
-    public static String generateMetricName(String name, boolean isErrorMetric)
-    {
-        return METRIC_PREFIX + name
-                .replace("/", "_")
-                .replace("-", "_")
-                .replace("{", "")
-                .replace("}", "")
-                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
-    }
-
     /**
      * Method to convert a snake case enum value to camel case for pretty printing for metrics
-     * @param value enum value to be converted
+     * @param value NonNull enum value to be converted
      * @return camelCase string of enum value
      */
     public static String toCamelCase(Enum value)
@@ -397,11 +389,18 @@ public class MetricsHandler
         String snakeCaseString = value.toString();
         String[] elements = snakeCaseString.toLowerCase().split("_");
         StringBuilder output = new StringBuilder();
-        for (String element : elements)
-        {
-            output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1));
-        }
+        Arrays.stream(elements).forEach(element -> output.append(element.substring(0, 1).toUpperCase()).append(element.substring(1)));
         return output.toString();
+    }
+
+    /**
+     * Method to delete the suffix "Error" to a camel case string if it exists.
+     * @param string the string whose suffix to remove
+     * @return string without the suffix "Error" if applicable.
+     */
+    private static String removeErrorSuffix(String string)
+    {
+        return string.endsWith("Error") ? string.substring(0, string.indexOf("Error")) : string;
     }
 
     /**
@@ -414,7 +413,7 @@ public class MetricsHandler
     {
         String capitalisedErrorLabel = errorLabel.substring(0,1).toUpperCase() + errorLabel.substring(1);
         String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
-        return labelWithRemovedWord + "Error";
+        return removeErrorSuffix(labelWithRemovedWord) + "Error";
     }
 
     /**
@@ -430,4 +429,14 @@ public class MetricsHandler
         return String.format("Exception: %s. Message: %s. Cause: %s", name, message, cause);
     }
 
+    @Deprecated
+    public static String generateMetricName(String name, boolean isErrorMetric)
+    {
+        return METRIC_PREFIX + name
+                .replace("/", "_")
+                .replace("-", "_")
+                .replace("{", "")
+                .replace("}", "")
+                .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
+    }
 }
