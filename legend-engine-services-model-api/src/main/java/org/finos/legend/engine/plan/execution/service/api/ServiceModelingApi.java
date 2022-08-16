@@ -19,13 +19,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.modelManager.ModelManager;
 import org.finos.legend.engine.plan.execution.service.ServiceModeling;
 import org.finos.legend.engine.plan.execution.service.test.TestResult;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.engine.shared.core.deployment.DeploymentMode;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
@@ -93,16 +91,9 @@ public class ServiceModelingApi
         }
         catch (Exception ex)
         {
-            String servicePath = null;
-            if (service instanceof PureModelContextData)
-            {
-                PureModelContextData data = ((PureModelContextData) service).shallowCopy();
-                Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-                servicePath = invokedService == null ? null : invokedService.getPath();
-            }
             MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, ex, servicePath);
+            MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, ex, uriInfo != null ? uriInfo.getPath() : null);
             return response;
         }
     }

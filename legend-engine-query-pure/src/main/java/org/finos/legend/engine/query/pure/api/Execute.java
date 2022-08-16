@@ -25,7 +25,6 @@ import org.eclipse.collections.api.block.function.Function0;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperRuntimeBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.HelperValueSpecificationBuilder;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.PureModel;
@@ -38,11 +37,8 @@ import org.finos.legend.engine.plan.generation.PlanWithDebug;
 import org.finos.legend.engine.plan.generation.transformers.PlanTransformer;
 import org.finos.legend.engine.plan.platform.PlanPlatform;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.SingleExecutionPlan;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.Variable;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.executionContext.ExecutionContext;
 import org.finos.legend.engine.shared.core.api.model.ExecuteInput;
@@ -101,7 +97,7 @@ public class Execute
     {
         MutableList<CommonProfile> profiles = ProfileManagerHelper.extractProfiles(pm);
         long start = System.currentTimeMillis();
-        String servicePath = getServicePathFromContext(executeInput.model);
+        String servicePath = uriInfo != null ? uriInfo.getPath() : null;
         try (Scope scope = GlobalTracer.get().buildSpan("Service: Execute").startActive(true))
         {
             String clientVersion = executeInput.clientVersion == null ? PureClientVersions.production : executeInput.clientVersion;
@@ -115,7 +111,7 @@ public class Execute
                     profiles, request.getRemoteUser(), format, servicePath);
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                MetricsHandler.observeRequest(uriInfo != null ? uriInfo.getPath() : null, start, System.currentTimeMillis());
+                MetricsHandler.observeRequest(servicePath, start, System.currentTimeMillis());
             }
             return response;
         }
@@ -146,7 +142,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, getServicePathFromContext(executeInput.model));
+            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_ERROR, profiles);
             return response;
         }
@@ -172,7 +168,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, getServicePathFromContext(executeInput.model));
+            MetricsHandler.observeError(LoggingEventType.GENERATE_PLAN_ERROR, ex, uriInfo != null ? uriInfo.getPath() : null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTION_PLAN_GENERATION_DEBUG_ERROR, profiles);
             return response;
         }
@@ -224,17 +220,5 @@ public class Execute
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }
-    }
-
-    private String getServicePathFromContext(PureModelContext context)
-    {
-        String servicePath = null;
-        if (context instanceof PureModelContextData)
-        {
-            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            servicePath = service == null ? null : service.getPath();
-        }
-        return servicePath;
     }
 }
