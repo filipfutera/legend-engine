@@ -56,7 +56,7 @@ public class TestErrorManagement
     public void testErrorWithValidOriginAndInvalidServicePattern()
     {
         MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, new Exception(), null);
-        String[] labels = {"ServiceTestExecuteError", "UnknownError", toCamelCase(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR), "N/A"};
+        String[] labels = {"ServiceTestExecuteError", "UnknownError", "ServiceTestExecute", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -366,9 +366,9 @@ public class TestErrorManagement
     @Test
     public void testEnumToUserFriendlyStringConversion()
     {
-        assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTION_ERROR), "PureQueryExecution");
-        assertEquals(toCamelCase(LoggingEventType.GENERATE_PLAN_ERROR), "GeneratePlan");
-        assertEquals(toCamelCase(LoggingEventType.UNRECOGNISED_ERROR), "Unrecognised");
+        assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTION_ERROR), "PureQueryExecutionError");
+        assertEquals(toCamelCase(LoggingEventType.GENERATE_PLAN_ERROR), "GeneratePlanError");
+        assertEquals(toCamelCase(LoggingEventType.UNRECOGNISED_ERROR), "UnrecognisedError");
         assertEquals(toCamelCase(ErrorCategory.USER_AUTHENTICATION_ERROR), "UserAuthenticationError");
         assertEquals(toCamelCase(ErrorCategory.UNKNOWN_ERROR), "UnknownError");
     }
