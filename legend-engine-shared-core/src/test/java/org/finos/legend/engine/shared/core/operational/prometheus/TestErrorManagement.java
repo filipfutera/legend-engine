@@ -421,4 +421,12 @@ public class TestErrorManagement
         String[] labels = {"UnrecognisedEngineError", "InternalServerError", "ServiceExecute", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
+
+    @Test
+    public void testErrorCategorizationRegexCaseInsensitivity()
+    {
+        MetricsHandler.observeError(null, new Exception("KERBEROS"), TEST_SERVICE_PATH);
+        String[] labels = {"UnrecognisedEngineError", "UserAuthenticationError", "ServiceExecute", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
 }
