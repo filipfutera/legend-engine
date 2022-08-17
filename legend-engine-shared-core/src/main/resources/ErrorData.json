@@ -39,6 +39,10 @@
           {
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find a match for function"
+          },
+          {
+            "ExceptionName": "IllegalArgumentException",
+            "MessageRegex": "Missing external parameter"
           }
         ],
         "TypeExceptionRegex": ""
@@ -206,10 +210,6 @@
       {
         "TypeName": "JavaErrors",
         "Exceptions": [
-          {
-            "ExceptionName": "IllegalArgumentException",
-            "MessageRegex": "Missing external parameter"
-          },
           {
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find property .* in (class|association)"
