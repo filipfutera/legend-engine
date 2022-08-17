@@ -21,14 +21,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.PureModel;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.extension.CompilerExtensions;
 import org.finos.legend.engine.language.pure.modelManager.ModelManager;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContext;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextPointer;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Service;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lambda;
 import org.finos.legend.engine.shared.core.kerberos.ProfileManagerHelper;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -88,7 +86,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(LoggingEventType.COMPILE_MODEL_ERROR, ex, getServicePathFromContext(model));
+            MetricsHandler.observeError(LoggingEventType.COMPILE_MODEL_ERROR, ex, null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -117,7 +115,7 @@ public class Compile
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(LoggingEventType.LAMBDA_RETURN_TYPE_ERROR, ex, getServicePathFromContext(lambdaReturnTypeInput.model));
+            MetricsHandler.observeError(LoggingEventType.LAMBDA_RETURN_TYPE_ERROR, ex, null);
             return handleException(uriInfo, profiles, start, ex);
         }
     }
@@ -133,17 +131,5 @@ public class Compile
             Response errorResponse = ExceptionTool.exceptionManager(ex, LoggingEventType.COMPILE_ERROR, profiles);
             return errorResponse;
         }
-    }
-
-    private String getServicePathFromContext(PureModelContext context)
-    {
-        String servicePath = null;
-        if (context instanceof PureModelContextData)
-        {
-            PureModelContextData data = ((PureModelContextData) context).shallowCopy();
-            Service service = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-            servicePath = service == null ? null : service.getPath();
-        }
-        return servicePath;
     }
 }
