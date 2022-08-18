@@ -252,7 +252,7 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        assert (origin != null);
+        assert (origin != null) : "Error origin must not be null!";
         String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
         String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;

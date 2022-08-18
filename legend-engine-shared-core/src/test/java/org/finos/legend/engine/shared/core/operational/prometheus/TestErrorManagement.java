@@ -29,6 +29,7 @@ import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
 import static org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.toCamelCase;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class TestErrorManagement
 {
@@ -63,7 +64,11 @@ public class TestErrorManagement
     @Test
     public void testErrorWithoutOrigin() throws Exception
     {
-        MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
+        Exception exception = assertThrows(Exception.class, () ->
+        {
+            MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
+        });
+        assertEquals(exception.getMessage(), "Error origin must not be null!");
     }
 
     @Test
