@@ -65,9 +65,7 @@ public class TestErrorManagement
     public void testErrorWithoutOrigin()
     {
         Exception exception = assertThrows(EngineException.class, () ->
-        {
-            MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
-        });
+                MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH));
         assertEquals(exception.getMessage(), "Error origin must not be null!");
     }
 
@@ -83,7 +81,7 @@ public class TestErrorManagement
     public void testServiceErrorLabelExtractionWithNonGenericException()
     {
         MetricsHandler.observeError(LoggingEventType.LAMBDA_RETURN_TYPE_ERROR, new NullPointerException(), TEST_SERVICE_PATH);
-        labels = new String[]{"NullPointerError", "UnknownError", "LambdaReturnType", TEST_SERVICE_PATH};
+        String[] labels = new String[]{"NullPointerError", "UnknownError", "LambdaReturnType", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
