@@ -176,7 +176,7 @@ public class TestErrorManagement
         Exception exceptionTwo = new Exception(exceptionOne);
         exceptionOne.initCause(exceptionTwo);
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, exceptionOne, null);
-        String[] labels = {"CatchAll", "UnknownError", "CatchAll", "N/A"};
+        String[] labels = {"CatchAllError", "UnknownError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
