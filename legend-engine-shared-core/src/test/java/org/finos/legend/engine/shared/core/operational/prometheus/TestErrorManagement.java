@@ -45,7 +45,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithValidOriginAndValidServicePattern()
+    public void testServiceErrorOriginLabel()
     {
         MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, new Exception(), TEST_SERVICE_PATH);
         String[] labels = {"ServiceTestExecuteError", "UnknownError", "ServiceTestExecute", TEST_SERVICE_PATH};
@@ -53,7 +53,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithValidOriginAndInvalidServicePattern()
+    public void testInteractiveErrorOriginLabel()
     {
         MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, new Exception(), null);
         String[] labels = {"ServiceTestExecuteError", "UnknownError", "ServiceTestExecute", "N/A"};
@@ -61,19 +61,9 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithInvalidOriginAndValidServicePattern()
+    public void testErrorWithoutOrigin() throws Exception
     {
         MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
-    public void testErrorWithInvalidOriginAndInvalidServicePattern()
-    {
-        MetricsHandler.observeError(null, new Exception(), null);
-        String[] labels = {"UnrecognisedError", "UnknownError", "Unrecognised", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test

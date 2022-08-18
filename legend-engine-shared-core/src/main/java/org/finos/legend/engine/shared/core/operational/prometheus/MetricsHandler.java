@@ -252,7 +252,7 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
+        assert (origin != null);
         String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
         String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
