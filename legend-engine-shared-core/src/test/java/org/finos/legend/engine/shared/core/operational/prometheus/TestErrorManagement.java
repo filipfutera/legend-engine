@@ -426,7 +426,7 @@ public class TestErrorManagement
     public void testErrorCategorizationRegexCaseInsensitivity()
     {
         MetricsHandler.observeError(null, new Exception("KERBEROS"), TEST_SERVICE_PATH);
-        String[] labels = {"UnrecognisedEngineError", "UserAuthenticationError", "Unrecognised", TEST_SERVICE_PATH};
+        String[] labels = {"UnrecognisedError", "UserAuthenticationError", "Unrecognised", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
     }
 }
