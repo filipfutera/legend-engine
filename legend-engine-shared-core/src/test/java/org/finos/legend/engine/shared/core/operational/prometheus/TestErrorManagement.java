@@ -62,9 +62,9 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testErrorWithoutOrigin() throws Exception
+    public void testErrorWithoutOrigin()
     {
-        Exception exception = assertThrows(Exception.class, () ->
+        Exception exception = assertThrows(EngineException.class, () ->
         {
             MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH);
         });

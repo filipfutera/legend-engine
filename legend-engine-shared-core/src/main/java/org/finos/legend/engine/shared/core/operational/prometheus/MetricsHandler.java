@@ -22,6 +22,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
+import org.finos.legend.engine.shared.core.operational.Assert;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
@@ -252,7 +253,7 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        assert (origin != null) : "Error origin must not be null!";
+        Assert.assertTrue(origin != null, () -> "Error origin must not be null!");
         String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
         String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
