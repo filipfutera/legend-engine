@@ -15,6 +15,7 @@
 package org.finos.legend.engine.shared.core.operational.errorManagement;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MatchingMethod;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
  * Class to hold data corresponding to a particular category of errors
  * This data is to be used in categorising an exception occurring during execution
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExceptionCategory
 {
     /**
@@ -53,11 +55,14 @@ public class ExceptionCategory
     {
         this.errorCategory = errorCategory;
         this.keywords = new ArrayList<>();
-        for (String key : keys)
+        if (keys != null)
         {
-            this.keywords.add(Pattern.compile(key, Pattern.CASE_INSENSITIVE));
+            for (String key : keys)
+            {
+                this.keywords.add(Pattern.compile(key, Pattern.CASE_INSENSITIVE));
+            }
         }
-        this.exceptionTypes = exceptionTypes;
+        this.exceptionTypes = exceptionTypes == null ? new ArrayList<>() : exceptionTypes;
     }
 
     /**
@@ -128,6 +133,7 @@ public class ExceptionCategory
      * To track the Type for each error change the streams().anyMatch() to enhanced for loops in ErrorCategory
      * and return Type object's name when a successful match is found
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class ExceptionType
     {
         /**
@@ -155,8 +161,8 @@ public class ExceptionCategory
         public ExceptionType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptionOutlines)
         {
             this.typeName = typeName;
-            this.typeExceptionRegex = Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
-            this.exceptionOutlines = exceptionOutlines;
+            this.typeExceptionRegex = typeExceptionRegex == null ? null : Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
+            this.exceptionOutlines = exceptionOutlines == null ? new ArrayList<>() : exceptionOutlines;
         }
 
         /**
@@ -177,8 +183,7 @@ public class ExceptionCategory
          */
         public boolean hasMatchingTypeName(String name)
         {
-            Matcher matcher = this.typeExceptionRegex.matcher(name);
-            return !this.typeExceptionRegex.toString().equals("") && matcher.find();
+            return this.typeExceptionRegex != null && this.typeExceptionRegex.matcher(name).find();
         }
 
         /**
@@ -194,6 +199,7 @@ public class ExceptionCategory
         /**
          * Class to hold an error's exception class name and message regex to match upcoming exceptions against
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private static class ExceptionOutline
         {
             /**
@@ -215,7 +221,7 @@ public class ExceptionCategory
             public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
             {
                 this.exceptionName = exceptionName;
-                this.exceptionMessage = Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
+                this.exceptionMessage = exceptionMessage == null ? Pattern.compile("", Pattern.CASE_INSENSITIVE) : Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
             }
 
             /**

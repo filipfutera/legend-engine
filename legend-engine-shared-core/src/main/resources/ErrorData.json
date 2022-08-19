@@ -19,9 +19,6 @@
 
       {
         "TypeName": "PermissionsError",
-        "Exceptions": [
-
-        ],
         "TypeExceptionRegex": "Permission|Access"
       }
     ],
@@ -44,8 +41,7 @@
             "ExceptionName": "IllegalArgumentException",
             "MessageRegex": "Missing external parameter"
           }
-        ],
-        "TypeExceptionRegex": ""
+        ]
       },
 
       {
@@ -55,26 +51,8 @@
             "ExceptionName": "EngineException",
             "MessageRegex": "Can't find database"
           }
-        ],
-        "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "UserRequestError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "ServiceUpdateError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
+        ]
       }
-
     ],
     "Keywords": ["[a-zA-Z]+ '.*' not found"]
   },
@@ -86,34 +64,7 @@
     "Types": [
       {
         "TypeName": "MissingItemError",
-        "Exceptions": [
-
-        ],
         "TypeExceptionRegex": "Missing|NotFound"
-      },
-
-      {
-        "TypeName": "APIError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "JavaError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "ServerOverloadError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
       },
 
       {
@@ -149,9 +100,6 @@
 
       {
         "TypeName": "DatabaseError",
-        "Exceptions": [
-
-        ],
         "TypeExceptionRegex": "SQL"
       },
 
@@ -162,8 +110,7 @@
             "ExceptionName": "EngineException",
             "MessageRegex": "Unexpected token|Missing table or alias for column|Bracket operation is not supported|Field '.*' is required"
           }
-        ],
-        "TypeExceptionRegex": ""
+        ]
       },
 
       {
@@ -233,8 +180,7 @@
           "ExceptionName": "EngineException",
           "MessageRegex": "Can't resolve the builder for function|Can't find service"
         }
-      ],
-      "TypeExceptionRegex": ""
+      ]
       },
 
       {
@@ -244,18 +190,8 @@
             "ExceptionName": "RuntimeException",
             "MessageRegex": "Issue processing freemarker function"
           }
-        ],
-        "TypeExceptionRegex": ""
-      },
-
-      {
-        "TypeName": "RegexError",
-        "Exceptions": [
-
-        ],
-        "TypeExceptionRegex": ""
+        ]
       }
-
     ],
     "Keywords": ["mapping error","Error in '.*::.*':" ]
   },
@@ -270,7 +206,6 @@
         "Exceptions": [
           {
             "ExceptionName": "ConnectionException",
-            "MessageRegex": ""
           }
         ],
         "TypeExceptionRegex": "Connection|Timeout"
@@ -283,8 +218,7 @@
             "ExceptionName": "PureAssertFailException",
             "MessageRegex": "exception occurred executing service test suites"
           }
-        ],
-        "TypeExceptionRegex": ""
+        ]
       }
     ],
     "Keywords": ["test|timeout"]
