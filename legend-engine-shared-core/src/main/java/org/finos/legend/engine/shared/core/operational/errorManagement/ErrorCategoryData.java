@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * This data is to be used in categorising an exception occurring during execution
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExceptionCategory
+public class ErrorCategoryData
 {
     /**
      * User-friendly string for the error category
@@ -42,7 +42,7 @@ public class ExceptionCategory
     /**
      * List of error types (essentially sub-categories of errors) associated with this category
      */
-    private final ArrayList<ExceptionType> exceptionTypes;
+    private final ArrayList<ErrorTypeData> exceptionTypes;
 
     /**
      * Constructor to create an error category object containing data to be used in categorising occurring exceptions
@@ -51,7 +51,7 @@ public class ExceptionCategory
      * @param exceptionTypes list of error types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
+    public ErrorCategoryData(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ErrorTypeData> exceptionTypes)
     {
         this.errorCategory = errorCategory;
         this.keywords = new ArrayList<>();
@@ -134,7 +134,7 @@ public class ExceptionCategory
      * and return Type object's name when a successful match is found
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class ExceptionType
+    private static class ErrorTypeData
     {
         /**
          * more technical but still user-friendly name of the error type
@@ -149,7 +149,7 @@ public class ExceptionCategory
         /**
          * List of exception outlines (exception class name and message regex pairs) associated with the Type.
          */
-        private final ArrayList<ExceptionOutline> exceptionOutlines;
+        private final ArrayList<ErrorExceptionOutline> exceptionOutlines;
 
         /**
          * Constructor to create an error type holding data to be used in categorizing an exception to its correct category
@@ -158,7 +158,7 @@ public class ExceptionCategory
          * @param exceptionOutlines is the list of exception name and message regex pairs to be used in matching
          */
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public ExceptionType(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptionOutlines)
+        public ErrorTypeData(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines)
         {
             this.typeName = typeName;
             this.typeExceptionRegex = typeExceptionRegex == null ? null : Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
@@ -200,7 +200,7 @@ public class ExceptionCategory
          * Class to hold an error's exception class name and message regex to match upcoming exceptions against
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private static class ExceptionOutline
+        private static class ErrorExceptionOutline
         {
             /**
              * Exception class name
@@ -218,7 +218,7 @@ public class ExceptionCategory
              * @param exceptionMessage is the regex corresponding to the message in the exception
              */
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-            public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
+            public ErrorExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
             {
                 this.exceptionName = exceptionName;
                 this.exceptionMessage = exceptionMessage == null ? Pattern.compile("", Pattern.CASE_INSENSITIVE) : Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
