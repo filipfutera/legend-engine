@@ -38,10 +38,6 @@ public class TestErrorManagement
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0d;
     private final String TEST_SERVICE_PATH = "service/remote/getRegistry";
-    private enum ErrorOrigin
-    {
-        ERROR_MANAGEMENT_TEST_ERROR
-    }
 
     @After()
     public void clearCounterData()
@@ -371,7 +367,7 @@ public class TestErrorManagement
     @Test
     public void testEnumToUserFriendlyStringConversion()
     {
-        assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTE_ERROR), "PureQueryExecutionError");
+        assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTE_ERROR), "PureQueryExecuteError");
         assertEquals(toCamelCase(LoggingEventType.GENERATE_PLAN_ERROR), "GeneratePlanError");
         assertEquals(toCamelCase(LoggingEventType.CATCH_ALL), "CatchAllError");
         assertEquals(toCamelCase(ErrorCategory.USER_AUTHENTICATION_ERROR), "UserAuthenticationError");
@@ -433,6 +429,11 @@ public class TestErrorManagement
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("KERBEROS"), TEST_SERVICE_PATH);
         String[] labels = {"CatchAllError", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, ERROR_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    private enum ErrorOrigin
+    {
+        ERROR_MANAGEMENT_TEST_ERROR
     }
 
     @Test

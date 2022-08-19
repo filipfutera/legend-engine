@@ -404,7 +404,7 @@ public class MetricsHandler
      */
     private static String removeErrorSuffix(String string)
     {
-        return string.endsWith("Error") ? string.substring(0, string.indexOf("Error")) : string;
+        return string.endsWith("Error") ? string.substring(0, string.lastIndexOf("Error")) : string;
     }
 
     /**
