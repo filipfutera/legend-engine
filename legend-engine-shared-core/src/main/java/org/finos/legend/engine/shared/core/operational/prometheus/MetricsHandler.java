@@ -25,7 +25,7 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.finos.legend.engine.shared.core.operational.Assert;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
-import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
+import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategoryData;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +247,7 @@ public class MetricsHandler
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
      */
-    private static final List<ExceptionCategory> EXCEPTION_CATEGORY_DATA = readErrorData();
+    private static final List<ErrorCategoryData> ERROR_CATEGORY_DATA = readErrorData();
 
     /**
      * Method to record an error occurring during execution and add it to the metrics.
@@ -320,11 +320,11 @@ public class MetricsHandler
         {
             for (MatchingMethod method : MatchingMethod.values())
             {
-                for (ExceptionCategory category : EXCEPTION_CATEGORY_DATA)
+                for (ErrorCategoryData categoryData : ERROR_CATEGORY_DATA)
                 {
-                    if (category.matches(exception, method))
+                    if (categoryData.matches(exception, method))
                     {
-                        return category.getErrorCategory();
+                        return categoryData.getErrorCategory();
                     }
                 }
             }
@@ -363,12 +363,12 @@ public class MetricsHandler
      * Find and read JSON file with outline of errors to be used in categorizing the exceptions
      * @return List of objects corresponding to the error categories with their respective data
      */
-    private static synchronized List<ExceptionCategory> readErrorData()
+    private static synchronized List<ErrorCategoryData> readErrorData()
     {
-        List<ExceptionCategory> categories;
+        List<ErrorCategoryData> categories;
         try (InputStream inputStream = MetricsHandler.class.getResourceAsStream(ERROR_DATA_PATH))
         {
-            categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ExceptionCategory[].class));
+            categories = Arrays.asList(new ObjectMapper().readValue(inputStream, ErrorCategoryData[].class));
             LOGGER.info("Successfully read error data from {}.", MetricsHandler.class.getResource(ERROR_DATA_PATH));
         }
         catch (Exception e)
