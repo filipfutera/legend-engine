@@ -205,7 +205,7 @@
         "TypeName": "ConnectionError",
         "Exceptions": [
           {
-            "ExceptionName": "ConnectionException",
+            "ExceptionName": "ConnectionException"
           }
         ],
         "TypeExceptionRegex": "Connection|Timeout"
