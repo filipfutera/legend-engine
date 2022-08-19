@@ -124,7 +124,7 @@ public class ServiceModeling
         }
         catch (IOException | JavaCompileException e)
         {
-            MetricsHandler.observeError(LoggingEventType.MODEL_RESOLVE_ERROR, e, invokedService == null ? null : invokedService.getPath());
+            MetricsHandler.observeError(LoggingEventType.MODEL_RESOLVE_ERROR, e, invokedService == null ? null : invokedService.pattern);
             throw new RuntimeException(e);
         }
     }

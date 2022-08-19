@@ -22,6 +22,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.factory.Maps;
+import org.finos.legend.engine.shared.core.operational.Assert;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ErrorCategory;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
@@ -231,18 +232,22 @@ public class MetricsHandler
      * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
      * the label given to the error, the category of the error and source of the error.
      */
-    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
+    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
      * Types of error matching techniques that can be performed on an incoming exceptions.
      */
     public enum MatchingMethod
-    { EXCEPTION_OUTLINE_MATCHING, KEYWORDS_MATCHING, TYPE_NAME_MATCHING }
+    {
+        EXCEPTION_OUTLINE_MATCHING,
+        KEYWORDS_MATCHING,
+        TYPE_NAME_MATCHING
+    }
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
      */
-    private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
+    private static final List<ExceptionCategory> EXCEPTION_CATEGORY_DATA = readErrorData();
 
     /**
      * Method to record an error occurring during execution and add it to the metrics.
@@ -252,10 +257,9 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        origin = origin == null ? LoggingEventType.UNRECOGNISED_ERROR : origin;
+        Assert.assertTrue(origin != null, () -> "Error origin must not be null!");
         String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
-        String source = servicePath == null ? toCamelCase(origin) : toCamelCase(LoggingEventType.SERVICE_EXECUTE_ERROR);
-        source = removeErrorSuffix(source);
+        String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
@@ -316,7 +320,7 @@ public class MetricsHandler
         {
             for (MatchingMethod method : MatchingMethod.values())
             {
-                for (ExceptionCategory category : ERROR_CATEGORY_DATA_OBJECTS)
+                for (ExceptionCategory category : EXCEPTION_CATEGORY_DATA)
                 {
                     if (category.matches(exception, method))
                     {
@@ -400,7 +404,7 @@ public class MetricsHandler
      */
     private static String removeErrorSuffix(String string)
     {
-        return string.endsWith("Error") ? string.substring(0, string.indexOf("Error")) : string;
+        return string.endsWith("Error") ? string.substring(0, string.lastIndexOf("Error")) : string;
     }
 
     /**

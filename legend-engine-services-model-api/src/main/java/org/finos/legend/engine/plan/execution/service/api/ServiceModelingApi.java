@@ -93,16 +93,15 @@ public class ServiceModelingApi
         }
         catch (Exception ex)
         {
-            String servicePath = null;
+            String servicePattern = null;
             if (service instanceof PureModelContextData)
             {
                 PureModelContextData data = ((PureModelContextData) service).shallowCopy();
                 Service invokedService = (Service) Iterate.detect(data.getElements(), e -> e instanceof Service);
-                servicePath = invokedService == null ? null : invokedService.getPath();
+                servicePattern = invokedService == null ? null : invokedService.pattern;
             }
-            MetricsHandler.observe("service test error", start, System.currentTimeMillis());
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.SERVICE_ERROR, profiles);
-            MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, ex, servicePath);
+            MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, ex, servicePattern);
             return response;
         }
     }
