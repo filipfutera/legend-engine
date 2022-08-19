@@ -117,7 +117,7 @@ public class Execute
         catch (Exception ex)
         {
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, profiles);
-            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR, ex, null);
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTE_ERROR, ex, null);
             return response;
         }
     }
@@ -215,7 +215,7 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTION_ERROR, ex, null);
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTE_ERROR, ex, null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
             return response;
         }

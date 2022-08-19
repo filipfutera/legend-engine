@@ -232,18 +232,22 @@ public class MetricsHandler
      * Prometheus counter to record errors with labels of the service causing the error if it is a service-related error,
      * the label given to the error, the category of the error and source of the error.
      */
-    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend ecosystem").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
+    protected static final Counter ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("errorLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
      * Types of error matching techniques that can be performed on an incoming exceptions.
      */
     public enum MatchingMethod
-    { EXCEPTION_OUTLINE_MATCHING, KEYWORDS_MATCHING, TYPE_NAME_MATCHING }
+    {
+        EXCEPTION_OUTLINE_MATCHING,
+        KEYWORDS_MATCHING,
+        TYPE_NAME_MATCHING
+    }
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
      */
-    private static final List<ExceptionCategory> ERROR_CATEGORY_DATA_OBJECTS = readErrorData();
+    private static final List<ExceptionCategory> EXCEPTION_CATEGORY_DATA = readErrorData();
 
     /**
      * Method to record an error occurring during execution and add it to the metrics.
@@ -316,7 +320,7 @@ public class MetricsHandler
         {
             for (MatchingMethod method : MatchingMethod.values())
             {
-                for (ExceptionCategory category : ERROR_CATEGORY_DATA_OBJECTS)
+                for (ExceptionCategory category : EXCEPTION_CATEGORY_DATA)
                 {
                     if (category.matches(exception, method))
                     {

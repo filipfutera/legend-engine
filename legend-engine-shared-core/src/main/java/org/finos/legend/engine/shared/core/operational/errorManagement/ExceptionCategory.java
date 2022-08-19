@@ -45,17 +45,17 @@ public class ExceptionCategory
     /**
      * Constructor to create an error category object containing data to be used in categorising occurring exceptions
      * @param errorCategory is the name of the category meant to be end user understandable
-     * @param keywords are a list of regexes used in classifying an exception to this category
+     * @param keys are a list of regexes used in classifying an exception to this category
      * @param exceptionTypes list of error types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keywords, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
+    public ExceptionCategory(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ExceptionType> exceptionTypes)
     {
         this.errorCategory = errorCategory;
         this.keywords = new ArrayList<>();
-        for (String keyword : keywords)
+        for (String key : keys)
         {
-            this.keywords.add(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE));
+            this.keywords.add(Pattern.compile(key, Pattern.CASE_INSENSITIVE));
         }
         this.exceptionTypes = exceptionTypes;
     }
