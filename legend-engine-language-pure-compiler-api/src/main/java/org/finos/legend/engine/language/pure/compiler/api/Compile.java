@@ -122,14 +122,8 @@ public class Compile
 
     private Response handleException(UriInfo uriInfo, MutableList<CommonProfile> profiles, long start, Exception ex)
     {
-        if (ex instanceof EngineException)
-        {
-            return Response.status(Response.Status.BAD_REQUEST).entity(ex).build();
-        }
-        else
-        {
-            Response errorResponse = ExceptionTool.exceptionManager(ex, LoggingEventType.COMPILE_ERROR, profiles);
-            return errorResponse;
-        }
+        Response.Status status = ex instanceof EngineException ? Response.Status.BAD_REQUEST : Response.Status.INTERNAL_SERVER_ERROR;
+        Response errorResponse = ExceptionTool.exceptionManager(ex, LoggingEventType.COMPILE_ERROR, status, profiles);
+        return errorResponse;
     }
 }
