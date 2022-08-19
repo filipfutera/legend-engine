@@ -269,9 +269,8 @@ public class Execute
         }
         catch (Exception ex)
         {
-            MetricsHandler.observeError("execute");
+            MetricsHandler.observeError(LoggingEventType.PURE_QUERY_EXECUTE_ERROR, ex, null);
             Response response = ExceptionTool.exceptionManager(ex, LoggingEventType.EXECUTE_INTERACTIVE_ERROR, pm);
-            MetricsHandler.incrementErrorCount("pure/v1/execution/execute", response.getStatus());
             return response;
         }
     }
