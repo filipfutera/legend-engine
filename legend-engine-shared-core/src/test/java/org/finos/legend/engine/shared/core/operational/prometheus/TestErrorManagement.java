@@ -369,7 +369,7 @@ public class TestErrorManagement
     {
         assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTE_ERROR), "PureQueryExecuteError");
         assertEquals(toCamelCase(LoggingEventType.GENERATE_PLAN_ERROR), "GeneratePlanError");
-        assertEquals(toCamelCase(LoggingEventType.CATCH_ALL), "CatchAllError");
+        assertEquals(toCamelCase(LoggingEventType.CATCH_ALL), "CatchAll");
         assertEquals(toCamelCase(ErrorCategory.USER_AUTHENTICATION_ERROR), "UserAuthenticationError");
         assertEquals(toCamelCase(ErrorCategory.UNKNOWN_ERROR), "UnknownError");
     }
