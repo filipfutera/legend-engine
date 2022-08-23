@@ -258,12 +258,12 @@ public class MetricsHandler
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
         Assert.assertTrue(origin != null, () -> "Error origin must not be null!");
-        String errorLabel = getErrorLabel(removeErrorSuffix(toCamelCase(origin)), exception);
         String source = removeErrorSuffix(toCamelCase(origin));
+        String errorLabel = getErrorLabel(source, exception);
         String servicePattern = servicePath == null ? "N/A" : servicePath;
         String errorCategory = toCamelCase(getErrorCategory(exception));
         ERROR_COUNTER.labels(errorLabel, errorCategory, source, servicePattern).inc();
-        LOGGER.info("Error added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
+        LOGGER.error("Error added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", errorLabel, errorCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
