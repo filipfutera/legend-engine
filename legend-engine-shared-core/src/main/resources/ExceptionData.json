@@ -141,6 +141,10 @@
         "Priority": "primary"
       },
       {
+        "ExceptionName": "ConnectionClosedException",
+        "Priority": "primary"
+      },
+      {
         "ExceptionName": ".*",
         "MessageRegex": "test|timeout",
         "Priority": "secondary"
