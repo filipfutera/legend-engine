@@ -294,11 +294,12 @@ public class MetricsHandler
         return convertExceptionLabelToPrettyString(exceptionLabel);
     }
 
+    //comment about hashset if cause loop has no depth
     private static synchronized ExceptionLabelValues getExceptionLabelValues(String origin, Throwable exception)
     {
-        String originalExceptionLabel = getExceptionLabel(origin, exception);
+        boolean isExceptionNull = exception == null;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && exception != null; depth++)
+        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && !isExceptionNull; depth++)
         {
             exceptionLabelValues.exceptionLabel = Arrays.asList(GENERIC_EXCEPTION_CLASSES).contains(exception.getClass()) ? exceptionLabelValues.exceptionLabel : getExceptionLabel(origin, exception);
 
@@ -306,9 +307,10 @@ public class MetricsHandler
             exceptionLabelValues.exceptionCategory = engineExceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? exceptionLabelValues.exceptionCategory : engineExceptionCategory;
             exceptionLabelValues.exceptionCategory = exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? matchExceptionToExceptionDataFile(exception) : exceptionLabelValues.exceptionCategory;
 
-            exception = exception.getCause();
+            isExceptionNull = exception.getCause() == null;
+            exception = isExceptionNull ? exception : exception.getCause();
         }
-        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? originalExceptionLabel : exceptionLabelValues.exceptionLabel;
+        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? getExceptionLabel(origin, exception) : exceptionLabelValues.exceptionLabel;
         return exceptionLabelValues;
     }
 
