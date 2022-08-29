@@ -14,6 +14,7 @@
 
 package org.finos.legend.engine.shared.core.operational.prometheus;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
@@ -254,7 +255,9 @@ public class MetricsHandler
      */
     public enum Priority
     {
+        @JsonProperty("primary")
         PRIMARY,
+        @JsonProperty("secondary")
         SECONDARY,
     }
 
