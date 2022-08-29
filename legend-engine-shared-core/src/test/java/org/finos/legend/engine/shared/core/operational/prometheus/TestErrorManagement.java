@@ -66,7 +66,7 @@ public class TestErrorManagement
     {
         Exception exception = assertThrows(EngineException.class, () ->
                 MetricsHandler.observeError(null, new Exception(), TEST_SERVICE_PATH));
-        assertEquals(exception.getMessage(), "Error origin must not be null!");
+        assertEquals(exception.getMessage(), "Exception origin must not be null!");
     }
 
     @Test
