@@ -249,6 +249,10 @@ public class MetricsHandler
      */
     private static final List<ExceptionCategoryData> EXCEPTION_CATEGORY_DATA = readExceptionData();
 
+    private static final int CATEGORIZATION_DEPTH_LIMIT = 5;
+
+    private static final Class[] GENERIC_EXCEPTION_CLASSES = { RuntimeException.class, Exception.class, EngineException.class };
+
     /**
      * Method to record an exception occurring during execution and add it to the metrics.
      * @param origin the stage in execution at which the exception occurred. For service execution exceptions use SERVICE_EXECUTE_ERROR.
@@ -259,11 +263,13 @@ public class MetricsHandler
     {
         Assert.assertTrue(origin != null, () -> "Exception origin must not be null!");
         String source = removeErrorSuffix(toCamelCase(origin));
-        String exceptionLabel = getExceptionLabel(source, exception);
         String servicePattern = servicePath == null ? "N/A" : servicePath;
-        String exceptionCategory = toCamelCase(getExceptionCategory(exception));
-        EXCEPTION_ERROR_COUNTER.labels(exceptionLabel, exceptionCategory, source, servicePattern).inc();
-        LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabel, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
+
+        ExceptionLabelValues exceptionLabelValues = getExceptionLabelValues(source, exception);
+        String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
+        
+        EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern).inc();
+        LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
@@ -276,15 +282,7 @@ public class MetricsHandler
     private static synchronized String getExceptionLabel(String eventType, Throwable exception)
     {
         Class exceptionClass = exception.getClass();
-        HashSet<Throwable> exploredExceptions = new HashSet<>();
-        Class[] genericExceptionClasses = { RuntimeException.class, Exception.class, EngineException.class };
-        while (Arrays.asList(genericExceptionClasses).contains(exceptionClass) && exception.getCause() != null && !exploredExceptions.contains(exception.getCause()))
-        {
-            exploredExceptions.add(exception);
-            exception = exception.getCause();
-            exceptionClass = exception.getClass();
-        }
-        String exceptionLabel = exception.getClass().getSimpleName();
+        String exceptionLabel = exceptionClass.getSimpleName();
         if (exceptionClass.equals(RuntimeException.class) || exceptionClass.equals(Exception.class))
         {
             exceptionLabel = eventType + exceptionClass.getSimpleName();
@@ -296,65 +294,57 @@ public class MetricsHandler
         return convertExceptionLabelToPrettyString(exceptionLabel);
     }
 
-    /**
-     * Method to delegate obtaining the category from an exception either by matching or extracting from EngineException.
-     * @param exception the exception to be analysed that has occurred in execution.
-     * @return the user-friendly exception category.
-     */
-    private static synchronized ExceptionCategory getExceptionCategory(Throwable exception)
+    private static synchronized ExceptionLabelValues getExceptionLabelValues(String origin, Throwable exception)
     {
-        ExceptionCategory engineExceptionCategory = tryExtractErrorCategoryFromEngineException(exception);
-        return engineExceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? tryMatchExceptionToExceptionDataFile(exception) : engineExceptionCategory;
+        ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
+        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && exception != null; depth++)
+        {
+            exceptionLabelValues.exceptionLabel = Arrays.asList(GENERIC_EXCEPTION_CLASSES).contains(exception.getClass()) ? exceptionLabelValues.exceptionLabel : getExceptionLabel(origin, exception);
+
+            ExceptionCategory engineExceptionCategory = extractExceptionCategoryFromEngineException(exception);
+            exceptionLabelValues.exceptionCategory = engineExceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? exceptionLabelValues.exceptionCategory : engineExceptionCategory;
+            exceptionLabelValues.exceptionCategory = exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? matchExceptionToExceptionDataFile(exception) : exceptionLabelValues.exceptionCategory;
+
+            exception = exception.getCause();
+        }
+        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? getExceptionLabel(origin, exception) : exceptionLabelValues.exceptionLabel;
+        return exceptionLabelValues;
     }
 
     /**
      * Method to try and match an exception to an exception category using the matching methods.
-     * If an initial exception can't be matched its cause it matched.
-     * @param exception is the original exception that occurred in the engine.
+     * @param exception is the exception that occurred in the engine.
      * @return Category belonging to the exception.
      */
-    private static synchronized ExceptionCategory tryMatchExceptionToExceptionDataFile(Throwable exception)
+    private static synchronized ExceptionCategory matchExceptionToExceptionDataFile(Throwable exception)
     {
-        HashSet<Throwable> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
+        for (MatchingMethod method : MatchingMethod.values())
         {
-            for (MatchingMethod method : MatchingMethod.values())
+            for (ExceptionCategoryData categoryData : EXCEPTION_CATEGORY_DATA)
             {
-                for (ExceptionCategoryData categoryData : EXCEPTION_CATEGORY_DATA)
+                if (categoryData.matches(exception, method))
                 {
-                    if (categoryData.matches(exception, method))
-                    {
-                        return categoryData.getExceptionCategory();
-                    }
+                    return categoryData.getExceptionCategory();
                 }
             }
-            exceptionHistory.add(exception);
-            exception = exception.getCause();
         }
         return ExceptionCategory.UNKNOWN_ERROR;
     }
 
     /**
-     * Method to try and get an exception category from a possible engine exception in the original exception's trace.
-     * If the original exception is not an EngineException or does not have its category field populated the cause is analysed.
+     * Method to try and get an exception category from a possible engine exception.
      * @param exception is the original exception that occurred in the engine.
-     * @return Exception category belonging to the exception or UnknownError if no meaningful data could be obtained from a possible EngineException.
+     * @return Exception category belonging to the exception or UnknownError if no meaningful data could be obtained or the exception is not an EngineException.
      */
-    private static synchronized ExceptionCategory tryExtractErrorCategoryFromEngineException(Throwable exception)
+    private static synchronized ExceptionCategory extractExceptionCategoryFromEngineException(Throwable exception)
     {
-        HashSet<Throwable> exceptionHistory = new HashSet();
-        while (exception != null && !exceptionHistory.contains(exception))
+        if (exception instanceof EngineException)
         {
-            if (exception instanceof EngineException)
+            EngineException engineException = (EngineException) exception;
+            if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ExceptionCategory.UNKNOWN_ERROR)
             {
-                EngineException engineException = (EngineException) exception;
-                if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ExceptionCategory.UNKNOWN_ERROR)
-                {
-                    return engineException.getErrorCategory();
-                }
+                return engineException.getErrorCategory();
             }
-            exceptionHistory.add(exception);
-            exception = exception.getCause();
         }
         return ExceptionCategory.UNKNOWN_ERROR;
     }
@@ -441,5 +431,17 @@ public class MetricsHandler
                 .replace("{", "")
                 .replace("}", "")
                 .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
+    }
+
+    private static class ExceptionLabelValues
+    {
+        public String exceptionLabel;
+        public ExceptionCategory exceptionCategory;
+
+        public ExceptionLabelValues(String exceptionLabel, ExceptionCategory exceptionCategory)
+        {
+            this.exceptionLabel = exceptionLabel;
+            this.exceptionCategory = exceptionCategory;
+        }
     }
 }
