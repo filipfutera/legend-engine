@@ -16,16 +16,13 @@ package org.finos.legend.engine.shared.core.operational.prometheus;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import io.prometheus.client.CollectorRegistry;
-import org.apache.http.ConnectionClosedException;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.shared.core.operational.errorManagement.ExceptionCategory;
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.TestCouldNotBeSkippedException;
-import java.util.MissingFormatWidthException;
 import java.util.UnknownFormatFlagsException;
 import static org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.toCamelCase;
 import static org.junit.Assert.assertEquals;
@@ -218,14 +215,6 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testInteractiveErrorCategorizationToUserAuthenticationErrorWithTypeNameMatching()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new IllegalAccessException("user invalid details"), null);
-        String[] labels = {"IllegalAccessException", "UserAuthenticationError", "CatchAll", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
     public void testServiceErrorCategorizationToUserAuthenticationErrorWithKeywordsMatching()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("some text including kerberos keyword"), TEST_SERVICE_PATH);
@@ -241,13 +230,6 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
-    @Ignore("no type name patterns recorded for UserExecution exception category yet")
-    @Test
-    public void testErrorCategorizationToUserExecutionErrorWithTypeNameMatching()
-    {
-
-    }
-
     @Test
     public void testServiceErrorCategorizationToUserExecutionErrorWithKeywordsMatching()
     {
@@ -261,14 +243,6 @@ public class TestErrorManagement
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException("something has not been configured properly"), TEST_SERVICE_PATH);
         String[] labels = {"CatchAllRuntimeException", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
-    public void testServiceErrorCategorizationToInternalServerErrorWithTypeNameMatching()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new MissingFormatWidthException(""), TEST_SERVICE_PATH);
-        String[] labels = {"MissingFormatWidthException", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -293,14 +267,6 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testInteractiveErrorCategorizationToServerExecutionErrorWithTypeNameMatching()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new JsonGenerationException("some message"), null);
-        String[] labels = {"JsonGenerationException", "ServerExecutionError", "CatchAll", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
     public void testServiceErrorCategorizationToServerExecutionErrorWithKeywordsMatching()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("Error in 'some::graph': Couldn't resolve test"), TEST_SERVICE_PATH);
@@ -313,14 +279,6 @@ public class TestErrorManagement
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new IllegalArgumentException("Tests Failed! Error running tests for service 'some/service'"), TEST_SERVICE_PATH);
         String[] labels = {"IllegalArgumentException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
-    public void testInteractiveErrorCategorizationToOtherErrorWithTypeNameMatching()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new ConnectionClosedException(), null);
-        String[] labels = {"ConnectionClosedException", "OtherError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
