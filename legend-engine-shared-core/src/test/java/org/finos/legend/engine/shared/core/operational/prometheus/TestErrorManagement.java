@@ -393,4 +393,12 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
+    @Test
+    public void testOnlyFullMatchingForExceptionName()
+    {
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("Can't find database"), TEST_SERVICE_PATH);
+        String[] labels = {"CatchAllException", "UnknownError", "CatchAll", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
+    }
+
 }

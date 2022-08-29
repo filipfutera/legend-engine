@@ -63,7 +63,6 @@ public class ExceptionCategoryData
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
         return this.exceptions.stream().filter(e -> e.getPriority() == priority).anyMatch(e -> e.matches(name, message));
-
     }
 
     /**
