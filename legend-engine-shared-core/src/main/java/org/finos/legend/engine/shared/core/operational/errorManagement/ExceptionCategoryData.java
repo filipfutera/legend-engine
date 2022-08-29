@@ -23,16 +23,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class to hold data corresponding to a particular category of errors
+ * Class to hold data corresponding to a particular category of exceptions
  * This data is to be used in categorising an exception occurring during execution
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorCategoryData
+public class ExceptionCategoryData
 {
     /**
-     * User-friendly string for the error category
+     * User-friendly string for the exception category
      */
-    private final ErrorCategory errorCategory;
+    private final ExceptionCategory exceptionCategory;
 
     /**
      * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
@@ -40,20 +40,20 @@ public class ErrorCategoryData
     private final ArrayList<Pattern> keywords;
 
     /**
-     * List of error types (essentially sub-categories of errors) associated with this category
+     * List of exception types (essentially sub-categories of exceptions) associated with this category
      */
-    private final ArrayList<ErrorTypeData> exceptionTypes;
+    private final ArrayList<ExceptionTypeData> exceptionTypes;
 
     /**
-     * Constructor to create an error category object containing data to be used in categorising occurring exceptions
-     * @param errorCategory is the name of the category meant to be end user understandable
+     * Constructor to create an exception category data object containing data to be used in categorising occurring exceptions
+     * @param exceptionCategory is the name of the category meant to be end user understandable
      * @param keys are a list of regexes used in classifying an exception to this category
-     * @param exceptionTypes list of error types (subcategories) used in classifying an exception to this category
+     * @param exceptionTypes list of exception types (subcategories) used in classifying an exception to this category
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ErrorCategoryData(@JsonProperty("CategoryName") ErrorCategory errorCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ErrorTypeData> exceptionTypes)
+    public ExceptionCategoryData(@JsonProperty("CategoryName") ExceptionCategory exceptionCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ExceptionTypeData> exceptionTypes)
     {
-        this.errorCategory = errorCategory;
+        this.exceptionCategory = exceptionCategory;
         this.keywords = new ArrayList<>();
         if (keys != null)
         {
@@ -66,8 +66,8 @@ public class ErrorCategoryData
     }
 
     /**
-     * Method to check if an error category and an occurred exception are a match under a specified matching method
-     * @param exception is the error that occurred during execution
+     * Method to check if an exception category and an occurred exception are a match under a specified matching method
+     * @param exception is the exception that occurred during execution
      * @param method is the type of exception matching we would like to execute
      * @return true if the exception and category are a match false otherwise.
      */
@@ -84,7 +84,7 @@ public class ErrorCategoryData
             case TYPE_NAME_MATCHING:
                 return hasMatchingTypeName(name);
             default:
-                throw new EngineException("Invalid matching method specified for error handling", ErrorCategory.OTHER_ERROR);
+                throw new EngineException("Invalid matching method specified for error handling", ExceptionCategory.OTHER_ERROR);
         }
     }
 
@@ -121,23 +121,23 @@ public class ErrorCategoryData
     }
 
     /**
-     * @return user-friendly string corresponding to this error category
+     * @return user-friendly string corresponding to this exception category
      */
-    public ErrorCategory getErrorCategory()
+    public ExceptionCategory getExceptionCategory()
     {
-        return errorCategory;
+        return exceptionCategory;
     }
 
     /**
-     * Class representing an error type which is essentially a sub-category of errors
-     * To track the Type for each error change the streams().anyMatch() to enhanced for loops in ErrorCategory
+     * Class representing an exception type which is essentially a sub-category of exceptions
+     * To track the Type for each exception change the streams().anyMatch() to enhanced for loops in ExceptionCategoryData
      * and return Type object's name when a successful match is found
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class ErrorTypeData
+    private static class ExceptionTypeData
     {
         /**
-         * more technical but still user-friendly name of the error type
+         * more technical but still user-friendly name of the exception type
          */
         private final String typeName;
 
@@ -149,16 +149,16 @@ public class ErrorCategoryData
         /**
          * List of exception outlines (exception class name and message regex pairs) associated with the Type.
          */
-        private final ArrayList<ErrorExceptionOutline> exceptionOutlines;
+        private final ArrayList<ExceptionOutline> exceptionOutlines;
 
         /**
-         * Constructor to create an error type holding data to be used in categorizing an exception to its correct category
-         * @param typeName is the name of this error Type
+         * Constructor to create an exception type holding data to be used in categorizing an exception to its correct category
+         * @param typeName is the name of this exception Type
          * @param typeExceptionRegex is the regex matching exception names to this Type
          * @param exceptionOutlines is the list of exception name and message regex pairs to be used in matching
          */
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public ErrorTypeData(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ErrorExceptionOutline> exceptionOutlines)
+        public ExceptionTypeData(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptionOutlines)
         {
             this.typeName = typeName;
             this.typeExceptionRegex = typeExceptionRegex == null ? null : Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
@@ -177,7 +177,7 @@ public class ErrorCategoryData
         }
 
         /**
-         * Method to check if an occurring exception class name matches the defined exception class name regex for this error type
+         * Method to check if an occurring exception class name matches the defined exception class name regex for this exception type
          * @param name is the occurring exception class name
          * @return true if the type name regex matches the parameter name and false otherwise
          */
@@ -187,8 +187,8 @@ public class ErrorCategoryData
         }
 
         /**
-         * Method to get the user-friendly but more technical error Type name
-         * @return error type friendly name
+         * Method to get the user-friendly but more technical exception Type name
+         * @return friendly exception type name
          */
         public String getTypeName()
         {
@@ -197,10 +197,10 @@ public class ErrorCategoryData
 
 
         /**
-         * Class to hold an error's exception class name and message regex to match upcoming exceptions against
+         * Class to hold an exception's class name and message regex to match upcoming exceptions against
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private static class ErrorExceptionOutline
+        private static class ExceptionOutline
         {
             /**
              * Exception class name
@@ -218,7 +218,7 @@ public class ErrorCategoryData
              * @param exceptionMessage is the regex corresponding to the message in the exception
              */
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-            public ErrorExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
+            public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
             {
                 this.exceptionName = exceptionName;
                 this.exceptionMessage = exceptionMessage == null ? Pattern.compile("", Pattern.CASE_INSENSITIVE) : Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
