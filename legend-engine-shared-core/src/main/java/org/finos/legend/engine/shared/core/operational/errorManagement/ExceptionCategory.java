@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * User friendly error categories
  */
-public enum ErrorCategory
+public enum ExceptionCategory
 {
     @JsonProperty("UserAuthenticationError")
     USER_AUTHENTICATION_ERROR,
