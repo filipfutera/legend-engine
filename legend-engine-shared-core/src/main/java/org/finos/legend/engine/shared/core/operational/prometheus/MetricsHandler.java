@@ -253,7 +253,7 @@ public class MetricsHandler
     /**
      * Types of exception matching priorities that can be performed on an incoming exceptions.
      */
-    public enum Priority
+    public enum MatchingPriority
     {
         @JsonProperty("primary")
         PRIMARY,
@@ -339,7 +339,7 @@ public class MetricsHandler
      */
     private static synchronized ExceptionCategory matchExceptionToExceptionDataFile(Throwable exception)
     {
-        for (Priority method : Priority.values())
+        for (MatchingPriority method : MatchingPriority.values())
         {
             for (ExceptionCategoryData categoryData : EXCEPTION_CATEGORY_DATA)
             {

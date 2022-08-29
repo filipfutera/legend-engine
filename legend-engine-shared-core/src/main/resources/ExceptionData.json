@@ -84,7 +84,6 @@
         "ExceptionName": "FlatDataSchemaParseException",
         "MessageRegex": "Unexpected token",
         "Priority": "primary"
-
       },
       {
         "ExceptionName": "EngineException",
@@ -103,7 +102,8 @@
       },
       {
         "ExceptionName": "IllegalArgumentException",
-        "MessageRegex": "Invalid provided parameter|Reprocessing sql failed with vars|.*"
+        "MessageRegex": "Invalid provided parameter|Reprocessing sql failed with vars|.*",
+        "Priority": "primary"
       },
       {
         "ExceptionName": "RuntimeException",

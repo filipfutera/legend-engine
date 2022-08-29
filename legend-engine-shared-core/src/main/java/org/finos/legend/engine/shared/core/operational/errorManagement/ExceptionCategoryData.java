@@ -17,7 +17,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.Priority;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MatchingPriority;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,7 +57,7 @@ public class ExceptionCategoryData
      * @param priority is the priority of exception matching we would like to execute
      * @return true if the exception and category are a match under the given priority and false otherwise.
      */
-    public boolean matches(Throwable exception, Priority priority)
+    public boolean matches(Throwable exception, MatchingPriority priority)
     {
         assert (priority != null);
         String message = exception.getMessage() == null ? "" : exception.getMessage();
@@ -94,7 +94,7 @@ public class ExceptionCategoryData
         /**
          * Matching priority to define the order of importance of outlines.
          */
-        private final Priority priority;
+        private final MatchingPriority priority;
 
         /**
          * Constructor to create an exception outline object
@@ -103,7 +103,7 @@ public class ExceptionCategoryData
          * @param priority is the priority associated with the outline.
          */
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage, @JsonProperty("Priority") Priority priority)
+        public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage, @JsonProperty("Priority") MatchingPriority priority)
         {
             String nameRegex = exceptionName == null ? ".*" : String.format("^%s$", exceptionName);
             this.exceptionName = Pattern.compile(nameRegex, Pattern.CASE_INSENSITIVE);
@@ -128,7 +128,7 @@ public class ExceptionCategoryData
          * Method to get the priority of an exception outline.
          * @return primary or secondary.
          */
-        public Priority getPriority()
+        public MatchingPriority getPriority()
         {
             return priority;
         }
