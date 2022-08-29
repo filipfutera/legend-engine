@@ -235,6 +235,22 @@ public class MetricsHandler
     protected static final Counter EXCEPTION_ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("exceptionLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
+     * Depth to which the categorization and label extraction of the exception should commence.
+     * If the depth is to be infinite, we must add a hashset to getExceptionLabelValues to track explored exceptions and avoid infinite cause loops!
+     */
+    private static final int CATEGORIZATION_DEPTH_LIMIT = 5;
+
+    /**
+     * Uninformative exceptions that ideally should not be used for the exception label.
+     */
+    private static final Class[] GENERIC_EXCEPTION_CLASSES = { RuntimeException.class, Exception.class, EngineException.class };
+
+    /**
+     * List of objects corresponding to the error categories holding their associated exception data.
+     */
+    private static final List<ExceptionCategoryData> EXCEPTION_CATEGORY_DATA = readExceptionData();
+
+    /**
      * Types of error matching techniques that can be performed on an incoming exceptions.
      */
     public enum MatchingMethod
@@ -243,15 +259,6 @@ public class MetricsHandler
         KEYWORDS_MATCHING,
         TYPE_NAME_MATCHING
     }
-
-    /**
-     * List of objects corresponding to the error categories holding their associated exception data.
-     */
-    private static final List<ExceptionCategoryData> EXCEPTION_CATEGORY_DATA = readExceptionData();
-
-    private static final int CATEGORIZATION_DEPTH_LIMIT = 5;
-
-    private static final Class[] GENERIC_EXCEPTION_CLASSES = { RuntimeException.class, Exception.class, EngineException.class };
 
     /**
      * Method to record an exception occurring during execution and add it to the metrics.
@@ -294,12 +301,20 @@ public class MetricsHandler
         return convertExceptionLabelToPrettyString(exceptionLabel);
     }
 
-    //comment about hashset if cause loop has no depth
+    /**
+     * Method to loop down the cause trace of the exception to classify the exception to a category and extract an exception label.
+     * If the data cannot be extracted from the original exception, its cause it iteratively analysed.
+     * completed flag is used for early termination if a final category is found (from EngineException) and label is valid.
+     * @param origin is the stage in execution at which the error occurred.
+     * @param exception the original exception to be analysed that has occurred in execution.
+     * @return a pair of values corresponding to the exceptionLabel and category labels in the Counter.
+     */
     private static synchronized ExceptionLabelValues getExceptionLabelValues(String origin, Throwable exception)
     {
         boolean isExceptionNull = exception == null;
+        boolean completed = false;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && !isExceptionNull; depth++)
+        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && !isExceptionNull && !completed; depth++)
         {
             exceptionLabelValues.exceptionLabel = Arrays.asList(GENERIC_EXCEPTION_CLASSES).contains(exception.getClass()) ? exceptionLabelValues.exceptionLabel : getExceptionLabel(origin, exception);
 
@@ -308,6 +323,8 @@ public class MetricsHandler
             exceptionLabelValues.exceptionCategory = exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? matchExceptionToExceptionDataFile(exception) : exceptionLabelValues.exceptionCategory;
 
             isExceptionNull = exception.getCause() == null;
+            completed = engineExceptionCategory != ExceptionCategory.UNKNOWN_ERROR && exceptionLabelValues.exceptionLabel != null;
+
             exception = isExceptionNull ? exception : exception.getCause();
         }
         exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? getExceptionLabel(origin, exception) : exceptionLabelValues.exceptionLabel;
@@ -436,11 +453,26 @@ public class MetricsHandler
                 .replaceAll(" ", "_") + (isErrorMetric ? "_errors" : "");
     }
 
+    /**
+     * Class to represent a tuple of label values to be used in the Error Prometheus Counter.
+     */
     private static class ExceptionLabelValues
     {
+        /**
+         * exceptionLabel label value for the prometheus error counter
+         */
         public String exceptionLabel;
+
+        /**
+         * category label value for the prometheus error counter
+         */
         public ExceptionCategory exceptionCategory;
 
+        /**
+         * Constructor to create a pair of exception-related label values.
+         * @param exceptionLabel is the exceptionLabel label value for the prometheus error counter.
+         * @param exceptionCategory is the category label value for the prometheus error counter.
+         */
         public ExceptionLabelValues(String exceptionLabel, ExceptionCategory exceptionCategory)
         {
             this.exceptionLabel = exceptionLabel;
