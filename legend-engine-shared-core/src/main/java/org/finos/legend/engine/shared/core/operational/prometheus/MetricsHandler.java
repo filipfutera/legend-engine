@@ -250,13 +250,12 @@ public class MetricsHandler
     private static final List<ExceptionCategoryData> EXCEPTION_CATEGORY_DATA = readExceptionData();
 
     /**
-     * Types of error matching techniques that can be performed on an incoming exceptions.
+     * Types of exception matching priorities that can be performed on an incoming exceptions.
      */
-    public enum MatchingMethod
+    public enum Priority
     {
-        EXCEPTION_OUTLINE_MATCHING,
-        KEYWORDS_MATCHING,
-        TYPE_NAME_MATCHING
+        PRIMARY,
+        SECONDARY,
     }
 
     /**
@@ -337,7 +336,7 @@ public class MetricsHandler
      */
     private static synchronized ExceptionCategory matchExceptionToExceptionDataFile(Throwable exception)
     {
-        for (MatchingMethod method : MatchingMethod.values())
+        for (Priority method : Priority.values())
         {
             for (ExceptionCategoryData categoryData : EXCEPTION_CATEGORY_DATA)
             {

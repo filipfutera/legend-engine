@@ -17,7 +17,7 @@ package org.finos.legend.engine.shared.core.operational.errorManagement;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MatchingMethod;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.Priority;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,89 +35,35 @@ public class ExceptionCategoryData
     private final ExceptionCategory exceptionCategory;
 
     /**
-     * List of regexes - if an exception includes any such keyword in its class name or message the category is a match
+     * List of exception outlines associated with this category
      */
-    private final ArrayList<Pattern> keywords;
-
-    /**
-     * List of exception types (essentially sub-categories of exceptions) associated with this category
-     */
-    private final ArrayList<ExceptionTypeData> exceptionTypes;
+    private final ArrayList<ExceptionOutline> exceptions;
 
     /**
      * Constructor to create an exception category data object containing data to be used in categorising occurring exceptions
-     * @param exceptionCategory is the name of the category meant to be end user understandable
-     * @param keys are a list of regexes used in classifying an exception to this category
-     * @param exceptionTypes list of exception types (subcategories) used in classifying an exception to this category
+     * @param exceptionCategory is the name of the category meant to be end user understandable.
+     * @param exceptions is the list of exception outlines to be used for matching.
      */
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ExceptionCategoryData(@JsonProperty("CategoryName") ExceptionCategory exceptionCategory, @JsonProperty("Keywords") ArrayList<String> keys, @JsonProperty("Types") ArrayList<ExceptionTypeData> exceptionTypes)
+    public ExceptionCategoryData(@JsonProperty("CategoryName") ExceptionCategory exceptionCategory, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptions)
     {
         this.exceptionCategory = exceptionCategory;
-        this.keywords = new ArrayList<>();
-        if (keys != null)
-        {
-            for (String key : keys)
-            {
-                this.keywords.add(Pattern.compile(key, Pattern.CASE_INSENSITIVE));
-            }
-        }
-        this.exceptionTypes = exceptionTypes == null ? new ArrayList<>() : exceptionTypes;
+        this.exceptions = exceptions;
     }
 
     /**
-     * Method to check if an exception category and an occurred exception are a match under a specified matching method
+     * Method to check if an exception category and an occurred exception are a match under a specified matching priority
      * @param exception is the exception that occurred during execution
-     * @param method is the type of exception matching we would like to execute
-     * @return true if the exception and category are a match false otherwise.
+     * @param priority is the priority of exception matching we would like to execute
+     * @return true if the exception and category are a match under the given priority and false otherwise.
      */
-    public boolean matches(Throwable exception, MatchingMethod method)
+    public boolean matches(Throwable exception, Priority priority)
     {
+        assert (priority != null);
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        switch (method)
-        {
-            case EXCEPTION_OUTLINE_MATCHING:
-                return hasMatchingExceptionOutline(name, message);
-            case KEYWORDS_MATCHING:
-                return hasMatchingKeywords(name, message);
-            case TYPE_NAME_MATCHING:
-                return hasMatchingTypeName(name);
-            default:
-                throw new EngineException("Invalid matching method specified for error handling", ExceptionCategory.OTHER_ERROR);
-        }
-    }
+        return this.exceptions.stream().filter(e -> e.getPriority() == priority).anyMatch(e -> e.matches(name, message));
 
-    /**
-     * check if the exception's message or class name matches any category keywords
-     * @param name is the exception's name
-     * @param message is the exception's message
-     * @return true if the category is a match, false otherwise
-     */
-    private boolean hasMatchingKeywords(String name, String message)
-    {
-        return this.keywords.stream().anyMatch(keyword -> keyword.matcher(message).find() || keyword.matcher(name).find());
-    }
-
-    /**
-     * check if the exception's name and message match any of the defined exception name and message pairs
-     * @param name is the exception's name
-     * @param message is the exception's message
-     * @return true if the category is a match, false otherwise
-     */
-    private boolean hasMatchingExceptionOutline(String name, String message)
-    {
-        return this.exceptionTypes.stream().anyMatch(type -> type.hasMatchingExceptionOutline(name, message));
-    }
-
-    /**
-     * check if the exception's class name matches any of this category's Types' exception name regex
-     * @param name is the exception's name
-     * @return true if the category is a match, false otherwise
-     */
-    private boolean hasMatchingTypeName(String name)
-    {
-        return this.exceptionTypes.stream().anyMatch(type -> type.hasMatchingTypeName(name));
     }
 
     /**
@@ -129,112 +75,63 @@ public class ExceptionCategoryData
     }
 
     /**
-     * Class representing an exception type which is essentially a sub-category of exceptions
-     * To track the Type for each exception change the streams().anyMatch() to enhanced for loops in ExceptionCategoryData
-     * and return Type object's name when a successful match is found
+     * Class to hold an exception's class name regex and message regex to match upcoming exceptions against
+     * Holds the matching priority for the given name-message pair.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class ExceptionTypeData
+    private static class ExceptionOutline
     {
         /**
-         * more technical but still user-friendly name of the exception type
+         * Exception class name regex
          */
-        private final String typeName;
+        private final Pattern exceptionName;
 
         /**
-         * Regex to match against an unknown exception's class name
+         * Regex pattern to match with the exception message
          */
-        private final Pattern typeExceptionRegex;
+        private final Pattern exceptionMessage;
 
         /**
-         * List of exception outlines (exception class name and message regex pairs) associated with the Type.
+         * Matching priority to define the order of importance of outlines.
          */
-        private final ArrayList<ExceptionOutline> exceptionOutlines;
+        private final Priority priority;
 
         /**
-         * Constructor to create an exception type holding data to be used in categorizing an exception to its correct category
-         * @param typeName is the name of this exception Type
-         * @param typeExceptionRegex is the regex matching exception names to this Type
-         * @param exceptionOutlines is the list of exception name and message regex pairs to be used in matching
+         * Constructor to create an exception outline object
+         * @param exceptionName is the simple name regex of the exception
+         * @param exceptionMessage is the regex corresponding to the message in the exception
+         * @param priority is the priority associated with the outline.
          */
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public ExceptionTypeData(@JsonProperty("TypeName") String typeName, @JsonProperty("TypeExceptionRegex") String typeExceptionRegex, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptionOutlines)
+        public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage, @JsonProperty("Priority") Priority priority)
         {
-            this.typeName = typeName;
-            this.typeExceptionRegex = typeExceptionRegex == null ? null : Pattern.compile(typeExceptionRegex, Pattern.CASE_INSENSITIVE);
-            this.exceptionOutlines = exceptionOutlines == null ? new ArrayList<>() : exceptionOutlines;
+            String nameRegex = exceptionName == null ? ".*" : String.format("^%s$", exceptionName);
+            this.exceptionName = Pattern.compile(nameRegex, Pattern.CASE_INSENSITIVE);
+            this.exceptionMessage = exceptionMessage == null ? Pattern.compile(".*", Pattern.CASE_INSENSITIVE) : Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
+            this.priority = priority;
         }
 
         /**
-         * Checks if an occurring exception class name and message match any exception outline associated with this type.
-         * @param name is the exception class name
-         * @param message is the exception message
-         * @return true if the exception matches an outline class name and message regex pair and false otherwise.
+         * Method to check if an exception name and message match a predefined name and message regex pair
+         * @param name is the simple name of the exception
+         * @param message is the message included in the exception
+         * @return true if the name and message match the predefined pair false otherwise
          */
-        public boolean hasMatchingExceptionOutline(String name, String message)
+        public boolean matches(String name, String message)
         {
-            return this.exceptionOutlines.stream().anyMatch(exceptionOutline -> exceptionOutline.matches(name, message));
+            Matcher nameMatcher = this.exceptionName.matcher(name);
+            Matcher messageMatcher = this.exceptionMessage.matcher(message);
+            return nameMatcher.find() && messageMatcher.find();
         }
 
         /**
-         * Method to check if an occurring exception class name matches the defined exception class name regex for this exception type
-         * @param name is the occurring exception class name
-         * @return true if the type name regex matches the parameter name and false otherwise
+         * Method to get the priority of an exception outline.
+         * @return primary or secondary.
          */
-        public boolean hasMatchingTypeName(String name)
+        public Priority getPriority()
         {
-            return this.typeExceptionRegex != null && this.typeExceptionRegex.matcher(name).find();
+            return priority;
         }
 
-        /**
-         * Method to get the user-friendly but more technical exception Type name
-         * @return friendly exception type name
-         */
-        public String getTypeName()
-        {
-            return typeName;
-        }
-
-
-        /**
-         * Class to hold an exception's class name and message regex to match upcoming exceptions against
-         */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        private static class ExceptionOutline
-        {
-            /**
-             * Exception class name
-             */
-            private final String exceptionName;
-
-            /**
-             * Regex pattern to match with the exception message
-             */
-            private final Pattern exceptionMessage;
-
-            /**
-             * Constructor to create an exception outline object
-             * @param exceptionName is the simple name of the exception
-             * @param exceptionMessage is the regex corresponding to the message in the exception
-             */
-            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-            public ExceptionOutline(@JsonProperty("ExceptionName") String exceptionName, @JsonProperty("MessageRegex") String exceptionMessage)
-            {
-                this.exceptionName = exceptionName;
-                this.exceptionMessage = exceptionMessage == null ? Pattern.compile("", Pattern.CASE_INSENSITIVE) : Pattern.compile(exceptionMessage, Pattern.CASE_INSENSITIVE);
-            }
-
-            /**
-             * Method to check if an exception name and message match a predefined name and message regex pair
-             * @param name is the simple name of the exception
-             * @param message is the message included in the exception
-             * @return true if the name and message match the predefined pair false otherwise
-             */
-            public boolean matches(String name, String message)
-            {
-                Matcher matcher = this.exceptionMessage.matcher(message);
-                return name.equals(this.exceptionName) && matcher.find();
-            }
-        }
     }
 }
