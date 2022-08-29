@@ -267,7 +267,7 @@ public class MetricsHandler
 
         ExceptionLabelValues exceptionLabelValues = getExceptionLabelValues(source, exception);
         String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
-        
+
         EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern).inc();
         LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
@@ -296,6 +296,7 @@ public class MetricsHandler
 
     private static synchronized ExceptionLabelValues getExceptionLabelValues(String origin, Throwable exception)
     {
+        String originalExceptionLabel = getExceptionLabel(origin, exception);
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
         for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && exception != null; depth++)
         {
@@ -307,7 +308,7 @@ public class MetricsHandler
 
             exception = exception.getCause();
         }
-        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? getExceptionLabel(origin, exception) : exceptionLabelValues.exceptionLabel;
+        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? originalExceptionLabel : exceptionLabelValues.exceptionLabel;
         return exceptionLabelValues;
     }
 
