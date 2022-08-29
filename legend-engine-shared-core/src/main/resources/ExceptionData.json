@@ -102,7 +102,7 @@
       },
       {
         "ExceptionName": "IllegalArgumentException",
-        "MessageRegex": "Invalid provided parameter|Reprocessing sql failed with vars|.*",
+        "MessageRegex": "Invalid provided parameter|Reprocessing sql failed with vars",
         "Priority": "primary"
       },
       {
