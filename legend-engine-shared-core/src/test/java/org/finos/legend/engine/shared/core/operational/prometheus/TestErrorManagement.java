@@ -14,7 +14,6 @@
 
 package org.finos.legend.engine.shared.core.operational.prometheus;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
