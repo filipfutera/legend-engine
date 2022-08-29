@@ -257,8 +257,8 @@ public class TestErrorManagement
     @Test
     public void testInteractiveErrorCategorizationToServerExecutionErrorWithExceptionOutlineMatching()
     {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new IllegalArgumentException("there was an invalid hexadecimal representation of an ObjectId '123456789'"), null);
-        String[] labels = {"IllegalArgumentException", "ServerExecutionError", "CatchAll", "N/A"};
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException("Input stream was not provided"), null);
+        String[] labels = {"CatchAllRuntimeException", "ServerExecutionError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
 
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new EngineException("Error in 'some::graph': Can't find the profile 'some::profile'"), null);
@@ -283,7 +283,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testInteractiveErrorCategorizationToOtherErrorWithKeywordsMatchingInExceptionName()
+    public void testInteractiveErrorCategorizationToOtherErrorWithKeywordsMatchingInTestScenario()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new TestCouldNotBeSkippedException(null), null);
         String[] labels = {"TestCouldNotBeSkippedException", "OtherError", "CatchAll", "N/A"};
@@ -311,14 +311,6 @@ public class TestErrorManagement
     {
         MetricsHandler.observeError(LoggingEventType.DSB_EXECUTE_ERROR, new EngineException("Can't resolve the builder for function 'get/Login/Kerberos"), TEST_SERVICE_PATH);
         String[] labels = {"DsbExecuteEngineException", "ServerExecutionError", "DsbExecute", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
-    public void testServiceErrorCategorizationMatchingMethodPrioritizationOfKeywordsToTypeName()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new JsonGenerationException("can't get kerberos authentication"), TEST_SERVICE_PATH);
-        String[] labels = {"JsonGenerationException", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
