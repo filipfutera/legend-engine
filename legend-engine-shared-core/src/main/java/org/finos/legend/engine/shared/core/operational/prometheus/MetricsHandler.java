@@ -251,7 +251,7 @@ public class MetricsHandler
 
     /**
      * Method to record an error occurring during execution and add it to the metrics.
-     * @param origin the stage in execution at which the error occurred.
+     * @param origin the stage in execution at which the error occurred. For service execution errors use SERVICE_EXECUTE_ERROR.
      * @param exception the non-null exception to be analysed that has occurred in execution.
      * @param servicePath the name of the service whose execution invoked the error.
      */
