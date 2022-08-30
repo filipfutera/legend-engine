@@ -19,8 +19,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.MatchingPriority;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Class to hold data corresponding to a particular category of exceptions
@@ -37,7 +39,7 @@ public class ExceptionCategoryData
     /**
      * List of exception outlines associated with this category
      */
-    private final ArrayList<ExceptionOutline> exceptions;
+    private final HashMap<MatchingPriority, Stream<ExceptionOutline>> exceptions;
 
     /**
      * Constructor to create an exception category data object containing data to be used in categorising occurring exceptions
@@ -48,7 +50,11 @@ public class ExceptionCategoryData
     public ExceptionCategoryData(@JsonProperty("CategoryName") ExceptionCategory exceptionCategory, @JsonProperty("Exceptions") ArrayList<ExceptionOutline> exceptions)
     {
         this.exceptionCategory = exceptionCategory;
-        this.exceptions = exceptions;
+        this.exceptions = new HashMap<>();
+        for (MatchingPriority priority : MatchingPriority.values())
+        {
+            this.exceptions.put(priority, exceptions.stream().filter(exception -> exception.getPriority() == priority));
+        }
     }
 
     /**
@@ -62,7 +68,7 @@ public class ExceptionCategoryData
         assert (priority != null);
         String message = exception.getMessage() == null ? "" : exception.getMessage();
         String name = exception.getClass().getSimpleName();
-        return this.exceptions.stream().filter(e -> e.getPriority() == priority).anyMatch(e -> e.matches(name, message));
+        return this.exceptions.get(priority).anyMatch(e -> e.matches(name, message));
     }
 
     /**
