@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class MetricsHandler
@@ -235,15 +236,9 @@ public class MetricsHandler
     protected static final Counter EXCEPTION_ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("exceptionLabel", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
-     * Depth to which the categorization and label extraction of the exception should commence.
-     * If the depth is to be infinite, we must add a hashset to getExceptionLabelValues to track explored exceptions and avoid infinite cause loops!
-     */
-    private static final int CATEGORIZATION_DEPTH_LIMIT = 5;
-
-    /**
      * Uninformative exceptions that ideally should not be used for the exception label.
      */
-    private static final Class[] GENERIC_EXCEPTION_CLASSES = { RuntimeException.class, Exception.class, EngineException.class };
+    private static final HashSet<Class> GENERIC_EXCEPTION_CLASSES = new HashSet<>(Arrays.asList(RuntimeException.class, Exception.class, EngineException.class));
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
@@ -312,10 +307,11 @@ public class MetricsHandler
      */
     private static synchronized ExceptionLabelValues getCounterLabelValues(String origin, Throwable exception)
     {
+        int categorisationDepthLimit = 5;
         boolean isExceptionNull = exception == null;
         boolean completed = false;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < CATEGORIZATION_DEPTH_LIMIT && !isExceptionNull && !completed; depth++)
+        for (int depth = 0; depth < categorisationDepthLimit && !isExceptionNull && !completed; depth++)
         {
             exceptionLabelValues.exceptionLabel = Arrays.asList(GENERIC_EXCEPTION_CLASSES).contains(exception.getClass()) ? exceptionLabelValues.exceptionLabel : getExceptionLabel(origin, exception);
 
