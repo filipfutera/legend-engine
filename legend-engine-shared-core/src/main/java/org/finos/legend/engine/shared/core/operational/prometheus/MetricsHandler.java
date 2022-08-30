@@ -233,7 +233,7 @@ public class MetricsHandler
      * Prometheus counter to record exceptions with labels of the service causing the exception if it is a service-related exception,
      * the label given to the exception, the category of the exception and source of the exception.
      */
-    protected static final Counter EXCEPTION_ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("exceptionLabel", "category", "source", "serviceName").register(getMetricsRegistry());
+    protected static final Counter EXCEPTION_ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("exceptionClass", "category", "source", "serviceName").register(getMetricsRegistry());
 
     /**
      * Uninformative exceptions that ideally should not be used for the exception label.
@@ -268,64 +268,67 @@ public class MetricsHandler
         String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
 
-        ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(source, exception);
+        ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
         String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
 
-        EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern).inc();
-        LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
-    }
-
-    /**
-     * Method to obtain a label for the exception that has occurred - Mostly using the exception class except with:
-     * RuntimeException, Exception and EngineExceptions which are further processed and often combined with their LoggingEventType value.
-     * @param eventType the stage in execution at which the error occurred.
-     * @param exception the exception to be analysed that has occurred in execution.
-     * @return the exception label generated for the error.
-     */
-    private static synchronized String getExceptionLabel(String eventType, Throwable exception)
-    {
-        Class exceptionClass = exception.getClass();
-        String exceptionLabel = exceptionClass.getSimpleName();
-        if (exceptionClass.equals(RuntimeException.class) || exceptionClass.equals(Exception.class))
-        {
-            exceptionLabel = eventType + exceptionClass.getSimpleName();
-        }
-        else if (exception instanceof EngineException)
-        {
-            exceptionLabel = ((EngineException) exception).getErrorType() != null ? ((EngineException) exception).getErrorType().toString().toLowerCase() + exceptionClass.getSimpleName() : eventType + exceptionClass.getSimpleName();
-        }
-        return convertExceptionLabelToPrettyString(exceptionLabel);
+        EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern).inc();
+        LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
     }
 
     /**
      * Method to loop down the cause trace of the exception to classify the exception to a category and extract an exception label.
      * If the data cannot be extracted from the original exception, its cause it iteratively analysed.
-     * completed flag is used for early termination if a final category is found (from EngineException) and label is valid.
-     * @param origin is the stage in execution at which the error occurred.
+     * completed flags are used for early termination if a final category is found (from EngineException) and label is valid.
      * @param exception the original exception to be analysed that has occurred in execution.
      * @return a pair of values corresponding to the exceptionLabel and category labels in the Counter.
      */
-    private static synchronized ExceptionLabelValues getCounterLabelValues(String origin, Throwable exception)
+    private static synchronized ExceptionLabelValues getCounterLabelValues(Throwable exception)
     {
         int categorisationDepthLimit = 5;
-        boolean isExceptionNull = exception == null;
-        boolean completed = false;
+        boolean isCategorisationComplete = false;
+        boolean isExceptionClassExtracted = false;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < categorisationDepthLimit && !isExceptionNull && !completed; depth++)
+        for (int depth = 0; depth < categorisationDepthLimit && !(isCategorisationComplete && isExceptionClassExtracted); depth++)
         {
-            exceptionLabelValues.exceptionLabel = Arrays.asList(GENERIC_EXCEPTION_CLASSES).contains(exception.getClass()) ? exceptionLabelValues.exceptionLabel : getExceptionLabel(origin, exception);
+            //categorise the exception
+            if (!isCategorisationComplete)
+            {
+                if (isEngineExceptionWithValidExceptionCategory(exception))
+                {
+                    exceptionLabelValues.exceptionCategory = ((EngineException) exception).getErrorCategory();
+                    isCategorisationComplete = true;
+                }
+                else if (exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR)
+                {
+                    exceptionLabelValues.exceptionCategory = matchExceptionToExceptionDataFile(exception);
+                }
+            }
 
-            ExceptionCategory engineExceptionCategory = extractExceptionCategoryFromEngineException(exception);
-            exceptionLabelValues.exceptionCategory = engineExceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? exceptionLabelValues.exceptionCategory : engineExceptionCategory;
-            exceptionLabelValues.exceptionCategory = exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR ? matchExceptionToExceptionDataFile(exception) : exceptionLabelValues.exceptionCategory;
+            //get the class of the exception
+            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null))
+            {
+                exceptionLabelValues.exceptionClass = getExceptionClass(exception);
+                isExceptionClassExtracted = true;
+            }
 
-            isExceptionNull = exception.getCause() == null;
-            completed = engineExceptionCategory != ExceptionCategory.UNKNOWN_ERROR && exceptionLabelValues.exceptionLabel != null;
-
-            exception = isExceptionNull ? exception : exception.getCause();
+            exception = exception.getCause();
         }
-        exceptionLabelValues.exceptionLabel = exceptionLabelValues.exceptionLabel == null ? getExceptionLabel(origin, exception) : exceptionLabelValues.exceptionLabel;
         return exceptionLabelValues;
+    }
+
+    /**
+     * Method to check if an exception is an engine exception that has a nonnull and unknown category
+     * @param exception is the exception to be checked
+     * @return true if the exception has an associated valid category and false otherwise.
+     */
+    private static synchronized boolean isEngineExceptionWithValidExceptionCategory(Throwable exception)
+    {
+        if (exception instanceof EngineException)
+        {
+            EngineException engineException = (EngineException) exception;
+            return engineException.getErrorCategory() != ExceptionCategory.UNKNOWN_ERROR && engineException.getErrorCategory() != null;
+        }
+        return false;
     }
 
     /**
@@ -349,21 +352,13 @@ public class MetricsHandler
     }
 
     /**
-     * Method to try and get an exception category from a possible engine exception.
-     * @param exception is the original exception that occurred in the engine.
-     * @return Exception category belonging to the exception or UnknownError if no meaningful data could be obtained or the exception is not an EngineException.
+     * Method to get the exception Class from any exception
+     * @param throwable is the exception whose class simple name to obtain
+     * @return the class simple name of the exception
      */
-    private static synchronized ExceptionCategory extractExceptionCategoryFromEngineException(Throwable exception)
+    private static synchronized String getExceptionClass(Throwable throwable)
     {
-        if (exception instanceof EngineException)
-        {
-            EngineException engineException = (EngineException) exception;
-            if (engineException.getErrorCategory() != null && engineException.getErrorCategory() != ExceptionCategory.UNKNOWN_ERROR)
-            {
-                return engineException.getErrorCategory();
-            }
-        }
-        return ExceptionCategory.UNKNOWN_ERROR;
+        return throwable.getClass().getSimpleName();
     }
 
     /**
@@ -415,18 +410,6 @@ public class MetricsHandler
     }
 
     /**
-     * Method to take a label and change it to a pretty printed string.
-     * @param exceptionLabel is the string to be pretty printed
-     * @return pretty print version of error label for error metrics
-     */
-    private static String convertExceptionLabelToPrettyString(String exceptionLabel)
-    {
-        String capitalisedErrorLabel = exceptionLabel.substring(0,1).toUpperCase() + exceptionLabel.substring(1);
-        String labelWithRemovedWord = capitalisedErrorLabel.substring(0, capitalisedErrorLabel.lastIndexOf("Exception"));
-        return removeErrorSuffix(labelWithRemovedWord) + "Exception";
-    }
-
-    /**
      * Method to pretty print an exception with the purpose of adding it to the error data file
      * @param exception is the exception to be pretty printed
      * @return pretty print formatted exception string
@@ -458,7 +441,7 @@ public class MetricsHandler
         /**
          * exceptionLabel label value for the prometheus error counter
          */
-        public String exceptionLabel;
+        public String exceptionClass;
 
         /**
          * category label value for the prometheus error counter
@@ -467,12 +450,12 @@ public class MetricsHandler
 
         /**
          * Constructor to create a pair of exception-related label values.
-         * @param exceptionLabel is the exceptionLabel label value for the prometheus error counter.
+         * @param exceptionClass is the simple name of the class causing the exception.
          * @param exceptionCategory is the category label value for the prometheus error counter.
          */
-        public ExceptionLabelValues(String exceptionLabel, ExceptionCategory exceptionCategory)
+        public ExceptionLabelValues(String exceptionClass, ExceptionCategory exceptionCategory)
         {
-            this.exceptionLabel = exceptionLabel;
+            this.exceptionClass = exceptionClass;
             this.exceptionCategory = exceptionCategory;
         }
     }
