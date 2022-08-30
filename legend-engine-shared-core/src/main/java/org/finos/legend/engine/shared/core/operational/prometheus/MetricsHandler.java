@@ -288,7 +288,7 @@ public class MetricsHandler
         boolean isCategorisationComplete = false;
         boolean isExceptionClassExtracted = false;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < categorisationDepthLimit && !(isCategorisationComplete && isExceptionClassExtracted); depth++)
+        for (int depth = 0; depth < categorisationDepthLimit && !(isCategorisationComplete && isExceptionClassExtracted) && exception != null; depth++)
         {
             //categorise the exception
             if (!isCategorisationComplete)
