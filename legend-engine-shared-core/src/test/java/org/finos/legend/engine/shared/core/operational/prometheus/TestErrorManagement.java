@@ -29,7 +29,7 @@ import static org.junit.Assert.assertThrows;
 
 public class TestErrorManagement
 {
-    private final String[] COUNTER_LABEL_NAMES = {"exceptionLabel", "category", "source", "serviceName"};
+    private final String[] COUNTER_LABEL_NAMES = {"exceptionClass", "category", "source", "serviceName"};
     private final String METRIC_NAME = "legend_engine_error_total";
     private final CollectorRegistry METRIC_REGISTRY = MetricsHandler.getMetricsRegistry();
     private final double DELTA = 0d;
