@@ -305,7 +305,7 @@ public class MetricsHandler
             }
 
             //get the class of the exception
-            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null))
+            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null || depth == categorisationDepthLimit - 1))
             {
                 exceptionLabelValues.exceptionClass = getExceptionClass(exception);
                 isExceptionClassExtracted = true;
