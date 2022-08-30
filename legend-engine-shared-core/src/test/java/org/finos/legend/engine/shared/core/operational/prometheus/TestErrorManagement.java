@@ -140,22 +140,22 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testInteractiveErrorLabelExtractionWithCrossCausingExceptions()
+    public void testInteractiveErrorLabelExtractionWithCrossCausingExceptionsOnFiveLoopIterations()
     {
         Exception exceptionOne = new Exception();
         RuntimeException exceptionTwo = new RuntimeException(exceptionOne);
         exceptionOne.initCause(exceptionTwo);
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, exceptionOne, null);
-        String[] labels = {"RuntimeException", "UnknownError", "CatchAll", "N/A"};
+        String[] labels = {"Exception", "UnknownError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
-    public void testInteractiveErrorLabelExtractionWithLoopingExceptionCause()
+    public void testInteractiveErrorLabelExtractionWithLoopingExceptionCauseOnFiveLoopIterations()
     {
         Exception exceptionOne = new Exception();
-        Exception exceptionTwo = new Exception();
-        RuntimeException exceptionThree = new RuntimeException(exceptionOne);
+        RuntimeException exceptionTwo = new RuntimeException();
+        Exception exceptionThree = new Exception(exceptionOne);
         exceptionOne.initCause(exceptionTwo);
         exceptionTwo.initCause(exceptionThree);
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, exceptionOne, null);
