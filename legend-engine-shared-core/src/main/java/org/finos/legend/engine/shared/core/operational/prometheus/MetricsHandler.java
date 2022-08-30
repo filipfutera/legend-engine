@@ -273,7 +273,7 @@ public class MetricsHandler
         String source = removeErrorSuffix(toCamelCase(origin));
         String servicePattern = servicePath == null ? "N/A" : servicePath;
 
-        ExceptionLabelValues exceptionLabelValues = getExceptionLabelValues(source, exception);
+        ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(source, exception);
         String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
 
         EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionLabel, exceptionCategory, source, servicePattern).inc();
@@ -310,7 +310,7 @@ public class MetricsHandler
      * @param exception the original exception to be analysed that has occurred in execution.
      * @return a pair of values corresponding to the exceptionLabel and category labels in the Counter.
      */
-    private static synchronized ExceptionLabelValues getExceptionLabelValues(String origin, Throwable exception)
+    private static synchronized ExceptionLabelValues getCounterLabelValues(String origin, Throwable exception)
     {
         boolean isExceptionNull = exception == null;
         boolean completed = false;
