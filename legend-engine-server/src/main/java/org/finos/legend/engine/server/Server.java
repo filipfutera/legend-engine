@@ -84,6 +84,7 @@ import org.finos.legend.engine.server.core.session.api.SessionInfo;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.engine.shared.core.deployment.DeploymentStateAndVersions;
 import org.finos.legend.engine.shared.core.operational.http.InflateInterceptor;
+import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler;
 import org.finos.legend.engine.shared.core.url.EngineUrlStreamHandlerFactory;
 import org.finos.legend.engine.shared.core.vault.Vault;
 import org.finos.legend.engine.shared.core.vault.VaultConfiguration;
@@ -155,6 +156,8 @@ public class Server<T extends ServerConfiguration> extends Application<T>
 
         relationalStoreExecutor = (RelationalStoreExecutor) Relational.build(serverConfiguration.relationalexecution);
         PlanExecutor planExecutor = PlanExecutor.newPlanExecutor(relationalStoreExecutor, ServiceStore.build(), InMemory.build());
+
+        MetricsHandler.setDoExceptionCategorisation(serverConfiguration.doExceptionCategorisation);
 
         // Session Management
         SessionTracker sessionTracker = new SessionTracker();

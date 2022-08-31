@@ -36,8 +36,8 @@ public class ServerConfiguration extends Configuration
     public Map<String, Integer> filterPriorities;
     public MetaDataServerConfiguration metadataserver;
     public List<VaultConfiguration> vaults;
-
     public RelationalExecutionConfiguration relationalexecution;
+    public boolean doExceptionCategorisation = true;
 
     /*
         This configuration has been deprecated in favor of the 'temporarytestdb' in RelationalExecutionConfiguration
