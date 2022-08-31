@@ -301,7 +301,7 @@ public class MetricsHandler
         int categorisationDepthLimit = 5;
         boolean isCategorisationComplete = false;
         boolean isExceptionClassExtracted = false;
-        ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(null, ExceptionCategory.UNKNOWN_ERROR);
+        ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(getExceptionClass(exception), ExceptionCategory.UNKNOWN_ERROR);
         for (int depth = 0; depth < categorisationDepthLimit && !(isCategorisationComplete && isExceptionClassExtracted) && exception != null; depth++)
         {
             //categorise the exception
@@ -319,16 +319,21 @@ public class MetricsHandler
             }
 
             //get the class of the exception
-            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null || depth == categorisationDepthLimit - 1))
+            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass())))
             {
-                String prefix = exception instanceof EngineException ? toCamelCase(((EngineException) exception).getErrorType()) : "";
-                exceptionLabelValues.exceptionClass = prefix + exception.getClass().getSimpleName();
+                exceptionLabelValues.exceptionClass = getExceptionClass(exception);
                 isExceptionClassExtracted = true;
             }
 
             exception = exception.getCause();
         }
         return exceptionLabelValues;
+    }
+
+    private static synchronized String getExceptionClass(Throwable exception)
+    {
+        String prefix = exception instanceof EngineException ? toCamelCase(((EngineException) exception).getErrorType()) : "";
+        return prefix + exception.getClass().getSimpleName();
     }
 
     /**
