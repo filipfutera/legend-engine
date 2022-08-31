@@ -38,7 +38,7 @@ public class ServerConfiguration extends Configuration
     public MetaDataServerConfiguration metadataserver;
     public List<VaultConfiguration> vaults;
     public RelationalExecutionConfiguration relationalexecution;
-    public ErrorHandlingConfiguration errorhandlingconfiguration;
+    public ErrorHandlingConfiguration errorhandlingconfiguration = new ErrorHandlingConfiguration();
 
     /*
         This configuration has been deprecated in favor of the 'temporarytestdb' in RelationalExecutionConfiguration
