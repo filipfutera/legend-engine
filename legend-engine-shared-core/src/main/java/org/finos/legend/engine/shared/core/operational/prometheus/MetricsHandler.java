@@ -290,41 +290,32 @@ public class MetricsHandler
     }
 
     /**
-     * Method to loop down the cause trace of the exception to classify the exception to a category and extract an exception label.
+     * Method to loop down the cause trace of the exception to classify the exception to a category and extract its exception label.
      * If the data cannot be extracted from the original exception, its cause it iteratively analysed.
-     * completed flags are used for early termination if a final category is found (from EngineException) and label is valid.
      * @param exception the original exception to be analysed that has occurred in execution.
      * @return a pair of values corresponding to the exceptionLabel and category labels in the Counter.
      */
     private static synchronized ExceptionLabelValues getCounterLabelValues(Throwable exception)
     {
         int categorisationDepthLimit = 5;
-        boolean isCategorisationComplete = false;
-        boolean isExceptionClassExtracted = false;
         ExceptionLabelValues exceptionLabelValues = new ExceptionLabelValues(getExceptionClass(exception), ExceptionCategory.UNKNOWN_ERROR);
-        for (int depth = 0; depth < categorisationDepthLimit && !(isCategorisationComplete && isExceptionClassExtracted) && exception != null; depth++)
+        for (int depth = 0; depth < categorisationDepthLimit && exception != null; depth++)
         {
-            //categorise the exception
-            if (!isCategorisationComplete)
+            if (isEngineExceptionWithValidExceptionCategory(exception))
             {
-                if (isEngineExceptionWithValidExceptionCategory(exception))
-                {
-                    exceptionLabelValues.exceptionCategory = ((EngineException) exception).getErrorCategory();
-                    isCategorisationComplete = true;
-                }
-                else if (exceptionLabelValues.exceptionCategory == ExceptionCategory.UNKNOWN_ERROR)
-                {
-                    exceptionLabelValues.exceptionCategory = matchExceptionToExceptionDataFile(exception);
-                }
-            }
-
-            //get the class of the exception
-            if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass())))
-            {
+                exceptionLabelValues.exceptionCategory = ((EngineException) exception).getErrorCategory();
                 exceptionLabelValues.exceptionClass = getExceptionClass(exception);
-                isExceptionClassExtracted = true;
+                return exceptionLabelValues;
             }
-
+            else
+            {
+                exceptionLabelValues.exceptionCategory = matchExceptionToExceptionDataFile(exception);
+                if (exceptionLabelValues.exceptionCategory != ExceptionCategory.UNKNOWN_ERROR)
+                {
+                    exceptionLabelValues.exceptionClass = getExceptionClass(exception);
+                    return exceptionLabelValues;
+                }
+            }
             exception = exception.getCause();
         }
         return exceptionLabelValues;
@@ -370,6 +361,7 @@ public class MetricsHandler
             {
                 if (categoryData.matches(exception, method))
                 {
+                    LOGGER.error("Error was matched using method: {}", method);
                     return categoryData.getExceptionCategory();
                 }
             }

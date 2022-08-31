@@ -72,10 +72,12 @@ import org.finos.legend.engine.query.graphQL.api.debug.GraphQLDebug;
 import org.finos.legend.engine.query.graphQL.api.execute.GraphQLExecute;
 import org.finos.legend.engine.query.graphQL.api.grammar.GraphQLGrammar;
 import org.finos.legend.engine.query.pure.api.Execute;
+import org.finos.legend.engine.server.bundles.ErrorHandlingBundle;
 import org.finos.legend.engine.server.core.ServerShared;
 import org.finos.legend.engine.server.core.api.CurrentUser;
 import org.finos.legend.engine.server.core.api.Info;
 import org.finos.legend.engine.server.core.api.Memory;
+import org.finos.legend.engine.server.core.configuration.ErrorHandlingConfiguration;
 import org.finos.legend.engine.server.core.exceptionMappers.CatchAllExceptionMapper;
 import org.finos.legend.engine.server.core.exceptionMappers.JsonInformationExceptionMapper;
 import org.finos.legend.engine.server.core.session.SessionAttributeBundle;
@@ -134,6 +136,15 @@ public class Server<T extends ServerConfiguration> extends Application<T>
         bootstrap.addBundle(new LegendPac4jBundle<>(serverConfiguration -> serverConfiguration.pac4j));
         bootstrap.addBundle(new SessionAttributeBundle());
         bootstrap.addBundle(new MultiPartBundle());
+        bootstrap.addBundle(new ErrorHandlingBundle<T>()
+        {
+            @Override
+            protected ErrorHandlingConfiguration getErrorHandlingConfiguration(
+                    T configuration)
+            {
+                return configuration.errorhandlingconfiguration;
+            }
+        });
         PureProtocolObjectMapperFactory.withPureProtocolExtensions(bootstrap.getObjectMapper());
         VaultFactory.withVaultConfigurationExtensions(bootstrap.getObjectMapper());
         ObjectMapperFactory.withStandardConfigurations(bootstrap.getObjectMapper());
