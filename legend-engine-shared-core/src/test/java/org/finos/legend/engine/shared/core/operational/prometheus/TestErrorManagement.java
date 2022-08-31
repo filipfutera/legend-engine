@@ -85,7 +85,7 @@ public class TestErrorManagement
     public void testInteractiveErrorLabelExtractionWithEngineExceptionWithType()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new EngineException(null, null, EngineErrorType.COMPILATION), null);
-        String[] labels = {"EngineException", "UnknownError", "CatchAll", "N/A"};
+        String[] labels = {"CompilationEngineException", "UnknownError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 

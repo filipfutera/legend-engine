@@ -16,6 +16,8 @@ package org.finos.legend.engine.shared.core.operational.prometheus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentracing.Scope;
+import io.opentracing.util.GlobalTracer;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -264,15 +266,18 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        Assert.assertTrue(origin != null, () -> "Exception origin must not be null!");
-        String source = removeErrorSuffix(toCamelCase(origin));
-        String servicePattern = servicePath == null ? "N/A" : servicePath;
+        try (Scope scope = GlobalTracer.get().buildSpan("Error Handling").startActive(true))
+        {
+            Assert.assertTrue(origin != null, () -> "Exception origin must not be null!");
+            String source = removeErrorSuffix(toCamelCase(origin));
+            String servicePattern = servicePath == null ? "N/A" : servicePath;
 
-        ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
-        String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
+            ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
+            String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
 
-        EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern).inc();
-        LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
+            EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern).inc();
+            LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
+        }
     }
 
     /**
@@ -307,7 +312,8 @@ public class MetricsHandler
             //get the class of the exception
             if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null || depth == categorisationDepthLimit - 1))
             {
-                exceptionLabelValues.exceptionClass = getExceptionClass(exception);
+                String prefix = exception instanceof EngineException ? toCamelCase(((EngineException) exception).getErrorType()) : "";
+                exceptionLabelValues.exceptionClass = prefix + getExceptionClass(exception);
                 isExceptionClassExtracted = true;
             }
 
@@ -332,6 +338,16 @@ public class MetricsHandler
     }
 
     /**
+     * Method to get the exception Class from any exception
+     * @param throwable is the exception whose class simple name to obtain
+     * @return the class simple name of the exception
+     */
+    private static synchronized String getExceptionClass(Throwable throwable)
+    {
+        return throwable.getClass().getSimpleName();
+    }
+
+    /**
      * Method to try and match an exception to an exception category using the matching methods.
      * @param exception is the exception that occurred in the engine.
      * @return Category belonging to the exception.
@@ -349,16 +365,6 @@ public class MetricsHandler
             }
         }
         return ExceptionCategory.UNKNOWN_ERROR;
-    }
-
-    /**
-     * Method to get the exception Class from any exception
-     * @param throwable is the exception whose class simple name to obtain
-     * @return the class simple name of the exception
-     */
-    private static synchronized String getExceptionClass(Throwable throwable)
-    {
-        return throwable.getClass().getSimpleName();
     }
 
     /**
@@ -392,6 +398,10 @@ public class MetricsHandler
      */
     public static String toCamelCase(Enum value)
     {
+        if (value == null)
+        {
+            return "";
+        }
         String snakeCaseString = value.toString();
         String[] elements = snakeCaseString.toLowerCase().split("_");
         StringBuilder output = new StringBuilder();
