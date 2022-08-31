@@ -106,10 +106,10 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testServiceErrorLabelExtractionWithRuntimeExceptionWithCause()
+    public void testServiceErrorLabelExtractionWithRuntimeExceptionWithCauseThatMatches()
     {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException(new ArithmeticException()), TEST_SERVICE_PATH);
-        String[] labels = {"ArithmeticException", "UnknownError", "CatchAll", TEST_SERVICE_PATH};
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException(new ArithmeticException("tests")), TEST_SERVICE_PATH);
+        String[] labels = {"ArithmeticException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -192,7 +192,7 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"SocketTimeoutException", "OtherError", "CatchAll", "N/A"};
+        String[] labels = {"Exception", "OtherError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -352,15 +352,15 @@ public class TestErrorManagement
     public void testServiceErrorCategorizationExtractingValidCategoryFromNestedEngineException()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception(new EngineException("some message", ExceptionCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"EngineException", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
-    public void testServiceErrorCategorizationMatchingTechniquePrioritizationOfCategorisedExceptionToMatching()
+    public void testServiceErrorCategorizationMatchingTechniquePrioritizationOfFirstMatch()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("kerberos", new EngineException("some message", ExceptionCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
