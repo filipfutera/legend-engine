@@ -109,7 +109,7 @@ public class TestErrorManagement
     public void testServiceErrorLabelExtractionWithRuntimeExceptionWithCauseThatMatches()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException(new ArithmeticException("tests")), TEST_SERVICE_PATH);
-        String[] labels = {"ArithmeticException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"RuntimeException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
