@@ -401,4 +401,13 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
+    @Test
+    public void testInteractiveErrorCategorizationDownCauseTrace()
+    {
+        Exception exception = new Exception(new EngineException("", new RuntimeException("Issue processing freemarker function")));
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, exception, null);
+        String[] labels = {"RuntimeException", "ServerExecutionError", "CatchAll", "N/A"};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
+    }
+
 }
