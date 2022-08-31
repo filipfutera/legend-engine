@@ -324,7 +324,7 @@ public class MetricsHandler
                 exceptionLabelValues.exceptionClass = getExceptionClass(exception);
                 isExceptionClassExtracted = true;
             }
-            
+
             exception = exception.getCause();
         }
         return exceptionLabelValues;
