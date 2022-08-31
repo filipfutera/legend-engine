@@ -357,9 +357,17 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testServiceErrorCategorizationMatchingTechniquePrioritizationOfFirstMatch()
+    public void testServiceErrorCategorizationTechniquePrioritizationOfFirstMatchWithExceptionFile()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("kerberos", new EngineException("some message", ExceptionCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
+        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
+    }
+
+    @Test
+    public void testServiceErrorCategorizationTechniquePrioritizationOfFirstMatchWithEngineException()
+    {
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new EngineException("some message", new Exception("kerberos"), ExceptionCategory.INTERNAL_SERVER_ERROR), TEST_SERVICE_PATH);
         String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
