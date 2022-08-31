@@ -71,5 +71,7 @@
     "temporarytestdb": {
       "port": 9092
     }
-  }
+  },
+
+  "doExceptionCategorisation": true
 }

@@ -248,6 +248,11 @@ public class MetricsHandler
     private static final List<ExceptionCategoryData> EXCEPTION_CATEGORY_DATA = readExceptionData();
 
     /**
+     * Flag to turn exception categorisation on and off.
+     */
+    private static boolean doExceptionCategorisation = true;
+
+    /**
      * Types of exception matching priorities that can be performed on an incoming exceptions.
      */
     public enum MatchingPriority
@@ -271,12 +276,16 @@ public class MetricsHandler
             Assert.assertTrue(origin != null, () -> "Exception origin must not be null!");
             String source = removeErrorSuffix(toCamelCase(origin));
             String servicePattern = servicePath == null ? "N/A" : servicePath;
-
-            ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
-            String exceptionCategory = toCamelCase(exceptionLabelValues.exceptionCategory);
-
-            EXCEPTION_ERROR_COUNTER.labels(exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern).inc();
-            LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}.", exceptionLabelValues.exceptionClass, exceptionCategory, source, servicePattern, exceptionToPrettyString(exception));
+            String exceptionClass = exception.getClass().getSimpleName();
+            ExceptionCategory category = ExceptionCategory.UNKNOWN_ERROR;
+            if (doExceptionCategorisation)
+            {
+                ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
+                exceptionClass = exceptionLabelValues.exceptionClass;
+                category = exceptionLabelValues.exceptionCategory;
+            }
+            EXCEPTION_ERROR_COUNTER.labels(exceptionClass, toCamelCase(category), source, servicePattern).inc();
+            LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}. Exception Categorisation is: {}", exceptionClass, category, source, servicePattern, exceptionToPrettyString(exception), doExceptionCategorisation);
         }
     }
 
@@ -313,7 +322,7 @@ public class MetricsHandler
             if (!isExceptionClassExtracted && (!GENERIC_EXCEPTION_CLASSES.contains(exception.getClass()) || exception.getCause() == null || depth == categorisationDepthLimit - 1))
             {
                 String prefix = exception instanceof EngineException ? toCamelCase(((EngineException) exception).getErrorType()) : "";
-                exceptionLabelValues.exceptionClass = prefix + getExceptionClass(exception);
+                exceptionLabelValues.exceptionClass = prefix + exception.getClass().getSimpleName();
                 isExceptionClassExtracted = true;
             }
 
@@ -335,16 +344,6 @@ public class MetricsHandler
             return engineException.getErrorCategory() != ExceptionCategory.UNKNOWN_ERROR && engineException.getErrorCategory() != null;
         }
         return false;
-    }
-
-    /**
-     * Method to get the exception Class from any exception
-     * @param throwable is the exception whose class simple name to obtain
-     * @return the class simple name of the exception
-     */
-    private static synchronized String getExceptionClass(Throwable throwable)
-    {
-        return throwable.getClass().getSimpleName();
     }
 
     /**
@@ -387,6 +386,16 @@ public class MetricsHandler
                 throw engineException;
         }
         return categories;
+    }
+
+    /**
+     * Method to turn exception categorisation on and off
+     * @param flag is true to set categorisation on and false otherwise.
+     */
+    public static synchronized void setDoExceptionCategorisation(boolean flag)
+    {
+        doExceptionCategorisation = flag;
+        LOGGER.info("Exception categorisation in error handling has been set to {}", flag);
     }
 
     // -------------------------------------- STRING UTILS -------------------------------------
