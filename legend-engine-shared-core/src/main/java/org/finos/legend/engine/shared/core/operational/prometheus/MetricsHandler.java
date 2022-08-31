@@ -324,12 +324,18 @@ public class MetricsHandler
                 exceptionLabelValues.exceptionClass = getExceptionClass(exception);
                 isExceptionClassExtracted = true;
             }
-
+            
             exception = exception.getCause();
         }
         return exceptionLabelValues;
     }
 
+    /**
+     * Method to obtain the exception class from an exception
+     * Prefixes the exception with the type if it is an engine exception
+     * @param exception is the exception whose class to obtain
+     * @return error counter label exceptionClass' value.
+     */
     private static synchronized String getExceptionClass(Throwable exception)
     {
         String prefix = exception instanceof EngineException ? toCamelCase(((EngineException) exception).getErrorType()) : "";
