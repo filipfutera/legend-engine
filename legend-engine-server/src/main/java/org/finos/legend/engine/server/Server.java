@@ -167,9 +167,7 @@ public class Server<T extends ServerConfiguration> extends Application<T>
 
         relationalStoreExecutor = (RelationalStoreExecutor) Relational.build(serverConfiguration.relationalexecution);
         PlanExecutor planExecutor = PlanExecutor.newPlanExecutor(relationalStoreExecutor, ServiceStore.build(), InMemory.build());
-
-        MetricsHandler.setDoExceptionCategorisation(serverConfiguration.doExceptionCategorisation);
-
+        
         // Session Management
         SessionTracker sessionTracker = new SessionTracker();
         environment.servlets().setSessionHandler(new SessionHandler());
