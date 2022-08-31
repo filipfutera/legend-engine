@@ -136,15 +136,8 @@ public class Server<T extends ServerConfiguration> extends Application<T>
         bootstrap.addBundle(new LegendPac4jBundle<>(serverConfiguration -> serverConfiguration.pac4j));
         bootstrap.addBundle(new SessionAttributeBundle());
         bootstrap.addBundle(new MultiPartBundle());
-        bootstrap.addBundle(new ErrorHandlingBundle<T>()
-        {
-            @Override
-            protected ErrorHandlingConfiguration getErrorHandlingConfiguration(
-                    T configuration)
-            {
-                return configuration.errorhandlingconfiguration;
-            }
-        });
+        bootstrap.addBundle(new ErrorHandlingBundle<T>(serverConfiguration -> serverConfiguration.errorhandlingconfiguration));
+
         PureProtocolObjectMapperFactory.withPureProtocolExtensions(bootstrap.getObjectMapper());
         VaultFactory.withVaultConfigurationExtensions(bootstrap.getObjectMapper());
         ObjectMapperFactory.withStandardConfigurations(bootstrap.getObjectMapper());
@@ -167,7 +160,7 @@ public class Server<T extends ServerConfiguration> extends Application<T>
 
         relationalStoreExecutor = (RelationalStoreExecutor) Relational.build(serverConfiguration.relationalexecution);
         PlanExecutor planExecutor = PlanExecutor.newPlanExecutor(relationalStoreExecutor, ServiceStore.build(), InMemory.build());
-        
+
         // Session Management
         SessionTracker sessionTracker = new SessionTracker();
         environment.servlets().setSessionHandler(new SessionHandler());

@@ -23,16 +23,19 @@ import org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler
 
 import java.util.function.Function;
 
-public abstract class ErrorHandlingBundle<T> implements ConfiguredBundle<T>
+public class ErrorHandlingBundle<T> implements ConfiguredBundle<T>
 {
-    public ErrorHandlingBundle()
+    private final Function<T, ErrorHandlingConfiguration> provider;
+
+    public ErrorHandlingBundle(Function<T, ErrorHandlingConfiguration> provider)
     {
+        this.provider = provider;
     }
 
     @Override
     public void run(T serverConfiguration, Environment environment) throws Exception
     {
-        ErrorHandlingConfiguration errorHandlingConfiguration = this.getErrorHandlingConfiguration((serverConfiguration));
+        ErrorHandlingConfiguration errorHandlingConfiguration = this.provider.apply(serverConfiguration);
         MetricsHandler.setDoExceptionCategorisation(errorHandlingConfiguration.doExceptionCategorisation);
     }
 
@@ -40,6 +43,4 @@ public abstract class ErrorHandlingBundle<T> implements ConfiguredBundle<T>
     public void initialize(Bootstrap<?> bootstrap)
     {
     }
-
-    protected abstract ErrorHandlingConfiguration getErrorHandlingConfiguration(T configuration);
 }
