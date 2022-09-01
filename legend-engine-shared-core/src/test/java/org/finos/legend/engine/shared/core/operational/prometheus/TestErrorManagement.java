@@ -42,7 +42,7 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testServiceErrorSourceeLabel()
+    public void testServiceErrorSourceLabel()
     {
         MetricsHandler.observeError(LoggingEventType.SERVICE_TEST_EXECUTE_ERROR, new Exception(), TEST_SERVICE_PATH);
         String[] labels = {"Exception", "UnknownError", "ServiceTestExecute", TEST_SERVICE_PATH};
