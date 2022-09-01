@@ -410,4 +410,15 @@ public class TestErrorManagement
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
+    @Test
+    public void testInteractiveErrorInToggledCategorisationMode()
+    {
+        MetricsHandler.setDoExceptionCategorisation(false);
+        Exception exception = new Exception(new EngineException("", new RuntimeException("Issue processing freemarker function")));
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, exception, null);
+        String[] labels = {"Exception", "UnknownError", "CatchAll", "N/A"};
+        MetricsHandler.setDoExceptionCategorisation(true);
+        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
+    }
+
 }

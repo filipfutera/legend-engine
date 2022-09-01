@@ -73,6 +73,6 @@
     }
   },
   "errorhandlingconfiguration": {
-    "doExceptionCategorisation": true
+    "enabled": true
   }
 }
