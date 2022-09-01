@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 public class MetricsHandler
@@ -236,11 +235,6 @@ public class MetricsHandler
      * the label given to the exception, the category of the exception and source of the exception.
      */
     protected static final Counter EXCEPTION_ERROR_COUNTER = Counter.build("legend_engine_error_total", "Count errors in legend engine").labelNames("exceptionClass", "category", "source", "serviceName").register(getMetricsRegistry());
-
-    /**
-     * Uninformative exceptions that ideally should not be used for the exception label.
-     */
-    private static final HashSet<Class> GENERIC_EXCEPTION_CLASSES = new HashSet<>(Arrays.asList(RuntimeException.class, Exception.class, EngineException.class));
 
     /**
      * List of objects corresponding to the error categories holding their associated exception data.
