@@ -17,5 +17,5 @@ package org.finos.legend.engine.server.core.configuration;
 
 public class ErrorHandlingConfiguration
 {
-    public boolean doExceptionCategorisation = true;
+    public boolean enabled = true;
 }
