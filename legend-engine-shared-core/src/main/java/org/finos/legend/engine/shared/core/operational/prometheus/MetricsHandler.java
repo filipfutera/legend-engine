@@ -244,7 +244,7 @@ public class MetricsHandler
     /**
      * Flag to turn exception categorisation on and off.
      */
-    private static boolean doExceptionCategorisation = true;
+    private static boolean categorisationEnabled = true;
 
     /**
      * Types of exception matching priorities that can be performed on an incoming exceptions.
@@ -272,14 +272,14 @@ public class MetricsHandler
             String servicePattern = servicePath == null ? "N/A" : servicePath;
             String exceptionClass = exception.getClass().getSimpleName();
             ExceptionCategory category = ExceptionCategory.UNKNOWN_ERROR;
-            if (doExceptionCategorisation)
+            if (categorisationEnabled)
             {
                 ExceptionLabelValues exceptionLabelValues = getCounterLabelValues(exception);
                 exceptionClass = exceptionLabelValues.exceptionClass;
                 category = exceptionLabelValues.exceptionCategory;
             }
             EXCEPTION_ERROR_COUNTER.labels(exceptionClass, toCamelCase(category), source, servicePattern).inc();
-            LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}. Exception Categorisation is: {}", exceptionClass, category, source, servicePattern, exceptionToPrettyString(exception), doExceptionCategorisation);
+            LOGGER.error("Exception added to metric - Label: {}. Category: {}. Source: {}. Service: {}. {}. Exception Categorisation is: {}", exceptionClass, category, source, servicePattern, exceptionToPrettyString(exception), categorisationEnabled);
         }
     }
 
@@ -303,9 +303,10 @@ public class MetricsHandler
             }
             else
             {
-                exceptionLabelValues.exceptionCategory = matchExceptionToExceptionDataFile(exception);
-                if (exceptionLabelValues.exceptionCategory != ExceptionCategory.UNKNOWN_ERROR)
+                ExceptionCategory matchedCategory = matchExceptionToExceptionDataFile(exception);
+                if (matchedCategory != ExceptionCategory.UNKNOWN_ERROR)
                 {
+                    exceptionLabelValues.exceptionCategory = matchedCategory;
                     exceptionLabelValues.exceptionClass = getExceptionClass(exception);
                     return exceptionLabelValues;
                 }
@@ -389,9 +390,9 @@ public class MetricsHandler
      * Method to turn exception categorisation on and off
      * @param flag is true to set categorisation on and false otherwise.
      */
-    public static synchronized void setDoExceptionCategorisation(boolean flag)
+    public static synchronized void setCategorisationEnabled(boolean flag)
     {
-        doExceptionCategorisation = flag;
+        categorisationEnabled = flag;
         LOGGER.info("Exception categorisation in error handling has been set to {}", flag);
     }
 

@@ -36,7 +36,7 @@ public class ErrorHandlingBundle<T> implements ConfiguredBundle<T>
     public void run(T serverConfiguration, Environment environment) throws Exception
     {
         ErrorHandlingConfiguration errorHandlingConfiguration = this.provider.apply(serverConfiguration);
-        MetricsHandler.setDoExceptionCategorisation(errorHandlingConfiguration.enabled);
+        MetricsHandler.setCategorisationEnabled(errorHandlingConfiguration.enabled);
     }
 
     @Override
