@@ -417,7 +417,7 @@ public class MetricsHandler
     }
 
     /**
-     * Method to delete the suffix "Error" from a camel case string if it exists.
+     * Method to delete the suffix "Error" from a string if it exists.
      * @param string the string whose suffix to remove
      * @return string without the suffix "Error" if applicable.
      */
