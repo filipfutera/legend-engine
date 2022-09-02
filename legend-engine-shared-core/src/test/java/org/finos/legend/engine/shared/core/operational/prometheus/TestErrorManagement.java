@@ -21,7 +21,6 @@ import org.finos.legend.engine.shared.core.operational.errorManagement.Exception
 import org.finos.legend.engine.shared.core.operational.logs.LoggingEventType;
 import org.junit.After;
 import org.junit.Test;
-import org.junit.TestCouldNotBeSkippedException;
 import java.util.UnknownFormatFlagsException;
 import static org.finos.legend.engine.shared.core.operational.prometheus.MetricsHandler.toCamelCase;
 import static org.junit.Assert.assertEquals;
