@@ -29,8 +29,6 @@ public enum ExceptionCategory
     INTERNAL_SERVER_ERROR,
     @JsonProperty("ServerExecutionError")
     SERVER_EXECUTION_ERROR,
-    @JsonProperty("OtherError")
-    OTHER_ERROR,
     UNKNOWN_ERROR,
 }
 

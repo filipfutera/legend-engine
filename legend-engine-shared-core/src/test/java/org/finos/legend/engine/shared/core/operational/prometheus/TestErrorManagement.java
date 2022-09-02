@@ -101,7 +101,7 @@ public class TestErrorManagement
     public void testServiceExceptionClassExtractionWithRuntimeExceptionWithCauseThatMatches()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException(new ArithmeticException("tests")), TEST_SERVICE_PATH);
-        String[] labels = {"RuntimeException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"RuntimeException", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -184,7 +184,7 @@ public class TestErrorManagement
     {
         RuntimeException nestedOtherErrorException = new RuntimeException(new java.net.SocketTimeoutException("socket timeout"));
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception(nestedOtherErrorException), null);
-        String[] labels = {"Exception", "OtherError", "CatchAll", "N/A"};
+        String[] labels = {"Exception", "InternalServerError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -258,26 +258,18 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testServiceExceptionCategorizationToOtherErrorWithExceptionOutlineMatching()
+    public void testServiceExceptionCategorizationInternalServerErrorWithExceptionOutlineMatchingInTestScenario()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new IllegalArgumentException("Tests Failed! Error running tests for service 'some/service'"), TEST_SERVICE_PATH);
-        String[] labels = {"IllegalArgumentException", "OtherError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"IllegalArgumentException", "InternalServerError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
-    public void testInteractiveExceptionCategorizationToOtherErrorWithKeywordsMatchingInTestScenario()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new TestCouldNotBeSkippedException(null), null);
-        String[] labels = {"TestCouldNotBeSkippedException", "OtherError", "CatchAll", "N/A"};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
-    public void testInteractiveExceptionCategorizationToOtherErrorWithKeywordsMatchingInExceptionMessage()
+    public void testInteractiveExceptionCategorizationToInternalServerErrorWithKeywordsMatchingInExceptionMessageInTestScenario()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("some tests have failed!"), null);
-        String[] labels = {"Exception", "OtherError", "CatchAll", "N/A"};
+        String[] labels = {"Exception", "InternalServerError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
