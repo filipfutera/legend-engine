@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public enum ExceptionCategory
 {
-    @JsonProperty("UserAuthenticationError")
-    USER_AUTHENTICATION_ERROR,
+    @JsonProperty("UserCredentialsError")
+    USER_CREDENTIALS_ERROR,
     @JsonProperty("UserExecutionError")
     USER_EXECUTION_ERROR,
     @JsonProperty("InternalServerError")

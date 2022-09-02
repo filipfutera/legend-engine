@@ -1,6 +1,6 @@
 [
   {
-    "CategoryName": "UserAuthenticationError",
+    "CategoryName": "UserCredentialsError",
     "Exceptions": [
       {
         "ExceptionName": "EngineException",
