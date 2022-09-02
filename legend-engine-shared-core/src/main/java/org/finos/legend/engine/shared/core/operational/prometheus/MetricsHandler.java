@@ -265,7 +265,7 @@ public class MetricsHandler
      */
     public static synchronized void observeError(Enum origin, Exception exception, String servicePath)
     {
-        try (Scope scope = GlobalTracer.get().buildSpan("Error Handling").startActive(true))
+        try (Scope scope = GlobalTracer.get().buildSpan("Error Categorisation").startActive(true))
         {
             Assert.assertTrue(origin != null, () -> "Exception origin must not be null!");
             String source = removeErrorSuffix(toCamelCase(origin));
@@ -474,5 +474,39 @@ public class MetricsHandler
             this.exceptionClass = exceptionClass;
             this.exceptionCategory = exceptionCategory;
         }
+    }
+
+
+    // ---------------------------------- REDUNDANT CODE FOR BACKWARD COMPATIBILITY ---------------------------------
+
+    /**
+     * Redundant code, kept temporarily for backwards compatibility.
+     * To be deleted.
+     */
+
+    @Deprecated
+    public static void incrementErrorCount(String operation, int code)
+    {
+    }
+
+    @Deprecated
+    public static void incrementExecutionErrorGauge()
+    {
+    }
+
+    @Deprecated
+    public static synchronized void observeErrorCount(String name)
+    {
+    }
+
+    @Deprecated
+    public static synchronized void observeErrorCount(String name, String[] labelNames, String[] labelValues)
+    {
+    }
+
+    @Deprecated
+    public static synchronized void observeError(String name)
+    {
+        EXCEPTION_ERROR_COUNTER.labels(name, toCamelCase(ExceptionCategory.UNKNOWN_ERROR), toCamelCase(LoggingEventType.CATCH_ALL), "N/A").inc();
     }
 }
