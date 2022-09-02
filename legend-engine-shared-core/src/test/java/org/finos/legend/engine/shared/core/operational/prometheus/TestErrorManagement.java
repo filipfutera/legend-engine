@@ -213,14 +213,6 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testServiceExceptionCategorizationToUserExecutionErrorWithKeywordsMatching()
-    {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("database schema 'someSchema' not found"), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserExecutionError", "CatchAll", TEST_SERVICE_PATH};
-        assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
-    }
-
-    @Test
     public void testServiceExceptionCategorizationToInternalServerErrorWithExceptionOutlineMatching()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new RuntimeException("something has not been configured properly"), TEST_SERVICE_PATH);
