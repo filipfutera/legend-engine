@@ -188,19 +188,19 @@ public class TestErrorManagement
     }
 
     @Test
-    public void testInteractiveExceptionCategorizationToUserAuthenticationErrorWithExceptionOutlineMatching()
+    public void testInteractiveExceptionCategorizationToUserCredentialsErrorWithExceptionOutlineMatching()
     {
         UnsupportedOperationException permissionsError = new UnsupportedOperationException("credentials issues");
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, permissionsError, null);
-        String[] labels = {"UnsupportedOperationException", "UserAuthenticationError", "CatchAll", "N/A"};
+        String[] labels = {"UnsupportedOperationException", "UserCredentialsError", "CatchAll", "N/A"};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
     @Test
-    public void testServiceExceptionCategorizationToUserAuthenticationErrorWithKeywordsMatching()
+    public void testServiceExceptionCategorizationToUserCredentialsErrorWithKeywordsMatching()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("some text including kerberos keyword"), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserCredentialsError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -208,7 +208,7 @@ public class TestErrorManagement
     public void testServiceExceptionCategorizationToUserExecutionErrorWithExceptionOutlineMatching()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("some text including kerberos keyword"), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserCredentialsError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -294,7 +294,7 @@ public class TestErrorManagement
         assertEquals(toCamelCase(LoggingEventType.PURE_QUERY_EXECUTE_ERROR), "PureQueryExecuteError");
         assertEquals(toCamelCase(LoggingEventType.GENERATE_PLAN_ERROR), "GeneratePlanError");
         assertEquals(toCamelCase(LoggingEventType.CATCH_ALL), "CatchAll");
-        assertEquals(toCamelCase(ExceptionCategory.USER_CREDENTIALS_ERROR), "UserAuthenticationError");
+        assertEquals(toCamelCase(ExceptionCategory.USER_CREDENTIALS_ERROR), "UserCredentialsError");
         assertEquals(toCamelCase(ExceptionCategory.UNKNOWN_ERROR), "UnknownError");
     }
 
@@ -343,7 +343,7 @@ public class TestErrorManagement
     public void testServiceExceptionCategorizationTechniquePrioritizationOfFirstMatchWithExceptionFile()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("kerberos", new EngineException("some message", ExceptionCategory.INTERNAL_SERVER_ERROR)), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserCredentialsError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -359,7 +359,7 @@ public class TestErrorManagement
     public void testServiceExceptionCategorizationRegexCaseInsensitivity()
     {
         MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("KERBEROS"), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserAuthenticationError", "CatchAll", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserCredentialsError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
@@ -372,7 +372,7 @@ public class TestErrorManagement
     public void testErrorOriginExtensibilityBeyondLoggingEventType()
     {
         MetricsHandler.observeError(ErrorOrigin.ERROR_MANAGEMENT_TEST_ERROR, new Exception("KERBEROS"), TEST_SERVICE_PATH);
-        String[] labels = {"Exception", "UserAuthenticationError", "ErrorManagementTest", TEST_SERVICE_PATH};
+        String[] labels = {"Exception", "UserCredentialsError", "ErrorManagementTest", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
 
