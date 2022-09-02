@@ -55,8 +55,21 @@
         "Priority": "primary"
       },
       {
+        "ExceptionName": "PureAssertFailException",
+        "MessageRegex": "exception occurred executing service test suites",
+        "Priority": "primary"
+      },
+      {
+        "ExceptionName": "ConnectionException",
+        "Priority": "primary"
+      },
+      {
+        "ExceptionName": "ConnectionClosedException",
+        "Priority": "primary"
+      },
+      {
         "ExceptionName": ".*",
-        "MessageRegex": "overload",
+        "MessageRegex": "test|timeout|overload",
         "Priority": "secondary"
       }
     ]
@@ -126,30 +139,5 @@
         "Priority": "secondary"
       }
     ]
-  },
-
-  {
-    "CategoryName": "OtherError",
-    "Exceptions": [
-      {
-        "ExceptionName": "PureAssertFailException",
-        "MessageRegex": "exception occurred executing service test suites",
-        "Priority": "primary"
-      },
-      {
-        "ExceptionName": "ConnectionException",
-        "Priority": "primary"
-      },
-      {
-        "ExceptionName": "ConnectionClosedException",
-        "Priority": "primary"
-      },
-      {
-        "ExceptionName": ".*",
-        "MessageRegex": "test|timeout",
-        "Priority": "secondary"
-      }
-    ]
   }
-
 ]
