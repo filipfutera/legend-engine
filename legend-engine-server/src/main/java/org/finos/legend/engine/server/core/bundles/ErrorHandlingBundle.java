@@ -13,7 +13,7 @@
 // limitations under the License.
 
 
-package org.finos.legend.engine.server.bundles;
+package org.finos.legend.engine.server.core.bundles;
 
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
