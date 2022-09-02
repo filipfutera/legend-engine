@@ -32,16 +32,6 @@
         "ExceptionName": "IllegalArgumentException",
         "MessageRegex": "Missing external parameter",
         "Priority": "primary"
-      },
-      {
-        "ExceptionName": "EngineException",
-        "MessageRegex": "Can't find database",
-        "Priority": "primary"
-      },
-      {
-        "ExceptionName": ".*",
-        "MessageRegex": "[a-zA-Z]+ '.*' not found",
-        "Priority": "secondary"
       }
     ]
   },
