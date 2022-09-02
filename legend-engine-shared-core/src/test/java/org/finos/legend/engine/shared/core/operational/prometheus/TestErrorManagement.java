@@ -251,7 +251,7 @@ public class TestErrorManagement
     @Test
     public void testServiceExceptionCategorizationToServerExecutionErrorWithKeywordsMatching()
     {
-        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("Error in 'some::graph': Couldn't resolve test"), TEST_SERVICE_PATH);
+        MetricsHandler.observeError(LoggingEventType.CATCH_ALL, new Exception("Error in 'some::graph': Couldn't resolve something"), TEST_SERVICE_PATH);
         String[] labels = {"Exception", "ServerExecutionError", "CatchAll", TEST_SERVICE_PATH};
         assertEquals(METRIC_REGISTRY.getSampleValue(METRIC_NAME, COUNTER_LABEL_NAMES, labels), 1, DELTA);
     }
