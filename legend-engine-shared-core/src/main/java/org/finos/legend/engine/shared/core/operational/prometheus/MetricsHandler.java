@@ -356,7 +356,6 @@ public class MetricsHandler
             {
                 if (categoryData.matches(exception, method))
                 {
-                    LOGGER.error("Error was matched using method: {}", method);
                     return categoryData.getExceptionCategory();
                 }
             }
